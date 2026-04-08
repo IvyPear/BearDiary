@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="vi" data-theme="blue">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof title != 'undefined' ? title : 'Moodiary' %></title>
-  
+  <title>
+    <%= typeof title !='undefined' ? title : 'Moodiary' %>
+  </title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --bg-main: #F8FAFF;
@@ -19,11 +22,40 @@
     }
 
     /* Pastel Themes */
-    [data-theme="blue"]   { --accent: #5A9BD4; --bg-main: #F8FAFF; --primary-dark: #2C4A7C; --card-border: #E0ECF9; }
-    [data-theme="pink"]   { --accent: #F8B4D9; --bg-main: #FFF5F8; --primary-dark: #831843; --card-border: #FCE7F3; }
-    [data-theme="green"]  { --accent: #A8E6CF; --bg-main: #F0FDF4; --primary-dark: #064E3B; --card-border: #D1FAE5; }
-    [data-theme="purple"] { --accent: #D4B3FF; --bg-main: #F5F3FF; --primary-dark: #4C1D95; --card-border: #EDE9FE; }
-    [data-theme="yellow"] { --accent: #F9D77E; --bg-main: #FEFCE8; --primary-dark: #854D0E; --card-border: #FEF08A; }
+    [data-theme="blue"] {
+      --accent: #5A9BD4;
+      --bg-main: #F8FAFF;
+      --primary-dark: #2C4A7C;
+      --card-border: #E0ECF9;
+    }
+
+    [data-theme="pink"] {
+      --accent: #F8B4D9;
+      --bg-main: #FFF5F8;
+      --primary-dark: #831843;
+      --card-border: #FCE7F3;
+    }
+
+    [data-theme="green"] {
+      --accent: #A8E6CF;
+      --bg-main: #F0FDF4;
+      --primary-dark: #064E3B;
+      --card-border: #D1FAE5;
+    }
+
+    [data-theme="purple"] {
+      --accent: #D4B3FF;
+      --bg-main: #F5F3FF;
+      --primary-dark: #4C1D95;
+      --card-border: #EDE9FE;
+    }
+
+    [data-theme="yellow"] {
+      --accent: #F9D77E;
+      --bg-main: #FEFCE8;
+      --primary-dark: #854D0E;
+      --card-border: #FEF08A;
+    }
 
     /* Dark Mode */
     [data-theme="dark"] {
@@ -33,27 +65,61 @@
       --card-border: #334155;
     }
 
-    body { 
-      font-family: 'Nunito', sans-serif; 
-      background-color: var(--bg-main); 
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg-main);
       color: var(--primary-dark);
       transition: all 0.3s ease;
     }
 
-    [data-theme="dark"] body { background-color: #0F172A; color: #F1F5F9; }
-    [data-theme="dark"] aside { background-color: #1E2937; border-right-color: #334155; }
-    [data-theme="dark"] .card-shadow, [data-theme="dark"] .mood-btn { background: #1E2937; border-color: #334155; }
-    [data-theme="dark"] .text-slate-400 { color: #94A3B8 !important; }
-    [data-theme="dark"] .text-slate-500, [data-theme="dark"] .text-slate-600 { color: #CBD5E1 !important; }
-    [data-theme="dark"] textarea { background: #0F172A; color: #E2E8F0; border-color: #334155; }
-    [data-theme="dark"] .banner-gradient { background: linear-gradient(135deg, #1E40AF, #3B82F6); }
-    [data-theme="dark"] .nav-item.active { background: var(--accent); color: white !important; }
-    [data-theme="dark"] .nav-item.active i { color: white !important; }
+    [data-theme="dark"] body {
+      background-color: #0F172A;
+      color: #F1F5F9;
+    }
 
-    .sidebar-active { 
-      background: var(--accent); 
-      color: white !important; 
-      box-shadow: 0 8px 25px rgba(90, 155, 212, 0.35); 
+    [data-theme="dark"] aside {
+      background-color: #1E2937;
+      border-right-color: #334155;
+    }
+
+    [data-theme="dark"] .card-shadow,
+    [data-theme="dark"] .mood-btn {
+      background: #1E2937;
+      border-color: #334155;
+    }
+
+    [data-theme="dark"] .text-slate-400 {
+      color: #94A3B8 !important;
+    }
+
+    [data-theme="dark"] .text-slate-500,
+    [data-theme="dark"] .text-slate-600 {
+      color: #CBD5E1 !important;
+    }
+
+    [data-theme="dark"] textarea {
+      background: #0F172A;
+      color: #E2E8F0;
+      border-color: #334155;
+    }
+
+    [data-theme="dark"] .banner-gradient {
+      background: linear-gradient(135deg, #1E40AF, #3B82F6);
+    }
+
+    [data-theme="dark"] .nav-item.active {
+      background: var(--accent);
+      color: white !important;
+    }
+
+    [data-theme="dark"] .nav-item.active i {
+      color: white !important;
+    }
+
+    .sidebar-active {
+      background: var(--accent);
+      color: white !important;
+      box-shadow: 0 8px 25px rgba(90, 155, 212, 0.35);
     }
 
     /* Nav Item Styles */
@@ -101,35 +167,115 @@
     }
 
     .app-logo {
-      width: 52px; height: 52px;
+      width: 52px;
+      height: 52px;
       background: linear-gradient(135deg, var(--accent), #7EB8E8);
       border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 32px; color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: white;
       box-shadow: 0 6px 20px rgba(90, 155, 212, 0.35);
       position: relative;
       transition: transform 0.3s ease;
     }
+
     .app-logo:hover {
       transform: scale(1.05);
     }
-    .app-logo::after { content: "❤️"; position: absolute; font-size: 18px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-    .card-shadow { box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); border: 1px solid var(--card-border); background: white; }
-    .banner-gradient { background: linear-gradient(135deg, var(--accent), #7EB8E8); }
+    .app-logo::after {
+      content: "❤️";
+      position: absolute;
+      font-size: 18px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
-    .mood-btn { transition: all 0.25s; border: 1px solid var(--card-border); background: white; }
-    .mood-btn:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(163, 196, 232, 0.25); }
+    .card-shadow {
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--card-border);
+      background: white;
+    }
 
-    .bear-float { animation: float 3.5s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    
-    .theme-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-    .theme-switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: 0.3s; border-radius: 34px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--accent); }
-    input:checked + .slider:before { transform: translateX(20px); }
+    .banner-gradient {
+      background: linear-gradient(135deg, var(--accent), #7EB8E8);
+    }
+
+    .mood-btn {
+      transition: all 0.25s;
+      border: 1px solid var(--card-border);
+      background: white;
+    }
+
+    .mood-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(163, 196, 232, 0.25);
+    }
+
+    .bear-float {
+      animation: float 3.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.3s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: var(--accent);
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(20px);
+    }
 
     /* Active menu indicator */
     .nav-item.active::before {
@@ -149,6 +295,7 @@
     }
   </style>
 </head>
+
 <body class="flex h-screen overflow-hidden">
 
   <aside class="w-[260px] bg-white border-r border-[#E0ECF9] flex flex-col p-6">
@@ -165,11 +312,13 @@
         <i class="fa-solid fa-house"></i>
         <span>Trang chủ</span>
       </a>
-      <a href="/diaries/timeline" class="nav-item <%= title === 'Dòng thời gian - Moodiary' || title === 'Nhật ký - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/timeline"
+        class="nav-item <%= title === 'Dòng thời gian - Moodiary' || title === 'Nhật ký - Moodiary' ? 'active' : '' %>">
         <i class="fa-solid fa-book-open"></i>
-        <span>Nhật ký</span>
+        <span>Timeline</span>
       </a>
-      <a href="/diaries/report" class="nav-item <%= title === 'Mood Report - Moodiary' || title === 'Báo cáo - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/report"
+        class="nav-item <%= title === 'Mood Report - Moodiary' || title === 'Báo cáo - Moodiary' ? 'active' : '' %>">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Báo cáo</span>
       </a>
@@ -208,7 +357,7 @@
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateEl = document.getElementById('currentDate');
     if (dateEl) {
-        dateEl.innerText = new Date().toLocaleDateString('vi-VN', dateOptions);
+      dateEl.innerText = new Date().toLocaleDateString('vi-VN', dateOptions);
     }
 
     // Quản lý Theme & Dark Mode
@@ -216,7 +365,7 @@
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('moodiary-theme', theme);
     }
-    
+
     function handleDarkModeToggle() {
       const toggle = document.getElementById('darkToggle');
       if (toggle.checked) {
@@ -226,8 +375,8 @@
         setTheme(savedTheme);
       }
     }
-    
-    window.onload = function() {
+
+    window.onload = function () {
       const savedTheme = localStorage.getItem('moodiary-theme');
       if (savedTheme && savedTheme !== 'dark') {
         localStorage.setItem('moodiary-previous-theme', savedTheme);
@@ -239,4 +388,5 @@
     };
   </script>
 </body>
+
 </html>

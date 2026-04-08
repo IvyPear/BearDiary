@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>
-    <%= typeof title !='undefined' ? title : 'Moodiary' %>
+    <%= typeof title !='undefined' ? title : 'Bear Diary' %>
   </title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -185,14 +185,7 @@
       transform: scale(1.05);
     }
 
-    .app-logo::after {
-      content: "❤️";
-      position: absolute;
-      font-size: 18px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+   
 
     .card-shadow {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
@@ -300,9 +293,9 @@
 
   <aside class="w-[260px] bg-white border-r border-[#E0ECF9] flex flex-col p-6">
     <div class="flex items-center gap-3 mb-10">
-      <div class="app-logo">📓</div>
+      <div class="app-logo">🐻</div>
       <div>
-        <h1 class="font-bold text-2xl leading-none text-[#2C4A7C]">Moodiary</h1>
+        <h1 class="font-bold text-2xl leading-none text-[#2C4A7C]">Bear Diary</h1>
         <p class="text-[10px] text-[#5A9BD4] font-bold uppercase tracking-[1px]">YOUR DAILY JOURNAL</p>
       </div>
     </div>

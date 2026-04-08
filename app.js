@@ -1,83 +1,62 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
+const methodOverride = require('method-override');
+const session = require('express-session');
+const flash = require('connect-flash');
 require('dotenv').config();
+
+const connectDB = require('./config/db'); // Nối Database
+const authRoutes = require('./routes/authRoutes');
+const diaryRoutes = require('./routes/diaryRoutes');
 
 const app = express();
 
-// Cấu hình EJS
+// Kết nối DB
+connectDB();
+
+// EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-// Sử dụng Layout
 app.use(expressLayouts);
-app.set('layout', 'layouts/main'); 
+app.set('layout', 'layouts/main');
 
-// Cấu hình file tĩnh (CSS, Image)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Middleware để parse form data
+// Body Parser & Method Override
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Route giả lập để xem giao diện Home
+// Session & Flash
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'viet_bear_diary',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(flash());
+
+// Biến toàn cục (Sử dụng được trong mọi file EJS)
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    next();
+});
+
+// Routes
+app.use('/auth', authRoutes);
+app.use('/diaries', diaryRoutes);
+
+// Tự động chuyển hướng URL gốc
 app.get('/', (req, res) => {
-    const userData = {
-        name: "Việt" 
-    };
-    
-    res.render('diaries/home', { 
-        user: userData,
-        title: 'Trang chủ - Moodiary' 
-    });
+    if (req.session.user) {
+        res.redirect('/diaries/home');
+    } else {
+        res.redirect('/auth/login');
+    }
 });
 
-app.get('/diaries/timeline', (req, res) => {
-    res.render('diaries/timeline', { 
-        title: 'Dòng thời gian - Moodiary' 
-    });
-});
-
-app.get('/diaries/report', (req, res) => {
-    res.render('diaries/report', { 
-        title: 'Mood Report - Moodiary' 
-    });
-});
-
-// Route profile - ĐẶT TRƯỚC app.use('/diaries', ...)
-app.get('/diaries/profile', (req, res) => {
-    const userData = {
-        name: "Việt" 
-    };
-    
-    res.render('diaries/profile', { 
-        user: userData,
-        title: 'Cá nhân - Moodiary' 
-    });
-});
-
-// Route cho auth (login, register)
-app.get('/auth/login', (req, res) => {
-    res.render('users/login', { 
-        title: 'Đăng nhập - Moodiary',
-        layout: false
-    });
-});
-
-app.get('/auth/register', (req, res) => {
-    res.render('users/register', { 
-        title: 'Đăng ký - Moodiary',
-        layout: false 
-    });
-});
-
-// Import routes (nếu bạn có file này)
-// app.use('/diaries', require('./routes/diaryRoutes'));
-
-// Đổi PORT thành 3001
-const PORT = process.env.PORT || 3001; 
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server đang chạy tại: http://localhost:${PORT}`);
-    console.log(`Trang chủ: http://localhost:${PORT}/`);
-    console.log(`Profile: http://localhost:${PORT}/diaries/profile`);
+    console.log(`✅ Server đang chạy mượt mà tại: http://localhost:${PORT}`);
 });

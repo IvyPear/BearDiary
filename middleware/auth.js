@@ -1,21 +1,16 @@
-// Kiểm tra người dùng đã đăng nhập chưa
-const requireAuth = (req, res, next) => {
-    // Kiểm tra session tồn tại và có userId
-    if (!req.session || !req.session.userId) {
-        return res.redirect('/auth/login');
-    }
-    next();
-};
-
-// Kiểm tra người dùng đã đăng nhập thì không vào login/register
-const requireGuest = (req, res, next) => {
-    if (req.session && req.session.userId) {
-        return res.redirect('/');
-    }
-    next();
-};
-
 module.exports = {
-    requireAuth,
-    requireGuest
+    ensureAuthenticated: function(req, res, next) {
+        if (req.session && req.session.user) {
+            return next();
+        }
+        req.flash('error_msg', 'Vui lòng đăng nhập để xem nhật ký của bạn 🐻');
+        res.redirect('/auth/login');
+    },
+    // Nếu đã đăng nhập rồi thì không cho vào trang Login/Register nữa
+    forwardAuthenticated: function(req, res, next) {
+        if (!req.session.user) {
+            return next();
+        }
+        res.redirect('/diaries/home');      
+    }
 };

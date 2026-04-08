@@ -1,33 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const diaryController = require('../controllers/diaryController');
+const { ensureAuthenticated } = require('../middleware/auth');
 
-// Tất cả các route diary đều cần đăng nhập
-router.use(requireAuth);
+// Áp dụng middleware bảo vệ cho tất cả các route bên dưới
+router.use(ensureAuthenticated);
 
-// Các route
-router.get('/', (req, res) => {
-    res.render('diaries/home');
-});
-
-router.get('/timeline', (req, res) => {
-    res.render('diaries/timeline');
-});
-
-router.get('/report', (req, res) => {
-    res.render('diaries/report');
-});
-
-router.get('/profile', (req, res) => {
-    res.render('diaries/profile');
-});
-
-router.get('/create', (req, res) => {
-    res.render('diaries/create');
-});
-
-router.get('/edit', (req, res) => {
-    res.render('diaries/edit');
-});
+router.get('/home', diaryController.getHome);
+router.post('/create', diaryController.createEntry); // API lưu bài viết
+router.get('/timeline', diaryController.getTimeline);
+router.get('/report', diaryController.getReport);
+router.get('/profile', diaryController.getProfile);
 
 module.exports = router;

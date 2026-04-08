@@ -1,50 +1,43 @@
-<div
-  class="banner-gradient rounded-[2.5rem] p-8 text-white flex justify-between items-center relative overflow-hidden mb-8 shadow-xl">
+<div class="banner-gradient rounded-[2.5rem] p-8 text-white flex justify-between items-center relative overflow-hidden mb-8 shadow-xl">
   <div class="relative z-10">
     <p class="text-white/90 text-sm font-semibold mb-1" id="currentDate"></p>
-    <h2 class="text-3xl font-extrabold mb-2">Chào ngày mới, <%= user.name %>! 👋</h2>
+    <h2 class="text-3xl font-extrabold mb-2">Chào ngày mới, <%= typeof user !== 'undefined' ? user.name : 'bạn' %>! 👋</h2>
     <p class="text-white/80">Hôm nay bạn thấy thế nào? Hãy viết dòng nhật ký đầu tiên ✨</p>
 
     <div class="flex gap-4 mt-6">
-      <div
-        class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
+      <div class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
         <p class="text-[10px] uppercase font-bold opacity-75">Tổng số bài</p>
-        <p class="text-xl font-black">12</p>
+        <p class="text-xl font-black"><%= totalEntries %></p>
       </div>
-      <div
-        class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
+      <div class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
         <p class="text-[10px] uppercase font-bold opacity-75">Yêu thích</p>
-        <p class="text-xl font-black">6</p>
+        <p class="text-xl font-black"><%= totalStarred %></p>
       </div>
-      <div
-        class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
-        <p class="text-[10px] uppercase font-bold opacity-75">Tháng này</p>
-        <p class="text-xl font-black">5</p>
+      <div class="banner-stat px-5 py-3 text-center min-w-[90px] bg-white/25 backdrop-blur-md border border-white/30 rounded-2xl">
+        <p class="text-[10px] uppercase font-bold opacity-75">Gần đây</p>
+        <p class="text-xl font-black"><%= recentEntries.length %></p>
       </div>
     </div>
   </div>
-  <div
-    class="w-32 h-32 bg-white/25 rounded-full flex items-center justify-center text-6xl bear-float border border-white/30">
-    🐻</div>
+  <div class="w-32 h-32 bg-white/25 rounded-full flex items-center justify-center text-6xl bear-float border border-white/30">🐻</div>
 </div>
 
 <div class="grid grid-cols-12 gap-6 items-start">
   <div class="col-span-3 bg-white rounded-[2rem] p-6 card-shadow">
     <h3 class="font-bold text-sm mb-6 flex items-center gap-2 text-[#2C4A7C]">Bạn đang cảm thấy thế nào? 🫧</h3>
     <div class="grid grid-cols-2 gap-3">
-      <% const moods=[ { emoji: '😊' , label: 'Vui vẻ' }, { emoji: '🥳' , label: 'Hào hứng' }, { emoji: '😌' ,
-        label: 'Binh yên' }, { emoji: '🙏' , label: 'Biết ơn' }, { emoji: '😢' , label: 'Buồn' }, { emoji: '😨' ,
-        label: 'Lo lắng' }, { emoji: '😴' , label: 'Mệt mỏi' }, { emoji: '😡' , label: 'Giận dữ' } ] %>
-        <% moods.forEach(mood=> { %>
-          <button class="mood-btn flex flex-col items-center p-3 rounded-2xl">
-            <span class="text-3xl mb-1">
-              <%= mood.emoji %>
-            </span>
-            <span class="text-[10px] font-bold text-slate-500">
-              <%= mood.label %>
-            </span>
-          </button>
-          <% }) %>
+      <% const moods = [ 
+        { emoji: '😊', label: 'Vui vẻ' }, { emoji: '🥳', label: 'Hào hứng' }, 
+        { emoji: '😌', label: 'Bình yên' }, { emoji: '🙏', label: 'Biết ơn' }, 
+        { emoji: '😢', label: 'Buồn' }, { emoji: '😨', label: 'Lo lắng' }, 
+        { emoji: '😴', label: 'Mệt mỏi' }, { emoji: '😡', label: 'Giận dữ' } 
+      ] %>
+      <% moods.forEach(m => { %>
+        <button type="button" class="mood-btn flex flex-col items-center p-3 rounded-2xl">
+          <span class="text-3xl mb-1"><%= m.emoji %></span>
+          <span class="text-[10px] font-bold text-slate-500"><%= m.label %></span>
+        </button>
+      <% }) %>
     </div>
   </div>
 
@@ -61,7 +54,8 @@
       </div>
 
       <div class="flex-1">
-        <textarea name="content"
+        <input type="hidden" name="mood" id="selectedMood" value="😊 Vui vẻ">
+        <textarea name="content" required
           class="w-full h-full outline-none border-t border-slate-100 pt-6 text-[#2C4A7C] placeholder:text-slate-300 resize-none text-base"
           placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
       </div>
@@ -79,42 +73,58 @@
 <div class="mt-10">
   <div class="flex justify-between items-center mb-6">
     <h3 class="font-bold text-lg text-[#2C4A7C]">Bài viết gần đây</h3>
-    <span class="text-[10px] font-bold text-[#5A9BD4] uppercase tracking-widest">12 Tổng số</span>
+    <span class="text-[10px] font-bold text-[#5A9BD4] uppercase tracking-widest"><%= totalEntries %> Tổng số</span>
   </div>
 
   <div class="grid grid-cols-3 gap-6">
-    <div class="bg-yellow-50 rounded-[2rem] overflow-hidden card-shadow">
-      <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400" class="h-32 w-full object-cover" />
-      <div class="p-5">
-        <div class="flex justify-between items-center mb-3">
-          <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-yellow-600">😊 Vui vẻ</span>
-          <span class="text-[10px] font-bold text-slate-400">2026-04-05</span>
-        </div>
-        <p class="text-xs font-semibold text-slate-600 line-clamp-2">Bắt đầu ngày mới với một tách cà phê thật ngon...
-        </p>
-      </div>
-    </div>
+    <% if (recentEntries && recentEntries.length > 0) { %>
+      <% recentEntries.forEach(entry => { 
+          // Tự động phân loại màu sắc và icon
+          let moodIcon = (entry.mood || '😊 Vui vẻ').split(' ')[0] || '😊';
+          let moodName = (entry.mood || '😊 Vui vẻ').replace(moodIcon, '').trim() || 'Vui vẻ';
+          let moodColor = 'blue';
+          let mLower = moodName.toLowerCase();
+          
+          if (mLower.includes('vui') || mLower.includes('happy')) moodColor = 'yellow';
+          else if (mLower.includes('bình') || mLower.includes('calm')) moodColor = 'emerald';
+          else if (mLower.includes('buồn') || mLower.includes('sad')) moodColor = 'rose';
+          else if (mLower.includes('hào') || mLower.includes('excited')) moodColor = 'purple';
 
-    <div class="bg-emerald-50 rounded-[2rem] overflow-hidden card-shadow">
-      <img src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400" class="h-32 w-full object-cover" />
-      <div class="p-5">
-        <div class="flex justify-between items-center mb-3">
-          <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-emerald-600">😌 Bình yên</span>
-          <span class="text-[10px] font-bold text-slate-400">2026-04-04</span>
+          // Format ngày tháng
+          let entryDate = entry.date ? new Date(entry.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+          let image = entry.image || 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400';
+      %>
+        <div class="bg-<%= moodColor %>-50 rounded-[2rem] overflow-hidden card-shadow">
+          <img src="<%= image %>" class="h-32 w-full object-cover" />
+          <div class="p-5">
+            <div class="flex justify-between items-center mb-3">
+              <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-<%= moodColor %>-600"><%= moodIcon %> <%= moodName %></span>
+              <span class="text-[10px] font-bold text-slate-400"><%= entryDate %></span>
+            </div>
+            <p class="text-xs font-semibold text-slate-600 line-clamp-2"><%= entry.content %></p>
+          </div>
         </div>
-        <p class="text-xs font-semibold text-slate-600 line-clamp-2">Ngắm hoàng hôn từ ban công nhà mình...</p>
+      <% }) %>
+    <% } else { %>
+      <div class="col-span-3 text-center text-slate-400 font-bold py-10 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
+        Bạn chưa có bài viết nào gần đây.
       </div>
-    </div>
-
-    <div class="bg-purple-50 rounded-[2rem] overflow-hidden card-shadow">
-      <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400" class="h-32 w-full object-cover" />
-      <div class="p-5">
-        <div class="flex justify-between items-center mb-3">
-          <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-purple-600">🥳 Hào hứng</span>
-          <span class="text-[10px] font-bold text-slate-400">2026-04-03</span>
-        </div>
-        <p class="text-xs font-semibold text-slate-600 line-clamp-2">Vừa hoàn thành xong project cuối khóa!</p>
-      </div>
-    </div>
+    <% } %>
   </div>
 </div>
+
+<script>
+  // Script hỗ trợ chọn cảm xúc gửi lên form
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Xóa active cũ
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('bg-[#F0F6FF]', 'border', 'border-[#5A9BD4]'));
+      // Thêm active mới
+      this.classList.add('bg-[#F0F6FF]', 'border', 'border-[#5A9BD4]');
+      
+      const emoji = this.querySelector('span:first-child').innerText;
+      const label = this.querySelector('span:last-child').innerText;
+      document.getElementById('selectedMood').value = `${emoji} ${label}`;
+    });
+  });
+</script>

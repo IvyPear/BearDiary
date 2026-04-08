@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moodiary - Create Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Nunito', sans-serif; }
+    
+    .left-panel {
+      background: radial-gradient(circle at center, #E0F0FF 0%, #C9E4FF 100%);
+    }
+
+    .feature-pill {
+      background: white;
+      padding: 6px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #3B82F6;
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.05);
+    }
+
+    .input-box {
+      background: #F8FBFF;
+      border: 1px solid #EBF4FF;
+      border-radius: 14px;
+      padding: 14px 18px;
+      transition: all 0.2s;
+    }
+
+    .input-box:focus {
+      border-color: #3B82F6;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+      outline: none;
+    }
+
+    .btn-create {
+      background: #2563EB;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+      transition: all 0.3s;
+    }
+
+    .btn-create:hover {
+      background: #1D4ED8;
+      transform: translateY(-2px);
+    }
+
+    .floating {
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+  </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+  <div class="hidden lg:flex w-[60%] left-panel flex-col items-center justify-center p-12">
+    <div class="flex flex-col items-center text-center">
+      <div class="w-80 h-80 mb-10 floating flex items-center justify-center relative">
+        <div class="w-full h-full bg-white/30 rounded-full blur-3xl absolute animate-pulse"></div>
+        <div class="text-[180px] z-10 drop-shadow-2xl">🐻</div>
+      </div>
+      
+      <h1 class="text-5xl font-black text-[#1E3A8A] mb-3 tracking-tight">Moodiary</h1>
+      <p class="text-[#3B82F6] font-bold text-lg mb-10">Your personal mood & diary companion ☀️</p>
+      
+      <div class="flex gap-4">
+        <span class="feature-pill">Track moods</span>
+        <span class="feature-pill">Write freely</span>
+        <span class="feature-pill">See patterns</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full lg:w-[40%] bg-white flex flex-col items-center justify-center p-8 md:p-20 overflow-y-auto">
+    <div class="w-full max-w-md">
+      
+      <div class="mb-8">
+        <div class="flex items-center gap-2 text-blue-500 font-extrabold text-[12px] uppercase tracking-[0.15em] mb-3">
+           <i class="fa-solid fa-sparkles"></i> JOIN US TODAY
+        </div>
+        <h2 class="text-[32px] font-black text-[#1E3A8A] leading-tight">Create your account</h2>
+        <p class="text-slate-400 font-semibold mt-2">Start your journaling journey today</p>
+      </div>
+
+      <% if (error) { %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+          <%= error %>
+        </div>
+      <% } %>
+
+      <form action="/users/register" method="POST" class="space-y-5">
+        <div>
+          <label class="block text-[13px] font-bold text-slate-500 mb-2.5 ml-1">Your Name</label>
+          <input type="text" name="name" placeholder="Luna Park" 
+                 class="w-full input-box font-semibold text-slate-700 placeholder:text-slate-300" required>
+        </div>
+
+        <div>
+          <label class="block text-[13px] font-bold text-slate-500 mb-2.5 ml-1">Email Address</label>
+          <input type="email" name="email" placeholder="luna@example.com" 
+                 class="w-full input-box font-semibold text-slate-700 placeholder:text-slate-300" required>
+        </div>
+
+        <div>
+          <label class="block text-[13px] font-bold text-slate-500 mb-2.5 ml-1">Password</label>
+          <div class="relative">
+            <input type="password" name="password" placeholder="••••••••" 
+                   class="w-full input-box font-semibold text-slate-700" required>
+            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500">
+              <i class="fa-solid fa-eye-low-vision"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full btn-create text-white py-4.5 rounded-2xl font-black text-[16px] mt-6 py-4 shadow-lg">
+          Create Account
+        </button>
+      </form>
+
+      <div class="mt-8 text-center">
+        <p class="text-slate-400 font-bold text-sm">
+          Already have an account? 
+          <a href="/users/login" class="text-blue-500 hover:underline">Sign in</a>
+        </p>
+      </div>
+
+      <div class="mt-10 bg-blue-50/50 border border-blue-50 p-4 rounded-2xl flex items-center justify-center gap-2">
+        <span class="text-sm">💡</span>
+        <p class="text-[11px] font-bold text-blue-300 italic tracking-tight uppercase">Demo: Use any email & password</p>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

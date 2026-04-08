@@ -1,0 +1,248 @@
+<%
+  title = 'Cá nhân - Moodiary';
+  // Dữ liệu người dùng - sau này thay bằng dữ liệu từ database
+  const user = {
+    name: 'Luna Park',
+    email: 'luna@example.com',
+    avatar: 'LP',
+    memberSince: 'January 2026',
+    totalEntries: 12,
+    starredEntries: 6,
+    dayStreak: 0,
+    daysJournaled: 12
+  };
+%>
+
+<style>
+  .profile-card-main {
+    background: white;
+    border-radius: 2.5rem;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+  }
+
+  .banner-box {
+    height: 160px;
+    background: var(--banner);
+    position: relative;
+  }
+
+  .avatar-container {
+    width: 100px;
+    height: 100px;
+    background: #DBEAFE;
+    border: 6px solid white;
+    border-radius: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--accent);
+    margin-top: -50px;
+    margin-left: 40px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  }
+
+  .stat-item {
+    border-radius: 1.5rem;
+    padding: 24px 10px;
+    text-align: center;
+    transition: transform 0.2s;
+    background: white;
+    border: 1px solid var(--card-border);
+  }
+  .stat-item:hover { transform: translateY(-4px); }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-radius: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .setting-row:hover { background: #F8FAFF; }
+
+  .icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  [data-theme="dark"] .profile-card-main { background: #1E2937; border-color: #334155; }
+  [data-theme="dark"] .stat-item { background: #1E2937; }
+  [data-theme="dark"] .setting-row:hover { background: #334155; }
+  [data-theme="dark"] .text-slate-400, [data-theme="dark"] .setting-row p { color: #94A3B8 !important; }
+  [data-theme="dark"] .text-slate-700 { color: #E2E8F0 !important; }
+  [data-theme="dark"] .icon-wrap.bg-blue-50 { background: #1E2A3E; color: #60A5FA; }
+  [data-theme="dark"] .icon-wrap.bg-purple-50 { background: #2D1B3A; color: #A78BFA; }
+  [data-theme="dark"] .icon-wrap.bg-yellow-50 { background: #3D3A1A; color: #FACC15; }
+  [data-theme="dark"] .icon-wrap.bg-violet-50 { background: #2D1B3A; color: #C084FC; }
+  [data-theme="dark"] .avatar-container { background: #1E2A3E; border-color: #334155; color: #60A5FA; }
+  [data-theme="dark"] #themePicker .bg-white { background-color: #1E2937; }
+  [data-theme="dark"] #themePicker h3 { color: #F1F5F9; }
+</style>
+
+<div class="flex items-center gap-4 mb-8">
+  <div class="w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg rounded-2xl" style="background: var(--accent)">
+    <i class="fa-solid fa-user-gear"></i>
+  </div>
+  <div>
+    <h2 class="text-3xl font-black">Hồ sơ của tôi</h2>
+    <p class="text-slate-400 font-bold text-sm">Cập nhật thông tin và phong cách của bạn</p>
+  </div>
+</div>
+
+<div class="profile-card-main mb-8">
+  <div class="banner-box"></div>
+  <div class="avatar-container"><%= user.avatar %></div>
+  <div class="px-10 pb-10">
+    <div class="flex justify-between items-start">
+      <div>
+        <h3 class="text-3xl font-black"><%= user.name %></h3>
+        <p class="text-slate-400 font-bold text-sm mt-1"><%= user.email %></p>
+        <div class="inline-flex items-center gap-2 bg-[#E0ECF9] text-[#5A9BD4] px-4 py-2 rounded-full mt-5 text-[11px] font-black uppercase tracking-widest">
+          <i class="fa-solid fa-calendar-check"></i>
+          Thành viên từ <%= user.memberSince %>
+        </div>
+      </div>
+      <div class="text-5xl bear-float pt-2">🐻</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-4 gap-6 mb-10">
+  <div class="stat-item bg-rose-50">
+    <p class="text-rose-500 text-3xl font-black mb-1"><%= user.dayStreak %></p>
+    <p class="text-[11px] font-black text-rose-300 uppercase tracking-tighter">Ngày liên tiếp</p>
+  </div>
+  <div class="stat-item bg-[#E0ECF9]">
+    <p class="text-[#5A9BD4] text-3xl font-black mb-1"><%= user.totalEntries %></p>
+    <p class="text-[11px] font-black text-[#5A9BD4] uppercase tracking-tighter">Tổng số bài</p>
+  </div>
+  <div class="stat-item bg-emerald-50">
+    <p class="text-emerald-500 text-3xl font-black mb-1"><%= user.daysJournaled %></p>
+    <p class="text-[11px] font-black text-emerald-300 uppercase tracking-tighter">Ngày viết</p>
+  </div>
+  <div class="stat-item bg-yellow-50">
+    <p class="text-yellow-600 text-3xl font-black mb-1"><%= user.starredEntries %></p>
+    <p class="text-[11px] font-black text-yellow-400 uppercase tracking-tighter">Đã gắn sao</p>
+  </div>
+</div>
+
+<div class="profile-card-main p-8">
+  <h4 class="text-[12px] font-black text-[#5A9BD4] uppercase tracking-[0.2em] mb-6 ml-4">Cài đặt tài khoản</h4>
+  <div class="space-y-1">
+    <div onclick="editProfile()" class="setting-row group cursor-pointer">
+      <div class="flex items-center gap-5">
+        <div class="icon-wrap bg-blue-50 text-blue-500 group-hover:scale-110 transition-all"><i class="fa-solid fa-user-pen"></i></div>
+        <div>
+          <p class="font-extrabold text-slate-700">Chỉnh sửa hồ sơ</p>
+          <p class="text-[11px] text-slate-400 font-bold">Tên, email và tiểu sử</p>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+    </div>
+
+    <div onclick="changePassword()" class="setting-row group cursor-pointer">
+      <div class="flex items-center gap-5">
+        <div class="icon-wrap bg-purple-50 text-purple-500 group-hover:scale-110 transition-all"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <p class="font-extrabold text-slate-700">Bảo mật</p>
+          <p class="text-[11px] text-slate-400 font-bold">Mật khẩu và xác thực</p>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+    </div>
+
+    <div class="setting-row">
+      <div class="flex items-center gap-5">
+        <div class="icon-wrap bg-yellow-50 text-yellow-500"><i class="fa-solid fa-circle-half-stroke"></i></div>
+        <div>
+          <p class="font-extrabold text-slate-700">Giao diện</p>
+          <p class="text-[11px] text-slate-400 font-bold">Chế độ tối và chủ đề</p>
+        </div>
+      </div>
+      <div class="text-sm font-bold text-slate-500" id="appearanceStatus">☀️ Sáng</div>
+    </div>
+
+    <div onclick="toggleThemePicker()" class="setting-row group cursor-pointer">
+      <div class="flex items-center gap-5">
+        <div class="icon-wrap bg-violet-50 text-violet-500 group-hover:scale-110 transition-all"><i class="fa-solid fa-palette"></i></div>
+        <div>
+          <p class="font-extrabold text-slate-700">Đổi chủ đề</p>
+          <p class="text-[11px] text-slate-400 font-bold">Chọn màu sắc yêu thích</p>
+        </div>
+      </div>
+      <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Theme Picker Modal -->
+<div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
+    <h3 class="text-lg font-bold text-center mb-6 text-[#2C4A7C]">Chọn chủ đề màu</h3>
+    <div class="grid grid-cols-5 gap-6">
+      <div onclick="setThemeAndUpdate('blue')" class="w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+      <div onclick="setThemeAndUpdate('pink')" class="w-12 h-12 rounded-2xl bg-[#F8B4D9] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+      <div onclick="setThemeAndUpdate('green')" class="w-12 h-12 rounded-2xl bg-[#A8E6CF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+      <div onclick="setThemeAndUpdate('purple')" class="w-12 h-12 rounded-2xl bg-[#D4B3FF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+      <div onclick="setThemeAndUpdate('yellow')" class="w-12 h-12 rounded-2xl bg-[#F9D77E] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+    </div>
+    <div class="text-center mt-8">
+      <button onclick="toggleThemePicker()" class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-700">
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="text-center py-10 opacity-40">
+  <p class="text-[10px] font-black uppercase tracking-[0.3em]">Moodiary v1.0.4</p>
+</div>
+
+<script>
+  // Theme management
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('moodiary-theme', theme);
+    const isDark = theme === 'dark';
+    const statusEl = document.getElementById('appearanceStatus');
+    if (statusEl) {
+      statusEl.innerHTML = isDark ? '🌙 Tối' : '☀️ Sáng';
+    }
+  }
+
+  function setThemeAndUpdate(theme) {
+    if (theme !== 'dark') {
+      localStorage.setItem('moodiary-previous-theme', theme);
+    }
+    setTheme(theme);
+    const darkToggle = document.getElementById('darkToggle');
+    if (darkToggle) darkToggle.checked = (theme === 'dark');
+    toggleThemePicker();
+  }
+
+  function toggleThemePicker() {
+    const picker = document.getElementById('themePicker');
+    if (picker) picker.classList.toggle('hidden');
+  }
+
+  function editProfile() {
+    alert('✏️ Chức năng chỉnh sửa hồ sơ sẽ sớm được cập nhật!');
+  }
+
+  function changePassword() {
+    alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
+  }
+</script>

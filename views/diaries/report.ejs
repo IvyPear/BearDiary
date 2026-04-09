@@ -1,9 +1,10 @@
 <%
-  title = 'Mood Report - Moodiary';
+  title = 'Báo cáo cảm xúc - Bear Diary';
   activePage = 'report';
 %>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
 <style>
   .report-icon {
@@ -22,7 +23,7 @@
   .glass-card { 
     background: white; 
     border-radius: 2rem; 
-    border: 1px solid var(--card-border); 
+    border: 1px solid var(--card-border);
     box-shadow: 0 10px 40px rgba(0,0,0,0.04); 
   }
 
@@ -36,21 +37,58 @@
     font-size: 14px;
     position: relative;
     background: #FDFDFF;
-    border: 1px solid #E0ECF9;
+    border: 1.5px solid #E2E8F0;
     transition: all 0.2s;
+    cursor: pointer;
   }
-  .cal-day.other-month { color: #9CA3AF; opacity: 0.6; }
-  .cal-day.has-entry { background-size: cover; background-position: center; color: white; }
+  
+  .cal-day.has-journal {
+    border: 2px solid var(--accent, #5A9BD4);
+    background: rgba(90, 155, 212, 0.05);
+  }
+  
+  .cal-day.has-journal.has-image {
+    background-size: cover;
+    background-position: center;
+    color: white;
+    position: relative;
+  }
+  
+  .cal-day.has-journal.has-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 0.9rem;
+  }
+  
+  .cal-day.has-journal.has-image span {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .cal-day.no-journal {
+    border: 1.5px solid #E2E8F0;
+    background: #FDFDFF;
+  }
+  
+  .cal-day.other-month { 
+    color: #9CA3AF; 
+    opacity: 0.6;
+    border-color: #E2E8F0;
+  }
+  
   .cal-day.today { 
-    border: 2px solid var(--accent); 
-    color: var(--accent); 
+    border: 2.5px solid var(--accent, #5A9BD4); 
+    color: var(--accent, #5A9BD4); 
     font-weight: 800;
+    background: rgba(90, 155, 212, 0.08);
   }
   
   .important-star {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -6px;
+    right: -6px;
     color: #FBBF24;
     background: white;
     border-radius: 50%;
@@ -61,7 +99,12 @@
     justify-content: center;
     font-size: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    z-index: 10;
+    z-index: 15;
+  }
+  
+  .cal-day.has-journal.has-image .important-star {
+    background: rgba(0,0,0,0.6);
+    color: #FBBF24;
   }
 
   .stat-card {
@@ -74,181 +117,203 @@
 
   [data-theme="dark"] .glass-card { background: #1E2937; border-color: #334155; }
   [data-theme="dark"] .cal-day { background: #1E2937; border-color: #334155; color: #E2E8F0; }
+  [data-theme="dark"] .cal-day.has-journal { background: rgba(90, 155, 212, 0.15); }
   [data-theme="dark"] .stat-card { background: #1E2937; border-color: #334155; }
   [data-theme="dark"] .important-star { background: #1E2937; }
+  [data-theme="dark"] .cal-day.has-journal.has-image .important-star { background: #1E2937; }
 </style>
 
 <div class="flex items-center gap-4 mb-8">
   <div class="report-icon">📊</div>
   <div>
-    <h2 class="text-3xl font-black text-[#2C4A7C]">Mood Report</h2>
-    <p class="text-slate-400 font-bold text-xs uppercase tracking-wider">INSIGHTS FROM YOUR JOURNAL</p>
+    <h2 class="text-3xl font-black text-[#2C4A7C]">Báo cáo cảm xúc</h2>
+    <p class="text-slate-400 font-bold text-xs uppercase tracking-wider">GÓC NHÌN TỪ NHẬT KÝ CỦA BẠN</p>
   </div>
 </div>
 
-<!-- Month Navigation -->
 <div class="glass-card p-4 mb-8 flex items-center justify-between">
-  <button class="w-10 h-10 rounded-full hover:bg-[#F0F6FF] text-[#5A9BD4] transition-all">
+  <a href="/diaries/report?month=<%= prevMonth %>&year=<%= prevYear %>" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F0F6FF] text-[#5A9BD4] transition-all">
     <i class="fa-solid fa-chevron-left"></i>
-  </button>
+  </a>
   <div class="text-center">
-    <h3 class="text-xl font-black">April 2026</h3>
-    <p class="text-[10px] font-bold text-slate-400 uppercase">5 entries this month</p>
+    <h3 class="text-xl font-black">Tháng <%= currentMonth %>, <%= currentYear %></h3>
+    <p class="text-[10px] font-bold text-slate-400 uppercase"><%= entriesCount %> bài viết trong tháng</p>
   </div>
-  <button class="w-10 h-10 rounded-full hover:bg-[#F0F6FF] text-[#5A9BD4] transition-all">
+  <a href="/diaries/report?month=<%= nextMonth %>&year=<%= nextYear %>" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#F0F6FF] text-[#5A9BD4] transition-all">
     <i class="fa-solid fa-chevron-right"></i>
-  </button>
+  </a>
 </div>
 
 <div class="grid grid-cols-12 gap-8 mb-8">
-  <!-- Mood Distribution Chart -->
-  <div class="col-span-5 glass-card p-8">
-    <h4 class="font-bold text-lg mb-6 text-[#2C4A7C]">Mood Distribution</h4>
-    <div class="relative mb-8">
-      <canvas id="moodChart" height="250"></canvas>
-    </div>
-    <div class="space-y-3">
-      <div class="flex justify-between items-center text-xs font-bold p-2 bg-slate-50 rounded-xl">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-400"></span> 😊 Happy</div>
-        <span>2</span>
+  <div class="col-span-5 glass-card p-8 flex flex-col">
+    <h4 class="font-bold text-lg mb-6 text-[#2C4A7C]">Phân bố cảm xúc</h4>
+    
+    <% if (entriesCount > 0) { %>
+      <div class="relative mb-6 flex-1">
+        <canvas id="moodChart" height="250"></canvas>
       </div>
-      <div class="flex justify-between items-center text-xs font-bold p-2">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 😌 Calm</div>
-        <span>1</span>
+      <div class="mt-6 p-4 bg-[#E0ECF9] rounded-2xl text-center">
+        <p class="text-[10px] font-bold text-[#5A9BD4] uppercase">CẢM XÚC PHỔ BIẾN NHẤT</p>
+        <p class="text-lg font-black"><%= topMood %></p>
       </div>
-      <div class="flex justify-between items-center text-xs font-bold p-2 bg-slate-50 rounded-xl">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-400"></span> 🥳 Excited</div>
-        <span>1</span>
+    <% } else { %>
+      <div class="flex-1 flex flex-col items-center justify-center text-slate-400 min-h-[250px]">
+        <i class="fa-solid fa-face-meh text-5xl mb-4 opacity-30"></i>
+        <p class="font-bold text-sm">Chưa có dữ liệu cảm xúc</p>
+        <p class="text-xs mt-1">Hãy viết nhật ký trong tháng này nhé!</p>
       </div>
-      <div class="flex justify-between items-center text-xs font-bold p-2">
-        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-400"></span> 😢 Sad</div>
-        <span>1</span>
-      </div>
-    </div>
-    <div class="mt-6 p-4 bg-[#E0ECF9] rounded-2xl text-center">
-      <p class="text-[10px] font-bold text-[#5A9BD4] uppercase">Most Common Mood</p>
-      <p class="text-lg font-black">😊 Happy</p>
-    </div>
+    <% } %>
   </div>
 
-  <!-- Calendar View -->
   <div class="col-span-7 glass-card p-8">
-    <h4 class="font-bold text-lg mb-6 text-[#2C4A7C]">Calendar View</h4>
+    <h4 class="font-bold text-lg mb-6 text-[#2C4A7C]">Lịch</h4>
     
     <div class="grid grid-cols-7 gap-3 text-center mb-4">
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Sun</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Mon</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Tue</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Wed</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Thu</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Fri</span>
-      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">Sat</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">CN</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T2</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T3</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T4</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T5</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T6</span>
+      <span class="text-[10px] font-black text-[#5A9BD4] uppercase">T7</span>
     </div>
 
     <div class="grid grid-cols-7 gap-3">
-      <div class="cal-day other-month">29</div>
-      <div class="cal-day other-month">30</div>
-      <div class="cal-day other-month">31</div>
-      <div class="cal-day bg-yellow-100/50">
-        <div class="important-star"><i class="fa-solid fa-star"></i></div>
-        <span class="text-yellow-600">1</span>
-      </div>
-      <div class="cal-day has-entry" style="background-image: url('https://images.unsplash.com/photo-1517842645767-c639042777db?w=100')">
-        <div class="absolute inset-0 bg-black/30 rounded-2xl"></div>
-        <span class="relative z-10">2</span>
-      </div>
-      <div class="cal-day has-entry" style="background-image: url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=100')">
-        <div class="important-star"><i class="fa-solid fa-star"></i></div>
-        <span class="relative z-10">3</span>
-      </div>
-      <div class="cal-day bg-emerald-50">4</div>
-
-      <div class="cal-day has-entry" style="background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=100')">
-        <div class="important-star"><i class="fa-solid fa-star"></i></div>
-        <span class="relative z-10">5</span>
-      </div>
-      <div class="cal-day">6</div>
-      <div class="cal-day">7</div>
-      <div class="cal-day today">8</div>
-      <div class="cal-day">9</div>
-      <div class="cal-day">10</div>
-      <div class="cal-day">11</div>
-
-      <div class="cal-day">12</div>
-      <div class="cal-day">13</div>
-      <div class="cal-day">14</div>
-      <div class="cal-day">15</div>
-      <div class="cal-day">16</div>
-      <div class="cal-day">17</div>
-      <div class="cal-day">18</div>
-
-      <div class="cal-day">19</div>
-      <div class="cal-day">20</div>
-      <div class="cal-day">21</div>
-      <div class="cal-day">22</div>
-      <div class="cal-day">23</div>
-      <div class="cal-day">24</div>
-      <div class="cal-day">25</div>
-
-      <div class="cal-day">26</div>
-      <div class="cal-day">27</div>
-      <div class="cal-day">28</div>
-      <div class="cal-day">29</div>
-      <div class="cal-day">30</div>
-      <div class="cal-day other-month">1</div>
-      <div class="cal-day other-month">2</div>
+      <% calendarDays.forEach(day => { %>
+        <% 
+          let classes = 'cal-day';
+          if (day.isOtherMonth) classes += ' other-month no-journal';
+          else if (!day.hasJournal) classes += ' no-journal';
+          else {
+            classes += ' has-journal';
+            if (day.image) classes += ' has-image';
+          }
+          if (day.isToday) classes += ' today';
+        %>
+        <div class="<%= classes %>" <%- day.image ? `style="background-image: url('${day.image}')"` : '' %>>
+          <% if (day.isStarred) { %>
+            <div class="important-star"><i class="fa-solid fa-star"></i></div>
+          <% } %>
+          <span><%= day.day %></span>
+        </div>
+      <% }) %>
     </div>
 
     <div class="mt-8 flex gap-6 text-[10px] font-bold text-slate-400">
-      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded border-2 border-[#5A9BD4]"></span> Today</div>
-      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-200"></span> Has entry</div>
-      <div class="flex items-center gap-2"><i class="fa-solid fa-star text-yellow-400"></i> Starred</div>
+      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded border-2 border-[#5A9BD4]"></span> Có nhật ký</div>
+      <div class="flex items-center gap-2"><i class="fa-solid fa-star text-yellow-400"></i> Bài viết yêu thích</div>
+      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded border-2 border-[#5A9BD4] bg-cover"></span> Có ảnh</div>
     </div>
   </div>
 </div>
 
-<!-- Stats Cards -->
 <div class="grid grid-cols-4 gap-6">
   <div class="stat-card bg-[#E0ECF9]">
     <p class="text-3xl mb-1">📝</p>
-    <h5 class="text-2xl font-black">12</h5>
-    <p class="text-[10px] font-bold text-[#5A9BD4] uppercase">Total Entries</p>
+    <h5 class="text-2xl font-black"><%= totalEntries %></h5>
+    <p class="text-[10px] font-bold text-[#5A9BD4] uppercase">Tổng số bài viết</p>
   </div>
   <div class="stat-card bg-emerald-50">
     <p class="text-3xl mb-1">📅</p>
-    <h5 class="text-2xl font-black">12</h5>
-    <p class="text-[10px] font-bold text-emerald-500 uppercase">Days Journaled</p>
+    <h5 class="text-2xl font-black"><%= entriesCount %></h5>
+    <p class="text-[10px] font-bold text-emerald-500 uppercase">Bài trong tháng</p>
   </div>
   <div class="stat-card bg-yellow-50">
     <p class="text-3xl mb-1">⭐</p>
-    <h5 class="text-2xl font-black">6</h5>
-    <p class="text-[10px] font-bold text-yellow-600 uppercase">Starred Entries</p>
+    <h5 class="text-2xl font-black"><%= totalStarred %></h5>
+    <p class="text-[10px] font-bold text-yellow-600 uppercase">Bài viết yêu thích</p>
   </div>
   <div class="stat-card bg-purple-50">
-    <p class="text-3xl mb-1">😊</p>
-    <h5 class="text-2xl font-black">Happy</h5>
-    <p class="text-[10px] font-bold text-purple-500 uppercase">Best Mood</p>
+    <p class="text-3xl mb-1">✨</p>
+    <h5 class="text-lg font-black truncate px-2"><%= topMood === 'Chưa có dữ liệu' ? 'N/A' : topMood.split(' ')[0] %></h5>
+    <p class="text-[10px] font-bold text-purple-500 uppercase">Cảm xúc nổi bật</p>
   </div>
 </div>
 
 <script>
-  const ctx = document.getElementById('moodChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Happy', 'Excited', 'Grateful', 'Calm', 'Sad'],
-      datasets: [{
-        data: [2, 1, 1, 1, 1],
-        backgroundColor: ['#FBBF24', '#F87171', '#34D399', '#5A9BD4', '#94A3B8'],
-        borderWidth: 0,
-        hoverOffset: 20
-      }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      cutout: '70%',
-      responsive: true,
-      maintainAspectRatio: true
-    }
-  });
+  // Xử lý EJS trong nháy đơn để JS hiểu là string (không bị đỏ code ở VS Code)
+  const entriesCount = Number('<%= entriesCount || 0 %>');
+
+  // Chỉ vẽ Chart nếu tháng đó có bài viết
+  if (entriesCount > 0) {
+      const ctx = document.getElementById('moodChart').getContext('2d');
+      
+      const rawLabels = JSON.parse('<%- chartLabels || "[]" %>');
+      const rawData = JSON.parse('<%- chartData || "[]" %>');
+      
+      const labels = rawLabels.map(l => l.substring(l.indexOf(' ') + 1) || l);
+      const icons = rawLabels.map(l => l.split(' ')[0] || '');
+      
+      const colors = ['#FDE68A', '#FBCFE8', '#A7F3D0', '#BFDBFE', '#E9D5FF', '#FCA5A5', '#D8B4FE'];
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: rawData,
+            backgroundColor: colors.slice(0, rawData.length),
+            borderWidth: 0,
+            hoverOffset: 20
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: '60%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: { size: 11, weight: 'bold' },
+                padding: 10,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: 8,
+                generateLabels: (chart) => {
+                  const data = chart.data;
+                  const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  
+                  return data.labels.map((label, i) => {
+                    const val = data.datasets[0].data[i];
+                    const percent = ((val / total) * 100).toFixed(1);
+                    return {
+                      text: `${icons[i]} ${label} (${percent}%)`,
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      index: i,
+                      hidden: false,
+                      fontColor: '#2C4A7C'
+                    };
+                  });
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percent = ((context.raw / total) * 100).toFixed(1);
+                  return `${icons[context.dataIndex]} ${context.label}: ${context.raw} bài (${percent}%)`;
+                }
+              }
+            },
+            datalabels: {
+              color: '#2C4A7C',
+              font: { weight: 'bold', size: 13 },
+              formatter: (value, context) => {
+                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                return Math.round((value / total) * 100) + '%';
+              },
+              anchor: 'center',
+              align: 'center',
+              offset: 0,
+              backgroundColor: 'rgba(255,255,255,0.85)',
+              borderRadius: 20,
+              padding: { left: 6, right: 6, top: 3, bottom: 3 }
+            }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
+  }
 </script>

@@ -24,7 +24,7 @@ exports.postRegister = async (req, res) => {
         }
 
         const newUser = new User({ name, email, password });
-        await newUser.save(); // Bcrypt sẽ tự động băm mật khẩu ở Model
+        await newUser.save(); 
 
         req.flash('success_msg', 'Đăng ký thành công! Hãy đăng nhập ngay 🐻');
         res.redirect('/auth/login');

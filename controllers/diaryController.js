@@ -27,7 +27,6 @@ exports.createEntry = async (req, res) => {
         const newDiary = new Diary({
             userId: req.session.user._id,
             content: content,
-            // Nếu bạn có gắn thẻ input mood từ Frontend thì lấy, không thì mặc định
             mood: mood || '😊 Happy' 
         });
 

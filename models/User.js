@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true }
 }, { timestamps: true });
 
-// Mã hóa mật khẩu trước khi lưu (Bỏ chữ next đi)
+// Mã hóa mật khẩu trước khi lưu 
 userSchema.pre('save', async function() {
   // Nếu không thay đổi mật khẩu thì bỏ qua
   if (!this.isModified('password')) return; 

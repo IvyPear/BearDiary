@@ -1,58 +1,4 @@
-<%
-  title = 'Nhật ký - Moodiary';
-  let entries = [
-    { 
-      date: 'Sun, April 5, 2026', 
-      mood: 'Happy', 
-      moodIcon: '😊', 
-      moodColor: 'yellow',
-      content: 'Started the day with a perfect cup of coffee. The morning light was golden and everything felt just right...',
-      image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=500',
-      isStarred: true,
-      side: 'left'
-    },
-    { 
-      date: 'Sat, April 4, 2026', 
-      mood: 'Calm', 
-      moodIcon: '😌', 
-      moodColor: 'emerald',
-      content: 'Watched the sunset from my balcony today. The sky was painted with beautiful orange and pink hues. It reminded me to slow down and appreciate the little moments.',
-      image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=500',
-      isStarred: false,
-      side: 'right'
-    },
-    { 
-      date: 'Fri, April 3, 2026', 
-      mood: 'Sad', 
-      moodIcon: '😢', 
-      moodColor: 'rose',
-      content: 'Today was a bit tough. Felt overwhelmed with work and personal stuff. But writing this down helps me process my thoughts.',
-      image: null,
-      isStarred: false,
-      side: 'left'
-    },
-    { 
-      date: 'Thu, April 2, 2026', 
-      mood: 'Excited', 
-      moodIcon: '🥳', 
-      moodColor: 'purple',
-      content: 'Got a promotion at work today! All the hard work finally paid off. Celebrated with close friends in the evening.',
-      image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500',
-      isStarred: true,
-      side: 'right'
-    },
-    { 
-      date: 'Wed, April 1, 2026', 
-      mood: 'Grateful', 
-      moodIcon: '🙏', 
-      moodColor: 'blue',
-      content: 'So grateful for my family and friends. Had a wonderful dinner with everyone and shared lots of laughter.',
-      image: null,
-      isStarred: false,
-      side: 'left'
-    }
-  ];
-%>
+<% title = 'Timeline - Bear Diary'; %>
 
 <style>
   .timeline-container { position: relative; }
@@ -168,11 +114,11 @@
 
 <div class="flex flex-wrap gap-2 mb-12" id="filterPills">
   <button class="filter-pill active" data-mood="all">Tất cả (<%= entries.length %>)</button>
-  <button class="filter-pill" data-mood="happy">😊 Happy (2)</button>
-  <button class="filter-pill" data-mood="calm">😌 Calm (1)</button>
-  <button class="filter-pill" data-mood="excited">🥳 Excited (1)</button>
-  <button class="filter-pill" data-mood="grateful">🙏 Grateful (1)</button>
-  <button class="filter-pill" data-mood="sad">😢 Sad (1)</button>
+  <button class="filter-pill" data-mood="happy">😊 Happy</button>
+  <button class="filter-pill" data-mood="calm">😌 Calm</button>
+  <button class="filter-pill" data-mood="excited">🥳 Excited</button>
+  <button class="filter-pill" data-mood="grateful">🙏 Grateful</button>
+  <button class="filter-pill" data-mood="sad">😢 Sad</button>
 </div>
 
 <div class="relative">
@@ -185,19 +131,31 @@
   <div class="timeline-container space-y-20 pb-20" id="timelineContainer">
     <div class="timeline-line"></div>
     
-    <% entries.forEach((entry, index) => { %>
-      <div class="flex <%= entry.side === 'left' ? 'justify-start' : 'justify-end' %> relative timeline-item" 
-           data-mood="<%= entry.mood.toLowerCase() %>"
-           data-date="<%= entry.date %>">
-        <div class="emoji-dot border-<%= entry.moodColor %>-200"><%= entry.moodIcon %></div>
-        <div class="timeline-card bg-<%= entry.moodColor %>-50/50 border border-<%= entry.moodColor %>-100">
+    <% entries.forEach((entry, index) => { 
+        // ĐƠN GIẢN HOÁ: Tự động tách Icon, Tên cảm xúc và Màu sắc từ DB
+        let moodIcon = (entry.mood || '😊 Happy').split(' ')[0] || '😊';
+        let moodName = (entry.mood || '😊 Happy').replace(moodIcon, '').trim();
+        let moodColor = 'blue';
+        if (moodName.toLowerCase().includes('happy')) moodColor = 'yellow';
+        if (moodName.toLowerCase().includes('calm')) moodColor = 'emerald';
+        if (moodName.toLowerCase().includes('sad')) moodColor = 'rose';
+        if (moodName.toLowerCase().includes('excited')) moodColor = 'purple';
+        
+        let side = index % 2 === 0 ? 'left' : 'right';
+        let displayDate = new Date(entry.date).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+    %>
+      <div class="flex <%= side === 'left' ? 'justify-start' : 'justify-end' %> relative timeline-item" 
+           data-mood="<%= moodName.toLowerCase() %>"
+           data-date="<%= displayDate %>">
+        <div class="emoji-dot border-<%= moodColor %>-200"><%= moodIcon %></div>
+        <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
           <% if (entry.image) { %>
             <img src="<%= entry.image %>" class="h-48 w-full object-cover" />
           <% } %>
           <div class="p-6">
             <div class="flex justify-between items-center mb-4">
-              <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-<%= entry.moodColor %>-600">
-                <%= entry.moodIcon %> <%= entry.mood %>
+              <span class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-<%= moodColor %>-600">
+                <%= moodIcon %> <%= moodName %>
               </span>
               <div class="flex gap-3 text-slate-400">
                 <i onclick="editEntry(this)" class="fa-solid fa-pen hover:text-[#5A9BD4] cursor-pointer"></i>
@@ -205,7 +163,7 @@
                 <i onclick="deleteEntry(this)" class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer"></i>
               </div>
             </div>
-            <p class="text-[10px] font-black text-slate-400 uppercase mb-2">📅 <%= entry.date %></p>
+            <p class="text-[10px] font-black text-slate-400 uppercase mb-2">📅 <%= displayDate %></p>
             <p class="text-sm font-bold text-slate-600 leading-relaxed">
               <%= entry.content %>
             </p>
@@ -234,7 +192,6 @@
 
   filterPills.forEach(pill => {
     pill.addEventListener('click', function() {
-      // Remove active class from all pills
       filterPills.forEach(p => p.classList.remove('active'));
       this.classList.add('active');
       
@@ -254,7 +211,6 @@
     });
   });
 
-  // Month and Year filter (demo)
   document.getElementById('monthFilter').addEventListener('change', function() {
     alert('Lọc theo tháng: ' + this.options[this.selectedIndex].text);
   });

@@ -4,10 +4,11 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  avatar: { type: String },
   password: { type: String, required: true }
 }, { timestamps: true });
 
-// Mã hóa mật khẩu trước khi lưu (Bỏ chữ next đi)
+// Mã hóa mật khẩu trước khi lưu 
 userSchema.pre('save', async function() {
   // Nếu không thay đổi mật khẩu thì bỏ qua
   if (!this.isModified('password')) return; 
@@ -22,4 +23,4 @@ userSchema.methods.comparePassword = async function(password) {
   return bcrypt.compare(password, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema); 

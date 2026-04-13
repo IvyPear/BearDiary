@@ -1,9 +1,7 @@
-<% title='Cá nhân - Bear Diary' ; 
-// Dữ liệu người dùng - sau này thay bằng dữ liệu từ database 
-const user={
-  name: 'Luna Park' , email: 'luna@example.com' , avatar: 'LP' , memberSince: 'January 2026' , totalEntries: 12,
-  starredEntries: 6, dayStreak: 0, daysJournaled: 12 }; %>
-
+<% title = 'Cá nhân - Bear Diary'; %>
+<% 
+  // Dữ liệu được truyền từ controller 
+%>
   <style>
     .profile-card-main {
       background: white;
@@ -36,6 +34,25 @@ const user={
       position: relative;
       z-index: 10;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+    
+    .avatar-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
     }
 
     .stat-item {
@@ -146,7 +163,11 @@ const user={
   <div class="profile-card-main mb-8">
     <div class="banner-box"></div>
     <div class="avatar-container">
-      <%= user.avatar %>
+      <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
+        <img src="<%= user.avatar %>" alt="<%= user.name %>">
+      <% } else { %>
+        <div class="avatar-fallback"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+      <% } %>
     </div>
     <div class="px-10 pb-10">
       <div class="flex justify-between items-start">
@@ -160,7 +181,7 @@ const user={
           <div
             class="inline-flex items-center gap-2 bg-[#E0ECF9] text-[#5A9BD4] px-4 py-2 rounded-full mt-5 text-[11px] font-black uppercase tracking-widest">
             <i class="fa-solid fa-calendar-check"></i>
-            Thành viên từ <%= user.memberSince %>
+            Thành viên  <%= user.memberSince %>
           </div>
         </div>
         <div class="text-5xl bear-float pt-2">🐻</div>
@@ -303,7 +324,7 @@ const user={
     }
 
     function editProfile() {
-      alert('✏️ Chức năng chỉnh sửa hồ sơ sẽ sớm được cập nhật!');
+      window.location.href = '/diaries/profile/edit';
     }
 
     function changePassword() {

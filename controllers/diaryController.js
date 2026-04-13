@@ -1,51 +1,77 @@
 const Diary = require('../models/Diary');
 const User = require('../models/User');
 
+// GET /diaries/home
 exports.getHome = async (req, res) => {
     try {
         const userId = req.session.user._id;
 
-        // Lấy tất cả nhật ký để hiển thị timeline
+        // Lấy tất cả nhật ký của user hiện tại
         const diaries = await Diary.find({ userId }).sort({ date: -1 });
 
-        const recentEntries = diaries.slice(0, 3);   // vẫn giữ 3 bài gần nhất nếu cần
+        const recentEntries = diaries.slice(0, 3);
         const totalEntries = diaries.length;
-        const totalStarred = diaries.filter(d => d.isStarred).length;
+        const totalStarred = diaries.filter(d => d.isStarred === true).length;
 
         res.render('diaries/home', {
             title: 'Trang chủ - Moodiary',
             recentEntries,
-            diaries,           // ← thêm dòng này để hiển thị full timeline
             totalEntries,
-            totalStarred
+            totalStarred,
+            diaries: diaries          // ← Truyền dữ liệu timeline xuống view
         });
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi getHome:', error);
         res.send('Lỗi tải trang chủ');
     }
 };
 
-// === HÀM TẠO NHẬT KÝ MỚI - ĐÃ HỖ TRỢ UPLOAD ẢNH ===
+// POST /diaries/create - Lưu nhật ký + upload ảnh
 exports.createEntry = async (req, res) => {
     try {
-        const { title, content, mood, date } = req.body;
+        const { title, content, mood } = req.body;
 
         const newDiary = new Diary({
             userId: req.session.user._id,
             title: title || 'Nhật ký trong ngày',
             content: content,
             mood: mood || '😊 Happy',
-            image: req.file ? `/uploads/diary/${req.file.filename}` : null,   // ← Quan trọng: lưu đường dẫn ảnh
-            date: date ? new Date(date) : Date.now(),
+            image: req.file ? `/uploads/diary/${req.file.filename}` : null,
+            date: new Date(),
             isStarred: false
         });
 
         await newDiary.save();
-        console.log('✅ Đã lưu nhật ký mới với ảnh:', req.file ? 'Có ảnh' : 'Không có ảnh');
 
-        res.redirect('/diaries/home');   // Quay về trang home sau khi lưu
+        console.log('✅ Lưu nhật ký thành công!');
+        res.redirect('/diaries/home');
     } catch (error) {
-        console.error('❌ Lỗi khi tạo nhật ký:', error);
+        console.error('❌ Lỗi lưu nhật ký:', error);
+        res.redirect('/diaries/home');
+    }
+};
+
+// POST /diaries/create - Lưu nhật ký + upload ảnh
+exports.createEntry = async (req, res) => {
+    try {
+        const { title, content, mood } = req.body;
+
+        const newDiary = new Diary({
+            userId: req.session.user._id,
+            title: title || 'Nhật ký trong ngày',
+            content: content,
+            mood: mood || '😊 Happy',
+            image: req.file ? `/uploads/diary/${req.file.filename}` : null,
+            date: new Date(),
+            isStarred: false
+        });
+
+        await newDiary.save();
+
+        console.log('✅ Lưu nhật ký thành công!');
+        res.redirect('/diaries/home');
+    } catch (error) {
+        console.error('❌ Lỗi lưu nhật ký:', error);
         res.redirect('/diaries/home');
     }
 };

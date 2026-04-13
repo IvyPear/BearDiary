@@ -41,33 +41,57 @@
     </div>
   </div>
 
-  <div class="col-span-9 bg-white rounded-[2rem] p-8 card-shadow min-h-[450px] flex flex-col">
-    <form action="/diaries/create" method="POST" class="flex flex-col h-full flex-1">
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2 text-[#5A9BD4] font-bold text-sm">
-          ✨ Nhật ký hôm nay
-        </div>
-        <div class="flex gap-4 items-center">
-          <i class="fa-regular fa-star text-slate-300 hover:text-amber-400 cursor-pointer"></i>
-          <i class="fa-regular fa-image text-slate-300 hover:text-[#5A9BD4] cursor-pointer"></i>
-        </div>
+ <!-- ================== FORM VIẾT NHẬT KÝ + UPLOAD ẢNH ================== -->
+<div class="col-span-9 bg-white rounded-[2rem] p-8 card-shadow min-h-[450px] flex flex-col">
+  <form action="/diaries/create" method="POST" enctype="multipart/form-data" class="flex flex-col h-full flex-1">
+    
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-2 text-[#5A9BD4] font-bold text-sm">
+        ✨ Nhật ký hôm nay
       </div>
+    </div>
 
-      <div class="flex-1">
-        <input type="hidden" name="mood" id="selectedMood" value="😊 Vui vẻ">
-        <textarea name="content" required
-          class="w-full h-full outline-none border-t border-slate-100 pt-6 text-[#2C4A7C] placeholder:text-slate-300 resize-none text-base"
-          placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
-      </div>
+    <!-- Tiêu đề -->
+    <input 
+      type="text" 
+      name="title" 
+      placeholder="Tiêu đề nhật ký (tùy chọn)" 
+      class="w-full mb-4 px-4 py-3 rounded-2xl border border-slate-200 focus:border-[#5A9BD4] outline-none">
 
-      <div class="flex justify-end mt-4">
-        <button type="submit"
-          class="bg-[#5A9BD4] hover:bg-[#2C4A7C] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md transition-all">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu bài viết
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- Hidden mood -->
+    <input type="hidden" name="mood" id="selectedMood" value="😊 Vui vẻ">
+
+    <!-- Nội dung -->
+    <div class="flex-1">
+      <textarea name="content" required
+        class="w-full h-full outline-none border-t border-slate-100 pt-6 text-[#2C4A7C] placeholder:text-slate-300 resize-none text-base"
+        placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
+    </div>
+
+    <!-- Upload ảnh từ folder -->
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-slate-500 mb-2">📸 Thêm ảnh từ folder</label>
+      <input 
+        type="file" 
+        name="image" 
+        accept="image/*"
+        class="block w-full text-sm text-slate-500 
+               file:mr-4 file:py-2 file:px-4 
+               file:rounded-full file:border-0 
+               file:text-sm file:font-semibold 
+               file:bg-[#5A9BD4] file:text-white 
+               hover:file:bg-[#2C4A7C]">
+    </div>
+
+    <!-- Nút lưu -->
+    <div class="flex justify-end mt-6">
+      <button type="submit"
+        class="bg-[#5A9BD4] hover:bg-[#2C4A7C] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md transition-all">
+        <i class="fa-solid fa-floppy-disk"></i> 
+        Lưu nhật ký
+      </button>
+    </div>
+  </form>
 </div>
 
 <div class="mt-10">
@@ -128,3 +152,69 @@
     });
   });
 </script>
+<!-- ================== TIMELINE - DANH SÁCH NHẬT KÝ ================== -->
+<div class="mt-12">
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="font-bold text-lg text-[#2C4A7C]">📖 Dòng thời gian nhật ký của bạn</h3>
+    <a href="/diaries/timeline" class="text-[#5A9BD4] text-sm hover:underline">Xem đầy đủ →</a>
+  </div>
+
+  <% if (diaries && diaries.length > 0) { %>
+    <div class="space-y-8">
+      <% diaries.forEach(diary => { 
+        const moodParts = (diary.mood || '😊 Happy').split(' ');
+        const moodIcon = moodParts[0] || '😊';
+        const moodName = moodParts.slice(1).join(' ') || 'Happy';
+      %>
+        <div class="bg-white rounded-[2rem] p-7 card-shadow border border-slate-100">
+          
+          <!-- Header: Mood + Ngày -->
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl"><%= moodIcon %></span>
+              <span class="font-semibold text-[#2C4A7C]"><%= moodName %></span>
+            </div>
+            <span class="text-xs text-slate-400">
+              <%= new Date(diary.date).toLocaleDateString('vi-VN', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+              }) %>
+            </span>
+          </div>
+
+          <!-- Tiêu đề -->
+          <% if (diary.title && diary.title !== 'Nhật ký trong ngày') { %>
+            <h4 class="font-bold text-lg mb-3 text-[#2C4A7C]"><%= diary.title %></h4>
+          <% } %>
+
+          <!-- Nội dung -->
+          <p class="text-[#2C4A7C] leading-relaxed mb-5"><%= diary.content %></p>
+
+          <!-- Ảnh nếu có -->
+          <% if (diary.image) { %>
+            <div class="mt-4 rounded-2xl overflow-hidden border border-slate-100">
+              <img src="<%= diary.image %>" 
+                   alt="Ảnh nhật ký" 
+                   class="w-full max-h-[380px] object-cover">
+            </div>
+          <% } %>
+
+          <!-- Thời gian đăng -->
+          <div class="text-right mt-4 text-xs text-slate-400">
+            <%= new Date(diary.createdAt || diary.date).toLocaleTimeString('vi-VN', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }) %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="mt-12 text-center py-20 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
+      <p class="text-slate-400 text-lg">Chưa có nhật ký nào.</p>
+      <p class="text-slate-500 mt-2">Hãy viết nhật ký đầu tiên ở phía trên nhé ✨</p>
+    </div>
+  <% } %>
+</div>

@@ -29,7 +29,17 @@ exports.getHome = async (req, res) => {
 // POST /diaries/create - Lưu nhật ký + upload ảnh
 exports.createEntry = async (req, res) => {
     try {
+        console.log('=== BẮT ĐẦU LƯU NHẬT KÝ ===');
+        console.log('Body:', req.body);
+        console.log('File:', req.file ? req.file.filename : 'Không có file');
+
         const { title, content, mood } = req.body;
+
+        if (!content) {
+            console.log('❌ Thiếu nội dung');
+            req.flash('error_msg', 'Vui lòng nhập nội dung nhật ký');
+            return res.redirect('/diaries/home');
+        }
 
         const newDiary = new Diary({
             userId: req.session.user._id,
@@ -43,35 +53,13 @@ exports.createEntry = async (req, res) => {
 
         await newDiary.save();
 
-        console.log('✅ Lưu nhật ký thành công!');
+        console.log('✅ Lưu nhật ký thành công! ID:', newDiary._id);
+        req.flash('success_msg', 'Nhật ký đã được lưu thành công!');
         res.redirect('/diaries/home');
+
     } catch (error) {
-        console.error('❌ Lỗi lưu nhật ký:', error);
-        res.redirect('/diaries/home');
-    }
-};
-
-// POST /diaries/create - Lưu nhật ký + upload ảnh
-exports.createEntry = async (req, res) => {
-    try {
-        const { title, content, mood } = req.body;
-
-        const newDiary = new Diary({
-            userId: req.session.user._id,
-            title: title || 'Nhật ký trong ngày',
-            content: content,
-            mood: mood || '😊 Happy',
-            image: req.file ? `/uploads/diary/${req.file.filename}` : null,
-            date: new Date(),
-            isStarred: false
-        });
-
-        await newDiary.save();
-
-        console.log('✅ Lưu nhật ký thành công!');
-        res.redirect('/diaries/home');
-    } catch (error) {
-        console.error('❌ Lỗi lưu nhật ký:', error);
+        console.error('❌ LỖI LƯU NHẬT KÝ:', error);
+        req.flash('error_msg', 'Lỗi khi lưu nhật ký: ' + error.message);
         res.redirect('/diaries/home');
     }
 };

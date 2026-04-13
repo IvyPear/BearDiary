@@ -61,82 +61,22 @@ exports.createEntry = async (req, res) => {
     }
 };
 
+// GET /diaries/timeline
 exports.getTimeline = async (req, res) => {
     try {
         const userId = req.session.user._id;
 
-        // Lấy tháng và năm từ query URL, mặc định là trống (tất cả)
-        let query = { userId };
-        const currentMonth = req.query.month || '';
-        const currentYear = req.query.year || new Date().getFullYear().toString();
+        const diaries = await Diary.find({ userId }).sort({ createdAt: -1 });
 
-        if (currentMonth && currentYear) {
-            const startDate = new Date(parseInt(currentYear), parseInt(currentMonth) - 1, 1);
-            const endDate = new Date(parseInt(currentYear), parseInt(currentMonth), 0, 23, 59, 59, 999);
-            query.date = { $gte: startDate, $lte: endDate };
-        }
-
-        // Lấy dữ liệu thật từ MongoDB
-        const rawEntries = await Diary.find(query).sort({ date: -1 });
-
-        // Tạo hàm phụ để chuyển đổi mood thành Color và Icon giống mảng tĩnh của bạn
-        const parseMood = (moodString) => {
-            const str = moodString || '😊 Happy';
-            const parts = str.split(' ');
-            const icon = parts[0] || '😐';
-            const name = parts.slice(1).join(' ') || 'Normal';
-            
-            let color = 'blue';
-            const nLower = name.toLowerCase();
-            if (nLower.includes('happy') || nLower.includes('vui')) color = 'yellow';
-            else if (nLower.includes('calm') || nLower.includes('bình')) color = 'emerald';
-            else if (nLower.includes('sad') || nLower.includes('buồn')) color = 'rose';
-            else if (nLower.includes('excited') || nLower.includes('hào')) color = 'purple';
-            else if (nLower.includes('grateful') || nLower.includes('biết')) color = 'blue';
-
-            return { icon, name, color };
-        };
-
-        let moodCounts = { all: rawEntries.length };
-        let uniqueMoods = {};
-
-        // Biến đổi dữ liệu DB cho khớp với cấu trúc EJS cũ của bạn
-        const entries = rawEntries.map((e, index) => {
-            const { icon, name, color } = parseMood(e.mood);
-            const moodKey = name.toLowerCase();
-            
-            moodCounts[moodKey] = (moodCounts[moodKey] || 0) + 1;
-            if (!uniqueMoods[moodKey]) uniqueMoods[moodKey] = { icon, name };
-
-            const dateObj = new Date(e.date);
-            const dateStr = dateObj.toLocaleDateString('en-US', {
-                weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
-            });
-
-            return {
-                _id: e._id,
-                date: dateStr, // Định dạng lại ngày giống code gốc của bạn
-                mood: name,
-                moodIcon: icon,
-                moodColor: color,
-                content: e.content,
-                image: e.image || null,
-                isStarred: e.isStarred || false,
-                side: index % 2 === 0 ? 'left' : 'right' // Tạo xen kẽ trái phải
-            };
-        });
+        console.log(`[getTimeline] Tìm thấy ${diaries.length} nhật ký`);
 
         res.render('diaries/timeline', {
             title: 'Dòng thời gian - Moodiary',
-            entries,
-            moodCounts,
-            uniqueMoods,
-            currentMonth,
-            currentYear
+            diaries: diaries
         });
     } catch (error) {
-        console.error(error);
-        res.send('Lỗi tải Timeline');
+        console.error('Lỗi getTimeline:', error);
+        res.send('Lỗi tải timeline');
     }
 };
 

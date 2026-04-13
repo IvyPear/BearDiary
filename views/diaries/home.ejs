@@ -41,33 +41,57 @@
     </div>
   </div>
 
-  <div class="col-span-9 bg-white rounded-[2rem] p-8 card-shadow min-h-[450px] flex flex-col">
-    <form action="/diaries/create" method="POST" class="flex flex-col h-full flex-1">
-      <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2 text-[#5A9BD4] font-bold text-sm">
-          ✨ Nhật ký hôm nay
-        </div>
-        <div class="flex gap-4 items-center">
-          <i class="fa-regular fa-star text-slate-300 hover:text-amber-400 cursor-pointer"></i>
-          <i class="fa-regular fa-image text-slate-300 hover:text-[#5A9BD4] cursor-pointer"></i>
-        </div>
+  <!-- ================== FORM VIẾT NHẬT KÝ + UPLOAD ẢNH ================== -->
+<div class="col-span-9 bg-white rounded-[2rem] p-8 card-shadow min-h-[480px] flex flex-col">
+  <form action="/diaries/create" method="POST" enctype="multipart/form-data" class="flex flex-col h-full flex-1">
+    
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex items-center gap-2 text-[#5A9BD4] font-bold text-sm">
+        ✨ Nhật ký hôm nay
       </div>
+    </div>
 
-      <div class="flex-1">
-        <input type="hidden" name="mood" id="selectedMood" value="😊 Vui vẻ">
-        <textarea name="content" required
-          class="w-full h-full outline-none border-t border-slate-100 pt-6 text-[#2C4A7C] placeholder:text-slate-300 resize-none text-base"
-          placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
-      </div>
+    <!-- Tiêu đề -->
+    <input 
+      type="text" 
+      name="title" 
+      placeholder="Tiêu đề nhật ký (tùy chọn)" 
+      class="w-full mb-4 px-4 py-3 rounded-2xl border border-slate-200 focus:border-[#5A9BD4] outline-none">
 
-      <div class="flex justify-end mt-4">
-        <button type="submit"
-          class="bg-[#5A9BD4] hover:bg-[#2C4A7C] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md transition-all">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu bài viết
-        </button>
-      </div>
-    </form>
-  </div>
+    <!-- Hidden mood -->
+    <input type="hidden" name="mood" id="selectedMood" value="😊 Vui vẻ">
+
+    <!-- Nội dung -->
+    <div class="flex-1">
+      <textarea name="content" required
+        class="w-full h-full outline-none border-t border-slate-100 pt-6 text-[#2C4A7C] placeholder:text-slate-300 resize-none text-base"
+        placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
+    </div>
+
+    <!-- Upload ảnh từ folder -->
+    <div class="mt-6 p-4 border-2 border-dashed border-slate-300 rounded-2xl hover:border-[#5A9BD4]">
+      <label class="block text-sm font-medium text-slate-500 mb-3">📸 Thêm ảnh từ folder</label>
+      <input 
+        type="file" 
+        name="image" 
+        accept="image/*"
+        class="block w-full text-sm text-slate-500 
+               file:mr-4 file:py-3 file:px-6 
+               file:rounded-xl file:border-0 
+               file:text-sm file:font-semibold 
+               file:bg-[#5A9BD4] file:text-white 
+               hover:file:bg-[#2C4A7C]">
+    </div>
+
+    <!-- Nút lưu -->
+    <div class="flex justify-end mt-8">
+      <button type="submit"
+        class="bg-[#5A9BD4] hover:bg-[#2C4A7C] text-white px-10 py-4 rounded-2xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-floppy-disk"></i>
+        Lưu nhật ký
+      </button>
+    </div>
+  </form>
 </div>
 
 <div class="mt-10">

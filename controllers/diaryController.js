@@ -1,39 +1,62 @@
 const Diary = require('../models/Diary');
 const User = require('../models/User');
 
+// GET /diaries/home
 exports.getHome = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        // Lấy 3 bài viết gần nhất
-        const recentEntries = await Diary.find({ userId }).sort({ date: -1 }).limit(3);
-        const totalEntries = await Diary.countDocuments({ userId });
-        const totalStarred = await Diary.countDocuments({ userId, isStarred: true });
+
+        const diaries = await Diary.find({ userId }).sort({ createdAt: -1 });
+
+        console.log(`[getHome] Tìm thấy ${diaries.length} nhật ký cho user ${userId}`);
+
+        const recentEntries = diaries.slice(0, 3);
+        const totalEntries = diaries.length;
+        const totalStarred = diaries.filter(d => d.isStarred).length;
 
         res.render('diaries/home', {
             title: 'Trang chủ - Moodiary',
             recentEntries,
             totalEntries,
-            totalStarred
+            totalStarred,
+            diaries: diaries                  // ← Rất quan trọng
         });
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi getHome:', error);
         res.send('Lỗi tải trang chủ');
     }
 };
 
+// POST /diaries/create - Lưu nhật ký
 exports.createEntry = async (req, res) => {
     try {
-        const { content, mood } = req.body;
+        console.log("=== FORM ĐƯỢC GỬI ===");
+        console.log("Body:", req.body);
+        console.log("File:", req.file ? req.file.filename : "Không có file");
+
+        const { title, content, mood } = req.body;
+
+        if (!content || content.trim() === '') {
+            console.log("❌ Nội dung nhật ký trống");
+            return res.redirect('/diaries/home');
+        }
+
         const newDiary = new Diary({
             userId: req.session.user._id,
-            content: content,
-            mood: mood || '😊 Happy' 
+            title: title || 'Nhật ký trong ngày',
+            content: content.trim(),
+            mood: mood || '😊 Happy',
+            image: req.file ? `/uploads/diary/${req.file.filename}` : null,
+            date: new Date()
         });
 
         await newDiary.save();
+
+        console.log("✅ LƯU NHẬT KÝ THÀNH CÔNG!");
         res.redirect('/diaries/home');
+
     } catch (error) {
-        console.error(error);
+        console.error("❌ LỖI LƯU NHẬT KÝ:", error.message);
         res.redirect('/diaries/home');
     }
 };

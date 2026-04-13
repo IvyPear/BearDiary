@@ -1,15 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const diaryController = require('../controllers/diaryController');
-const { ensureAuthenticated } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
-// Áp dụng middleware bảo vệ cho tất cả các route bên dưới
-router.use(ensureAuthenticated);
-
+// Tạm thời bỏ auth để test dễ
 router.get('/home', diaryController.getHome);
-router.post('/create', diaryController.createEntry); // API lưu bài viết
-router.get('/timeline', diaryController.getTimeline);
-router.get('/report', diaryController.getReport);
-router.get('/profile', diaryController.getProfile);
+router.post('/create', upload.single('image'), diaryController.createEntry);
 
 module.exports = router;

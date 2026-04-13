@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const diaryController = require('../controllers/diaryController');
+const authController = require('../controllers/authController');
 const multer = require('multer');
 const path = require('path');
 
@@ -31,7 +32,13 @@ router.post('/delete/:id', diaryController.deleteEntry);
 router.get('/report', diaryController.getReport);
 router.get('/profile', diaryController.getProfile);
 router.get('/profile/edit', diaryController.getEditProfile);
-// Use upload.single middleware to accept avatar file from user's folder
+
+// Route update profile (hỗ trợ upload avatar)
+// Chú ý: 'avatarFile' là tên field trong form gửi lên (giống với editProfile.ejs)
 router.post('/profile/update', upload.single('avatarFile'), diaryController.updateProfile);
+
+// ==========================================
+// Route này cho phép upload avatar riêng biệt, không cần update toàn bộ profile
+router.post('/profile/upload-avatar', upload.single('avatar'), authController.updateAvatar);
 
 module.exports = router;

@@ -4,14 +4,18 @@ const User = require('../models/User');
 exports.getHome = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        // Lấy 3 bài viết gần nhất
-        const recentEntries = await Diary.find({ userId }).sort({ date: -1 }).limit(3);
-        const totalEntries = await Diary.countDocuments({ userId });
-        const totalStarred = await Diary.countDocuments({ userId, isStarred: true });
+
+        // Lấy tất cả nhật ký để hiển thị timeline
+        const diaries = await Diary.find({ userId }).sort({ date: -1 });
+
+        const recentEntries = diaries.slice(0, 3);   // vẫn giữ 3 bài gần nhất nếu cần
+        const totalEntries = diaries.length;
+        const totalStarred = diaries.filter(d => d.isStarred).length;
 
         res.render('diaries/home', {
             title: 'Trang chủ - Moodiary',
             recentEntries,
+            diaries,           // ← thêm dòng này để hiển thị full timeline
             totalEntries,
             totalStarred
         });
@@ -21,19 +25,27 @@ exports.getHome = async (req, res) => {
     }
 };
 
+// === HÀM TẠO NHẬT KÝ MỚI - ĐÃ HỖ TRỢ UPLOAD ẢNH ===
 exports.createEntry = async (req, res) => {
     try {
-        const { content, mood } = req.body;
+        const { title, content, mood, date } = req.body;
+
         const newDiary = new Diary({
             userId: req.session.user._id,
+            title: title || 'Nhật ký trong ngày',
             content: content,
-            mood: mood || '😊 Happy' 
+            mood: mood || '😊 Happy',
+            image: req.file ? `/uploads/diary/${req.file.filename}` : null,   // ← Quan trọng: lưu đường dẫn ảnh
+            date: date ? new Date(date) : Date.now(),
+            isStarred: false
         });
 
         await newDiary.save();
-        res.redirect('/diaries/home');
+        console.log('✅ Đã lưu nhật ký mới với ảnh:', req.file ? 'Có ảnh' : 'Không có ảnh');
+
+        res.redirect('/diaries/home');   // Quay về trang home sau khi lưu
     } catch (error) {
-        console.error(error);
+        console.error('❌ Lỗi khi tạo nhật ký:', error);
         res.redirect('/diaries/home');
     }
 };

@@ -20,7 +20,8 @@ const diarySchema = new mongoose.Schema({
     default: '😊 Happy' 
   },
   image: { 
-    type: String 
+    type: String,   // sẽ lưu đường dẫn ví dụ: "/uploads/diary/174xxxxxx.jpg"
+    default: null
   },
   isStarred: { 
     type: Boolean, 
@@ -30,6 +31,8 @@ const diarySchema = new mongoose.Schema({
     type: Date, 
     default: Date.now 
   }
-}, { timestamps: true });
+}, { 
+  timestamps: true   // tự động tạo createdAt và updatedAt
+});
 
 module.exports = mongoose.model('Diary', diarySchema);

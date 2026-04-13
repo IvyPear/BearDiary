@@ -6,7 +6,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 require('dotenv').config();
 
-const connectDB = require('./config/db'); // Nối Database
+const connectDB = require('./config/db');   // ← Chỉ giữ 1 dòng này
+
 const authRoutes = require('./routes/authRoutes');
 const diaryRoutes = require('./routes/diaryRoutes');
 
@@ -35,7 +36,7 @@ app.use(session({
 }));
 app.use(flash());
 
-// Biến toàn cục (Sử dụng được trong mọi file EJS)
+// Biến toàn cục 
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.success_msg = req.flash('success_msg');

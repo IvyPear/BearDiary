@@ -5,20 +5,18 @@ const User = require('../models/User');
 exports.getHome = async (req, res) => {
     try {
         const userId = req.session.user._id;
-
-        // Lấy tất cả nhật ký của user hiện tại
-        const diaries = await Diary.find({ userId }).sort({ date: -1 });
+        const diaries = await Diary.find({ userId }).sort({ createdAt: -1 });
 
         const recentEntries = diaries.slice(0, 3);
         const totalEntries = diaries.length;
-        const totalStarred = diaries.filter(d => d.isStarred === true).length;
+        const totalStarred = diaries.filter(d => d.isStarred).length;
 
         res.render('diaries/home', {
             title: 'Trang chủ - Moodiary',
             recentEntries,
             totalEntries,
             totalStarred,
-            diaries: diaries          // ← Truyền dữ liệu timeline xuống view
+            diaries: diaries   // ← Truyền dữ liệu để hiển thị timeline
         });
     } catch (error) {
         console.error('Lỗi getHome:', error);
@@ -29,17 +27,7 @@ exports.getHome = async (req, res) => {
 // POST /diaries/create - Lưu nhật ký + upload ảnh
 exports.createEntry = async (req, res) => {
     try {
-        console.log('=== BẮT ĐẦU LƯU NHẬT KÝ ===');
-        console.log('Body:', req.body);
-        console.log('File:', req.file ? req.file.filename : 'Không có file');
-
         const { title, content, mood } = req.body;
-
-        if (!content) {
-            console.log('❌ Thiếu nội dung');
-            req.flash('error_msg', 'Vui lòng nhập nội dung nhật ký');
-            return res.redirect('/diaries/home');
-        }
 
         const newDiary = new Diary({
             userId: req.session.user._id,
@@ -47,19 +35,15 @@ exports.createEntry = async (req, res) => {
             content: content,
             mood: mood || '😊 Happy',
             image: req.file ? `/uploads/diary/${req.file.filename}` : null,
-            date: new Date(),
-            isStarred: false
+            date: new Date()
         });
 
         await newDiary.save();
 
-        console.log('✅ Lưu nhật ký thành công! ID:', newDiary._id);
-        req.flash('success_msg', 'Nhật ký đã được lưu thành công!');
+        console.log('✅ Lưu nhật ký thành công!');
         res.redirect('/diaries/home');
-
     } catch (error) {
-        console.error('❌ LỖI LƯU NHẬT KÝ:', error);
-        req.flash('error_msg', 'Lỗi khi lưu nhật ký: ' + error.message);
+        console.error('❌ Lỗi lưu nhật ký:', error);
         res.redirect('/diaries/home');
     }
 };

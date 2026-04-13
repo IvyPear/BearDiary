@@ -4,64 +4,69 @@ const path = require('path');
 const methodOverride = require('method-override');
 const session = require('express-session');
 const flash = require('connect-flash');
-
-// --- THƯ VIỆN BẢO MẬT ---
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const connectDB = require('./config/db'); // Nối Database
+const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const diaryRoutes = require('./routes/diaryRoutes');
 
 const app = express();
 
-// Kết nối DB
+// 1. KẾT NỐI DATABASE
 connectDB();
 
-// ==========================================
-// CẤU HÌNH BẢO MẬT NÂNG CAO (SECURITY MIDDLEWARE)
-// ==========================================
+// 2. CẤU HÌNH BẢO MẬT HELMET (Sửa lỗi vỡ giao diện)
+// Cấu hình này cho phép tải CSS/JS từ các nguồn phổ biến như Tailwind và FontAwesome
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+        "img-src": ["'self'", "data:", "https://*"],
+      },
+    },
+  })
+);
 
-// 1. Đội mũ bảo hiểm cho HTTP Headers (Ẩn thông tin Server, chặn tấn công phổ biến)
-app.use(helmet());
-
-// 2. Chống bạo lực (Brute Force) & Spam truy cập
+// 3. GIỚI HẠN TỐC ĐỘ TRUY CẬP (Rate Limit)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 phút
-    max: 100, // Tối đa 100 request/15 phút cho mỗi địa chỉ IP
-    message: 'Bạn đã thao tác quá nhiều lần, vui lòng thử lại sau 15 phút! 🐻'
+    max: 100, // 100 request
+    message: 'Bạn thao tác quá nhanh, vui lòng thử lại sau 15 phút! 🐻'
 });
-app.use(limiter);
+app.use('/auth/', limiter); // Chỉ áp dụng giới hạn cho các trang đăng nhập/quên mật khẩu
 
-// ==========================================
-
-// EJS
+// 4. CẤU HÌNH EJS & STATIC FILES
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Body Parser & Method Override
+// 5. MIDDLEWARE XỬ LÝ DỮ LIỆU
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Session & Flash (Đã nâng cấp bảo mật Cookie)
+// 6. CẤU HÌNH SESSION & FLASH
 app.use(session({
     secret: process.env.SESSION_SECRET || 'viet_bear_diary',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        httpOnly: true, // Chống đánh cắp Session qua mã độc JavaScript (XSS)
-        secure: false,  // Đang dùng localhost (HTTP) nên để false. Khi nào up lên mạng có HTTPS thì đổi thành true
-        maxAge: 1000 * 60 * 60 * 24 // Thời gian sống của Cookie: 1 ngày
+        httpOnly: true, // Chống XSS
+        secure: false,  // Để false vì đang chạy localhost (HTTP)
+        maxAge: 1000 * 60 * 60 * 24 // 1 ngày
     }
 }));
 app.use(flash());
 
-// Biến toàn cục (Sử dụng được trong mọi file EJS)
+// 7. BIẾN TOÀN CỤC CHO VIEW
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.success_msg = req.flash('success_msg');
@@ -69,7 +74,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Routes
+// 8. ĐỊNH NGHĨA ROUTES
 app.use('/auth', authRoutes);
 app.use('/diaries', diaryRoutes);
 
@@ -82,7 +87,8 @@ app.get('/', (req, res) => {
     }
 });
 
+// 9. KHỞI CHẠY SERVER
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`✅ Server bảo mật đang chạy mượt mà tại: http://localhost:${PORT}`);
+    console.log(`✅ Bear Diary đang chạy mượt mà tại: http://localhost:${PORT}`);
 });

@@ -1,5 +1,7 @@
 const Diary = require('../models/Diary');
 const User = require('../models/User');
+const path = require('path');
+const fs = require('fs');
 
 exports.getHome = async (req, res) => {
     try {
@@ -366,16 +368,29 @@ exports.getEditProfile = async (req, res) => {
     }
 };
 
-// POST update profile
+// POST update profile (phần cần sửa)
 exports.updateProfile = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        console.log('updateProfile called, userId=', userId, 'file=', req.file && req.file.filename, 'body=', req.body);
         const { name, email } = req.body;
-        // avatar may come from uploaded file (req.file) or optional text field `avatar` for backward compat
+        
         let avatarPath;
+        
+        // Xử lý upload file avatar mới
         if (req.file) {
-            // stored in public/uploads
+            // Xóa avatar cũ nếu có và không phải là ảnh mặc định
+            const oldUser = await User.findById(userId);
+            if (oldUser && oldUser.avatar && !oldUser.avatar.includes('default-avatars')) {
+                const oldAvatarPath = path.join(__dirname, '../public', oldUser.avatar);
+                try {
+                    if (fs.existsSync(oldAvatarPath)) {
+                        fs.unlinkSync(oldAvatarPath);
+                    }
+                } catch (err) {
+                    console.error('Lỗi xóa avatar cũ:', err);
+                }
+            }
+            // Lưu avatar mới
             avatarPath = '/uploads/' + req.file.filename;
         } else if (req.body.avatar) {
             avatarPath = req.body.avatar.trim();
@@ -385,32 +400,47 @@ exports.updateProfile = async (req, res) => {
             return res.redirect('/diaries/profile');
         }
 
-        // Check email uniqueness if changed
+        // Check email uniqueness
         const existing = await User.findOne({ email: email.trim().toLowerCase() });
         if (existing && String(existing._id) !== String(userId)) {
-            return res.redirect('/diaries/profile');
+            req.flash('error_msg', 'Email đã được sử dụng!');
+            return res.redirect('/diaries/profile/edit');
         }
 
-        const updated = await User.findByIdAndUpdate(userId, {
+        // Cập nhật thông tin
+        const updateData = {
             name: name.trim(),
-            email: email.trim().toLowerCase(),
-            avatar: avatarPath !== undefined ? avatarPath : undefined
-        }, { new: true, runValidators: true }).lean();
+            email: email.trim().toLowerCase()
+        };
+        
+        if (avatarPath !== undefined) {
+            updateData.avatar = avatarPath;
+        }
 
-        // update session user and locals
-        req.session.user = req.session.user || {};
+        const updated = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true }).lean();
+
+        // Update session
         req.session.user.name = updated.name;
         req.session.user.email = updated.email;
         req.session.user.avatar = updated.avatar;
 
-        // If AJAX (fetch) request, return JSON so client can redirect
+        // Response cho AJAX request
         if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.json({ ok: true, redirect: '/diaries/profile' });
+            return res.json({ 
+                ok: true, 
+                redirect: '/diaries/profile',
+                avatar: updated.avatar
+            });
         }
 
+        req.flash('success_msg', 'Cập nhật thành công!');
         res.redirect('/diaries/profile');
     } catch (err) {
         console.error(err);
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({ ok: false, error: 'Có lỗi xảy ra' });
+        }
+        req.flash('error_msg', 'Có lỗi xảy ra!');
         res.redirect('/diaries/profile');
     }
 };

@@ -4,6 +4,10 @@ const path = require('path');
 const methodOverride = require('method-override');
 const session = require('express-session');
 const flash = require('connect-flash');
+
+// --- THƯ VIỆN BẢO MẬT ---
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const connectDB = require('./config/db'); // Nối Database
@@ -14,6 +18,23 @@ const app = express();
 
 // Kết nối DB
 connectDB();
+
+// ==========================================
+// CẤU HÌNH BẢO MẬT NÂNG CAO (SECURITY MIDDLEWARE)
+// ==========================================
+
+// 1. Đội mũ bảo hiểm cho HTTP Headers (Ẩn thông tin Server, chặn tấn công phổ biến)
+app.use(helmet());
+
+// 2. Chống bạo lực (Brute Force) & Spam truy cập
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 phút
+    max: 100, // Tối đa 100 request/15 phút cho mỗi địa chỉ IP
+    message: 'Bạn đã thao tác quá nhiều lần, vui lòng thử lại sau 15 phút! 🐻'
+});
+app.use(limiter);
+
+// ==========================================
 
 // EJS
 app.set('view engine', 'ejs');
@@ -27,11 +48,16 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session & Flash
+// Session & Flash (Đã nâng cấp bảo mật Cookie)
 app.use(session({
     secret: process.env.SESSION_SECRET || 'viet_bear_diary',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true, // Chống đánh cắp Session qua mã độc JavaScript (XSS)
+        secure: false,  // Đang dùng localhost (HTTP) nên để false. Khi nào up lên mạng có HTTPS thì đổi thành true
+        maxAge: 1000 * 60 * 60 * 24 // Thời gian sống của Cookie: 1 ngày
+    }
 }));
 app.use(flash());
 
@@ -58,5 +84,5 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`✅ Server đang chạy mượt mà tại: http://localhost:${PORT}`);
+    console.log(`✅ Server bảo mật đang chạy mượt mà tại: http://localhost:${PORT}`);
 });

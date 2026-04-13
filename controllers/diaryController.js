@@ -24,10 +24,18 @@ exports.getHome = async (req, res) => {
     }
 };
 
-// POST /diaries/create - Lưu nhật ký + upload ảnh
 exports.createEntry = async (req, res) => {
     try {
+        console.log("=== NHẬN DỮ LIỆU TỪ FORM ===");
+        console.log("Body:", req.body);
+        console.log("File:", req.file);
+
         const { title, content, mood } = req.body;
+
+        if (!content) {
+            console.log("❌ Không có nội dung");
+            return res.redirect('/diaries/home');
+        }
 
         const newDiary = new Diary({
             userId: req.session.user._id,
@@ -38,12 +46,12 @@ exports.createEntry = async (req, res) => {
             date: new Date()
         });
 
-        await newDiary.save();
+        const saved = await newDiary.save();
+        console.log("✅ LƯU THÀNH CÔNG! ID =", saved._id);
 
-        console.log('✅ Lưu nhật ký thành công!');
         res.redirect('/diaries/home');
     } catch (error) {
-        console.error('❌ Lỗi lưu nhật ký:', error);
+        console.error("❌ LỖI LƯU NHẬT KÝ:", error.message);
         res.redirect('/diaries/home');
     }
 };

@@ -11,7 +11,7 @@
       transform: translateX(-50%);
       width: 2px;
       height: 100%;
-      background-color: #DBEAFE;
+      background-color: var(--card-border);
       z-index: 0;
     }
 
@@ -72,7 +72,7 @@
       background: white;
       font-size: 14px;
       font-weight: 600;
-      color: #2C4A7C;
+      color: var(--primary-dark);
       min-width: 140px;
       cursor: pointer;
     }
@@ -105,10 +105,10 @@
 
   <div class="mb-8 flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 bg-[#5A9BD4] rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">📖
+      <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">📖
       </div>
       <div>
-        <h2 class="text-3xl font-black text-[#2C4A7C]">Dòng thời gian</h2>
+        <h2 class="text-3xl font-black primary-text">Dòng thời gian</h2>
         <p class="text-slate-400 font-bold text-sm">Tất cả nhật ký của bạn trong một nơi</p>
       </div>
     </div>
@@ -169,13 +169,13 @@
           </p>
 
           <a href="/diaries/home"
-            class="mt-10 inline-flex items-center gap-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-lg px-10 py-4 rounded-3xl transition shadow-lg">
+            class="mt-10 inline-flex items-center gap-3 accent-bg btn-accent text-white font-bold text-lg px-10 py-4 rounded-3xl transition shadow-lg">
             🔥 Viết nhật ký ngay
           </a>
         </div>
           <% } else { %>
             <div class="flex items-center gap-4 mb-12">
-              <span class="bg-[#E0ECF9] text-[#5A9BD4] px-6 py-2 rounded-full font-black text-sm">
+              <span class="bg-[#E0ECF9] accent-text px-6 py-2 rounded-full font-black text-sm">
                 <%= isAllMonths ? 'TẤT CẢ NHẬT KÝ' : `Tháng ${currentMonth}, ${currentYear}` %>
               </span>
               <div class="h-[1px] flex-1 bg-slate-100"></div>
@@ -212,7 +212,7 @@
                             </span>
                             <div class="flex gap-3 text-slate-400">
                               <i onclick="editEntry(this)"
-                                class="fa-solid fa-pen hover:text-[#5A9BD4] cursor-pointer"></i>
+                                class="fa-solid fa-pen hover-accent cursor-pointer"></i>
                               <i
                                 class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer"></i>
                               <i onclick="deleteEntry(this)"

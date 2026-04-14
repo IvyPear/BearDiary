@@ -3,17 +3,24 @@
 
 <head>
   <script>
-    // Apply saved theme asap to avoid flash and ensure persistence across views
     (function(){
       try {
+        var isDark = localStorage.getItem('moodiary-is-dark') === '1';
         var saved = localStorage.getItem('moodiary-theme') || 'blue';
-        if (saved && saved !== 'dark') localStorage.setItem('moodiary-previous-theme', saved);
-        document.documentElement.setAttribute('data-theme', saved);
+        var accent = localStorage.getItem('moodiary-accent');
+        if (isDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+        if (accent) {
+          document.documentElement.style.setProperty('--accent', accent);
+        }
       } catch (e) { /* ignore */ }
     })();
   </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
   <title>
     <%= typeof title !='undefined' ? title : 'Bear Diary' %>
   </title>
@@ -28,10 +35,12 @@
       --primary-dark: #2C4A7C;
       --accent: #5A9BD4;
       --accent-light: #A3C4E8;
+      --muted: #64748B;
+      --danger: #ef4444;
+      --card-bg: white;
       --card-border: #E0ECF9;
     }
 
-    /* Pastel Themes */
     [data-theme="blue"] {
       --accent: #5A9BD4;
       --bg-main: #F8FAFF;
@@ -67,12 +76,12 @@
       --card-border: #FEF08A;
     }
 
-    /* Dark Mode */
     [data-theme="dark"] {
-      --accent: #60A5FA;
       --bg-main: #0F172A;
       --primary-dark: #F1F5F9;
       --card-border: #334155;
+      --muted: #94A3B8;
+      --card-bg: #0F172A;
     }
 
     body {
@@ -82,14 +91,97 @@
       transition: all 0.3s ease;
     }
 
-    [data-theme="dark"] body {
-      background-color: #0F172A;
-      color: #F1F5F9;
+    html, body { overflow-x: hidden; }
+    main { min-width: 0; }
+    main > * { max-width: 1100px; margin: 0 auto; box-sizing: border-box; }
+
+    .primary-text { color: var(--primary-dark); }
+    .btn-accent:hover { background: var(--primary-dark) !important; }
+    .accent-bg { background: var(--accent); color: white; }
+    .accent-text { color: var(--accent); }
+    .accent-border { border-color: var(--accent) !important; }
+    .hover-accent:hover { color: var(--accent) !important; }
+
+    /* Sidebar - always visible on desktop, collapsible on mobile */
+    aside {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 260px;
+      background-color: white;
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      transition: transform 0.3s ease;
+      z-index: 80;
     }
 
     [data-theme="dark"] aside {
       background-color: #1E2937;
       border-right-color: #334155;
+    }
+
+    /* Main content with margin for sidebar */
+    main {
+      margin-left: 260px;
+      padding: 2rem;
+      transition: margin 0.3s ease;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      aside {
+        transform: translateX(-100%);
+        width: 240px;
+      }
+      
+      body.sidebar-open aside {
+        transform: translateX(0);
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      }
+      
+      main {
+        margin-left: 0;
+        padding: 1rem;
+        padding-top: 70px;
+      }
+      
+      /* Mobile top bar */
+      .mobile-top {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 56px;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--card-border);
+        z-index: 70;
+        padding: 0 1rem;
+        align-items: center;
+        gap: 1rem;
+      }
+      
+      .mobile-menu-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--primary-dark);
+        cursor: pointer;
+        padding: 8px;
+      }
+      
+      /* Hide text in sidebar on mobile when closed? No, keep as is when open */
+      /* But we want menu visible as icons only? Actually sidebar will slide in */
+    }
+    
+    /* Desktop: sidebar always visible */
+    @media (min-width: 769px) {
+      .mobile-top {
+        display: none !important;
+      }
     }
 
     [data-theme="dark"] .card-shadow,
@@ -98,41 +190,26 @@
       border-color: #334155;
     }
 
-    [data-theme="dark"] .text-slate-400 {
-      color: #94A3B8 !important;
-    }
-
+    [data-theme="dark"] .text-slate-400 { color: #94A3B8 !important; }
+    [data-theme="dark"] .text-slate-700 { color: #E2E8F0 !important; }
     [data-theme="dark"] .text-slate-500,
-    [data-theme="dark"] .text-slate-600 {
-      color: #CBD5E1 !important;
-    }
-
+    [data-theme="dark"] .text-slate-600 { color: #CBD5E1 !important; }
     [data-theme="dark"] textarea {
       background: #0F172A;
       color: #E2E8F0;
       border-color: #334155;
     }
-
     [data-theme="dark"] .banner-gradient {
-      background: linear-gradient(135deg, #1E40AF, #3B82F6);
+      background: linear-gradient(135deg, var(--accent), #0F172A);
     }
-
     [data-theme="dark"] .nav-item.active {
       background: var(--accent);
       color: white !important;
     }
-
     [data-theme="dark"] .nav-item.active i {
       color: white !important;
     }
 
-    .sidebar-active {
-      background: var(--accent);
-      color: white !important;
-      box-shadow: 0 8px 25px rgba(90, 155, 212, 0.35);
-    }
-
-    /* Nav Item Styles */
     .nav-item {
       display: flex;
       align-items: center;
@@ -146,31 +223,19 @@
       overflow: hidden;
     }
 
-    .nav-item i {
-      width: 20px;
-      transition: all 0.3s ease;
-    }
-
+    .nav-item i { width: 20px; transition: all 0.3s ease; }
     .nav-item:hover {
       background: #F0F6FF;
       color: #5A9BD4;
       transform: translateX(4px);
     }
-
-    .nav-item:hover i {
-      transform: scale(1.1);
-    }
-
+    .nav-item:hover i { transform: scale(1.1); }
     .nav-item.active {
       background: var(--accent);
       color: white !important;
       box-shadow: 0 8px 25px rgba(90, 155, 212, 0.35);
     }
-
-    .nav-item.active i {
-      color: white !important;
-    }
-
+    .nav-item.active i { color: white !important; }
     [data-theme="dark"] .nav-item:hover {
       background: #334155;
       color: #60A5FA;
@@ -187,15 +252,9 @@
       font-size: 32px;
       color: white;
       box-shadow: 0 6px 20px rgba(90, 155, 212, 0.35);
-      position: relative;
       transition: transform 0.3s ease;
     }
-
-    .app-logo:hover {
-      transform: scale(1.05);
-    }
-
-   
+    .app-logo:hover { transform: scale(1.05); }
 
     .card-shadow {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
@@ -212,27 +271,16 @@
       border: 1px solid var(--card-border);
       background: white;
     }
-
     .mood-btn:hover {
       border-color: var(--accent);
       transform: translateY(-3px);
       box-shadow: 0 8px 20px rgba(163, 196, 232, 0.25);
     }
 
-    .bear-float {
-      animation: float 3.5s ease-in-out infinite;
-    }
-
+    .bear-float { animation: float 3.5s ease-in-out infinite; }
     @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     .theme-switch {
@@ -241,13 +289,7 @@
       width: 44px;
       height: 24px;
     }
-
-    .theme-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
+    .theme-switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute;
       cursor: pointer;
@@ -259,7 +301,6 @@
       transition: 0.3s;
       border-radius: 34px;
     }
-
     .slider:before {
       position: absolute;
       content: "";
@@ -271,16 +312,9 @@
       transition: 0.3s;
       border-radius: 50%;
     }
+    input:checked+.slider { background-color: var(--accent); }
+    input:checked+.slider:before { transform: translateX(20px); }
 
-    input:checked+.slider {
-      background-color: var(--accent);
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(20px);
-    }
-
-    /* Active menu indicator */
     .nav-item.active::before {
       content: '';
       position: absolute;
@@ -292,21 +326,29 @@
       background: white;
       border-radius: 0 4px 4px 0;
     }
-
-    [data-theme="dark"] .nav-item.active::before {
-      background: #60A5FA;
-    }
+    [data-theme="dark"] .nav-item.active::before { background: var(--accent); }
   </style>
 </head>
 
-<body class="flex h-screen overflow-hidden">
+<body>
 
-  <aside class="w-[260px] bg-white border-r border-[#E0ECF9] flex flex-col p-6">
+  <!-- Mobile top bar -->
+  <div class="mobile-top">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="app-logo" style="width: 40px; height: 40px; font-size: 24px;">🐻</div>
+    <div style="flex:1"></div>
+    <div class="text-sm font-bold accent-text">Bear Diary</div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside>
     <div class="flex items-center gap-3 mb-10">
       <div class="app-logo">🐻</div>
       <div>
-        <h1 class="font-bold text-2xl leading-none text-[#2C4A7C]">Bear Diary</h1>
-        <p class="text-[10px] text-[#5A9BD4] font-bold uppercase tracking-[1px]">YOUR DAILY JOURNAL</p>
+        <h1 class="font-bold text-2xl leading-none primary-text">Bear Diary</h1>
+        <p class="text-[10px] accent-text font-bold uppercase tracking-[1px]">YOUR DAILY JOURNAL</p>
       </div>
     </div>
 
@@ -315,13 +357,11 @@
         <i class="fa-solid fa-house"></i>
         <span>Trang chủ</span>
       </a>
-      <a href="/diaries/timeline"
-        class="nav-item <%= title === 'Dòng thời gian - Moodiary' || title === 'Nhật ký - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/timeline" class="nav-item <%= title === 'Dòng thời gian - Moodiary' || title === 'Nhật ký - Moodiary' ? 'active' : '' %>">
         <i class="fa-solid fa-book-open"></i>
         <span>Timeline</span>
       </a>
-      <a href="/diaries/report"
-        class="nav-item <%= title === 'Mood Report - Moodiary' || title === 'Báo cáo - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/report" class="nav-item <%= title === 'Mood Report - Moodiary' || title === 'Báo cáo - Moodiary' ? 'active' : '' %>">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Báo cáo</span>
       </a>
@@ -334,10 +374,10 @@
     <div class="mt-auto space-y-4">
       <div class="flex items-center justify-between px-4 py-3">
         <div class="flex items-center gap-4 font-bold text-slate-400">
-          <i class="fa-solid fa-moon"></i> Chế độ tối
+          <i class="fa-solid fa-moon"></i> <span class="dark-mode-text">Chế độ tối</span>
         </div>
         <label class="theme-switch">
-          <input type="checkbox" id="darkToggle" onchange="handleDarkModeToggle()">
+          <input type="checkbox" id="darkToggle">
           <span class="slider"></span>
         </label>
       </div>
@@ -351,44 +391,90 @@
     </div>
   </aside>
 
-  <main class="flex-1 overflow-y-auto p-8">
+  <main>
     <%- body %>
   </main>
 
   <script>
-    // Hiển thị ngày tháng
+    // Date display
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateEl = document.getElementById('currentDate');
     if (dateEl) {
       dateEl.innerText = new Date().toLocaleDateString('vi-VN', dateOptions);
     }
 
-    // Quản lý Theme & Dark Mode
+    const THEME_ACCENTS = {
+      blue: '#5A9BD4',
+      pink: '#F8B4D9',
+      green: '#A8E6CF',
+      purple: '#D4B3FF',
+      yellow: '#F9D77E'
+    };
+    window.THEME_ACCENTS = THEME_ACCENTS;
+
     function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('moodiary-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      if (theme !== 'dark') {
+        localStorage.setItem('moodiary-theme', theme);
+        const accent = THEME_ACCENTS[theme] || THEME_ACCENTS['blue'];
+        localStorage.setItem('moodiary-accent', accent);
+        document.documentElement.style.setProperty('--accent', accent);
+        localStorage.setItem('moodiary-is-dark', '0');
+      } else {
+        const storedAccent = localStorage.getItem('moodiary-accent') || THEME_ACCENTS['blue'];
+        document.documentElement.style.setProperty('--accent', storedAccent);
+        localStorage.setItem('moodiary-is-dark', '1');
+      }
     }
 
-    function handleDarkModeToggle() {
-      const toggle = document.getElementById('darkToggle');
-      if (toggle.checked) {
+    document.addEventListener('DOMContentLoaded', function () {
+      const savedTheme = localStorage.getItem('moodiary-theme') || 'blue';
+      const isDark = localStorage.getItem('moodiary-is-dark') === '1';
+      if (isDark) {
         setTheme('dark');
       } else {
-        const savedTheme = localStorage.getItem('moodiary-previous-theme') || 'blue';
         setTheme(savedTheme);
       }
-    }
 
-    window.onload = function () {
-      const savedTheme = localStorage.getItem('moodiary-theme');
-      if (savedTheme && savedTheme !== 'dark') {
-        localStorage.setItem('moodiary-previous-theme', savedTheme);
-      }
-      const themeToLoad = savedTheme || 'blue';
-      setTheme(themeToLoad);
       const toggle = document.getElementById('darkToggle');
-      if (toggle) toggle.checked = (themeToLoad === 'dark');
-    };
+      if (toggle) {
+        toggle.checked = isDark;
+        toggle.addEventListener('change', function () {
+          const current = document.documentElement.getAttribute('data-theme');
+          if (toggle.checked) {
+            if (current && current !== 'dark') localStorage.setItem('moodiary-previous-theme', current);
+            setTheme('dark');
+            localStorage.setItem('moodiary-is-dark', '1');
+          } else {
+            const prev = localStorage.getItem('moodiary-previous-theme') || localStorage.getItem('moodiary-theme') || 'blue';
+            setTheme(prev);
+            localStorage.setItem('moodiary-is-dark', '0');
+          }
+        });
+      }
+
+      // Mobile menu
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      if (mobileBtn) {
+        mobileBtn.addEventListener('click', function () {
+          document.body.classList.toggle('sidebar-open');
+        });
+      }
+
+      // Close sidebar when clicking on overlay (main content)
+      const mainEl = document.querySelector('main');
+      if (mainEl) {
+        mainEl.addEventListener('click', function () {
+          if (window.innerWidth <= 768 && document.body.classList.contains('sidebar-open')) {
+            document.body.classList.remove('sidebar-open');
+          }
+        });
+      }
+    });
   </script>
 </body>
 

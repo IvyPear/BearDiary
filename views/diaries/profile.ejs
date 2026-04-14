@@ -2,7 +2,7 @@
 <% 
   // Dữ liệu được truyền từ controller 
 %>
-  <style>
+<style>
     .profile-card-main {
       background: white;
       border-radius: 2.5rem;
@@ -21,7 +21,7 @@
       width: 100px;
       height: 100px;
       background: #DBEAFE;
-      border: 6px solid white;
+      border: 6px solid var(--accent);
       border-radius: 2.5rem;
       display: flex;
       align-items: center;
@@ -92,6 +92,7 @@
       font-size: 18px;
     }
 
+    /* Dark mode styles */
     [data-theme="dark"] .profile-card-main {
       background: #1E2937;
       border-color: #334155;
@@ -99,6 +100,7 @@
 
     [data-theme="dark"] .stat-item {
       background: #1E2937;
+      border-color: #334155;
     }
 
     [data-theme="dark"] .setting-row:hover {
@@ -147,9 +149,41 @@
     [data-theme="dark"] #themePicker h3 {
       color: #F1F5F9;
     }
-  </style>
+    
+    [data-theme="dark"] .banner-box {
+      background: linear-gradient(135deg, #1E2937 0%, #0F172A 100%);
+    }
+    
+    [data-theme="dark"] .bg-rose-50 {
+      background: #3D1A1A !important;
+    }
+    
+    [data-theme="dark"] .bg-emerald-50 {
+      background: #1A3D2A !important;
+    }
+    
+    [data-theme="dark"] .bg-yellow-50 {
+      background: #3D3A1A !important;
+    }
+    
+    [data-theme="dark"] .bg-\[\#E0ECF9\] {
+      background: #1E2A3E !important;
+    }
+    
+    [data-theme="dark"] .text-rose-500 {
+      color: #F87171 !important;
+    }
+    
+    [data-theme="dark"] .text-emerald-500 {
+      color: #34D399 !important;
+    }
+    
+    [data-theme="dark"] .text-yellow-600 {
+      color: #FACC15 !important;
+    }
+</style>
 
-  <div class="flex items-center gap-4 mb-8">
+<div class="flex items-center gap-4 mb-8">
     <div class="w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg rounded-2xl"
       style="background: var(--accent)">
       <i class="fa-solid fa-user-gear"></i>
@@ -158,9 +192,9 @@
       <h2 class="text-3xl font-black">Hồ sơ của tôi</h2>
       <p class="text-slate-400 font-bold text-sm">Cập nhật thông tin và phong cách của bạn</p>
     </div>
-  </div>
+</div>
 
-  <div class="profile-card-main mb-8">
+<div class="profile-card-main mb-8">
     <div class="banner-box"></div>
     <div class="avatar-container">
       <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
@@ -179,7 +213,7 @@
             <%= user.email %>
           </p>
           <div
-            class="inline-flex items-center gap-2 bg-[#E0ECF9] text-[#5A9BD4] px-4 py-2 rounded-full mt-5 text-[11px] font-black uppercase tracking-widest">
+            class="inline-flex items-center gap-2 bg-[#E0ECF9] accent-text px-4 py-2 rounded-full mt-5 text-[11px] font-black uppercase tracking-widest">
             <i class="fa-solid fa-calendar-check"></i>
             Thành viên  <%= user.memberSince %>
           </div>
@@ -187,9 +221,9 @@
         <div class="text-5xl bear-float pt-2">🐻</div>
       </div>
     </div>
-  </div>
+</div>
 
-  <div class="grid grid-cols-4 gap-6 mb-10">
+<div class="grid grid-cols-4 gap-6 mb-10">
     <div class="stat-item bg-rose-50">
       <p class="text-rose-500 text-3xl font-black mb-1">
         <%= user.dayStreak %>
@@ -197,10 +231,10 @@
       <p class="text-[11px] font-black text-rose-300 uppercase tracking-tighter">Ngày liên tiếp</p>
     </div>
     <div class="stat-item bg-[#E0ECF9]">
-      <p class="text-[#5A9BD4] text-3xl font-black mb-1">
+      <p class="accent-text text-3xl font-black mb-1">
         <%= user.totalEntries %>
       </p>
-      <p class="text-[11px] font-black text-[#5A9BD4] uppercase tracking-tighter">Tổng số bài</p>
+      <p class="text-[11px] font-black accent-text uppercase tracking-tighter">Tổng số bài</p>
     </div>
     <div class="stat-item bg-emerald-50">
       <p class="text-emerald-500 text-3xl font-black mb-1">
@@ -214,12 +248,12 @@
       </p>
       <p class="text-[11px] font-black text-yellow-400 uppercase tracking-tighter">Đã gắn sao</p>
     </div>
-  </div>
+</div>
 
-  <div class="profile-card-main p-8">
-    <h4 class="text-[12px] font-black text-[#5A9BD4] uppercase tracking-[0.2em] mb-6 ml-4">Cài đặt tài khoản</h4>
+<div class="profile-card-main p-8">
+    <h4 class="text-[12px] font-black accent-text uppercase tracking-[0.2em] mb-6 ml-4">Cài đặt tài khoản</h4>
     <div class="space-y-1">
-      <div onclick="editProfile()" class="setting-row group cursor-pointer">
+      <div class="setting-row group cursor-pointer" id="editProfileBtn">
         <div class="flex items-center gap-5">
           <div class="icon-wrap bg-blue-50 text-blue-500 group-hover:scale-110 transition-all"><i
               class="fa-solid fa-user-pen"></i></div>
@@ -231,7 +265,7 @@
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
 
-      <div onclick="changePassword()" class="setting-row group cursor-pointer">
+      <div class="setting-row group cursor-pointer" id="changePasswordBtn">
         <div class="flex items-center gap-5">
           <div class="icon-wrap bg-purple-50 text-purple-500 group-hover:scale-110 transition-all"><i
               class="fa-solid fa-shield-halved"></i></div>
@@ -254,7 +288,7 @@
         <div class="text-sm font-bold text-slate-500" id="appearanceStatus">☀️ Sáng</div>
       </div>
 
-      <div onclick="toggleThemePicker()" class="setting-row group cursor-pointer">
+      <div class="setting-row group cursor-pointer" id="themePickerBtn">
         <div class="flex items-center gap-5">
           <div class="icon-wrap bg-violet-50 text-violet-500 group-hover:scale-110 transition-all"><i
               class="fa-solid fa-palette"></i></div>
@@ -266,68 +300,106 @@
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
     </div>
-  </div>
+</div>
 
-  <!-- Theme Picker Modal -->
-  <div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+<!-- Theme Picker Modal -->
+<div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
-      <h3 class="text-lg font-bold text-center mb-6 text-[#2C4A7C]">Chọn chủ đề màu</h3>
+      <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
       <div class="grid grid-cols-5 gap-6">
-        <div onclick="setThemeAndUpdate('blue')"
-          class="w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-        <div onclick="setThemeAndUpdate('pink')"
-          class="w-12 h-12 rounded-2xl bg-[#F8B4D9] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-        <div onclick="setThemeAndUpdate('green')"
-          class="w-12 h-12 rounded-2xl bg-[#A8E6CF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-        <div onclick="setThemeAndUpdate('purple')"
-          class="w-12 h-12 rounded-2xl bg-[#D4B3FF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-        <div onclick="setThemeAndUpdate('yellow')"
-          class="w-12 h-12 rounded-2xl bg-[#F9D77E] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+          <div data-theme="blue" class="theme-swatch w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+          <div data-theme="pink" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F8B4D9] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+          <div data-theme="green" class="theme-swatch w-12 h-12 rounded-2xl bg-[#A8E6CF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+          <div data-theme="purple" class="theme-swatch w-12 h-12 rounded-2xl bg-[#D4B3FF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+          <div data-theme="yellow" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F9D77E] cursor-pointer hover:scale-110 transition-transform shadow"></div>
       </div>
       <div class="text-center mt-8">
-        <button onclick="toggleThemePicker()" class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-700">
+        <button id="themePickerCloseBtn" class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-700">
           Đóng
         </button>
       </div>
     </div>
-  </div>
+</div>
 
-  <div class="text-center py-10 opacity-40">
+<div class="text-center py-10 opacity-40">
     <p class="text-[10px] font-black uppercase tracking-[0.3em]">Moodiary v1.0.4</p>
-  </div>
+</div>
 
-  <script>
-    // Theme management
-    function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('moodiary-theme', theme);
-      const isDark = theme === 'dark';
-      const statusEl = document.getElementById('appearanceStatus');
-      if (statusEl) {
-        statusEl.innerHTML = isDark ? '🌙 Tối' : '☀️ Sáng';
-      }
-    }
-
-    function setThemeAndUpdate(theme) {
-      if (theme !== 'dark') {
-        localStorage.setItem('moodiary-previous-theme', theme);
-      }
-      setTheme(theme);
-      const darkToggle = document.getElementById('darkToggle');
-      if (darkToggle) darkToggle.checked = (theme === 'dark');
-      toggleThemePicker();
-    }
-
-    function toggleThemePicker() {
-      const picker = document.getElementById('themePicker');
-      if (picker) picker.classList.toggle('hidden');
-    }
-
+<script>
+    // Các hàm riêng của profile
     function editProfile() {
-      window.location.href = '/diaries/profile/edit';
+        console.log('Navigating to edit profile...');
+        window.location.href = '/diaries/profile/edit';
     }
 
     function changePassword() {
-      alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
+        alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
     }
-  </script>
+    
+    // Cập nhật trạng thái appearanceStatus, đồng thời thêm event listeners (không dùng inline handlers)
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const statusEl = document.getElementById('appearanceStatus');
+      if (statusEl && currentTheme) {
+        statusEl.innerHTML = currentTheme === 'dark' ? '🌙 Tối' : '☀️ Sáng';
+      }
+
+      // Edit profile navigation
+      const editBtn = document.getElementById('editProfileBtn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function () {
+          window.location.href = '/diaries/profile/edit';
+        });
+      }
+
+      // Change password action
+      const pwdBtn = document.getElementById('changePasswordBtn');
+      if (pwdBtn) {
+        pwdBtn.addEventListener('click', function () {
+          alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
+        });
+      }
+
+      // Theme picker toggle
+      const themePickerBtn = document.getElementById('themePickerBtn');
+      const themePickerModal = document.getElementById('themePicker');
+      window.toggleThemePicker = function () {
+        if (!themePickerModal) return;
+        themePickerModal.classList.toggle('hidden');
+      };
+
+      if (themePickerBtn) {
+        themePickerBtn.addEventListener('click', function () {
+          window.toggleThemePicker();
+        });
+      }
+
+      // Theme picker close button
+      const themeClose = document.getElementById('themePickerCloseBtn');
+      if (themeClose) themeClose.addEventListener('click', window.toggleThemePicker);
+
+      // Theme color pickers (only swatches)
+      document.querySelectorAll('.theme-swatch').forEach(function (el) {
+        el.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          const t = el.getAttribute('data-theme');
+          if (t) {
+            const accent = (window.THEME_ACCENTS && window.THEME_ACCENTS[t]) || null;
+            // persist theme name and accent hex
+            localStorage.setItem('moodiary-theme', t);
+            if (accent) localStorage.setItem('moodiary-accent', accent);
+
+            // If dark mode is active, keep data-theme 'dark' but update accent only
+            const isDark = localStorage.getItem('moodiary-is-dark') === '1';
+            if (isDark) {
+              if (accent) document.documentElement.style.setProperty('--accent', accent);
+            } else {
+              // apply theme immediately (this will also update accent and clear dark flag)
+              if (window.setTheme) window.setTheme(t);
+            }
+          }
+          window.toggleThemePicker();
+        });
+      });
+    });
+</script>

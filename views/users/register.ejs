@@ -11,7 +11,7 @@
     body { font-family: 'Nunito', sans-serif; }
     
     .left-panel {
-      background: radial-gradient(circle at center, #E0F0FF 0%, #C9E4FF 100%);
+      background: radial-gradient(circle at center, var(--accent-light, #E0F0FF) 0%, var(--accent, #C9E4FF) 100%);
     }
 
     .feature-pill {
@@ -20,33 +20,33 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 800;
-      color: #3B82F6;
-      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.05);
+      color: var(--accent);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
     }
 
     .input-box {
-      background: #F8FBFF;
-      border: 1px solid #EBF4FF;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 14px;
       padding: 14px 18px;
       transition: all 0.2s;
     }
 
     .input-box:focus {
-      border-color: #3B82F6;
+      border-color: var(--accent);
       background: white;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 0 4px rgba(90,155,212,0.08);
       outline: none;
     }
 
     .btn-create {
-      background: #2563EB;
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+      background: var(--accent);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       transition: all 0.3s;
     }
 
     .btn-create:hover {
-      background: #1D4ED8;
+      background: var(--primary-dark);
       transform: translateY(-2px);
     }
 
@@ -68,8 +68,8 @@
         <div class="text-[180px] z-10 drop-shadow-2xl">🐻</div>
       </div>
       
-      <h1 class="text-5xl font-black text-[#1E3A8A] mb-3 tracking-tight">Bear Diary</h1>
-      <p class="text-[#3B82F6] font-bold text-lg mb-10">Your personal mood & diary companion ☀️</p>
+      <h1 class="text-5xl font-black primary-text mb-3 tracking-tight">Bear Diary</h1>
+      <p class="accent-text font-bold text-lg mb-10">Your personal mood & diary companion ☀️</p>
       
       <div class="flex gap-4">
         <span class="feature-pill">Track moods</span>

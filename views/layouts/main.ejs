@@ -2,6 +2,16 @@
 <html lang="vi" data-theme="blue">
 
 <head>
+  <script>
+    // Apply saved theme asap to avoid flash and ensure persistence across views
+    (function(){
+      try {
+        var saved = localStorage.getItem('moodiary-theme') || 'blue';
+        if (saved && saved !== 'dark') localStorage.setItem('moodiary-previous-theme', saved);
+        document.documentElement.setAttribute('data-theme', saved);
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>

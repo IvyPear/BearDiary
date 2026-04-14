@@ -1,5 +1,7 @@
 const Diary = require('../models/Diary');
 const User = require('../models/User');
+const path = require('path');
+const fs = require('fs');
 
 exports.getHome = async (req, res) => {
     try {
@@ -42,7 +44,7 @@ exports.getTimeline = async (req, res) => {
     try {
         const userId = req.session.user._id;
 
-        // Lấy tháng và năm từ query URL, mặc định là trống (tất cả)
+        // Lấy tháng và năm từ query URL, mặc định là trống 
         let query = { userId };
         const currentMonth = req.query.month || '';
         const currentYear = req.query.year || new Date().getFullYear().toString();
@@ -56,7 +58,7 @@ exports.getTimeline = async (req, res) => {
         // Lấy dữ liệu thật từ MongoDB
         const rawEntries = await Diary.find(query).sort({ date: -1 });
 
-        // Tạo hàm phụ để chuyển đổi mood thành Color và Icon giống mảng tĩnh của bạn
+        // Tạo hàm phụ để chuyển đổi mood thành Color và Icon 
         const parseMood = (moodString) => {
             const str = moodString || '😊 Happy';
             const parts = str.split(' ');
@@ -77,7 +79,7 @@ exports.getTimeline = async (req, res) => {
         let moodCounts = { all: rawEntries.length };
         let uniqueMoods = {};
 
-        // Biến đổi dữ liệu DB cho khớp với cấu trúc EJS cũ của bạn
+        // Biến đổi dữ liệu DB 
         const entries = rawEntries.map((e, index) => {
             const { icon, name, color } = parseMood(e.mood);
             const moodKey = name.toLowerCase();
@@ -115,9 +117,77 @@ exports.getTimeline = async (req, res) => {
         console.error(error);
         res.send('Lỗi tải Timeline');
     }
+    
 };
 
-// --- HÀM REPORT MỚI XỬ LÝ LỊCH ĐỘNG ---
+    // GET form chỉnh sửa
+    exports.getEditEntry = async (req, res) => {
+        try {
+            const userId = req.session.user._id;
+            const entryId = req.params.id;
+
+            const entry = await Diary.findOne({ _id: entryId, userId });
+
+            if (!entry) {
+                return res.redirect('/diaries/timeline');
+            }
+
+            res.render('diaries/edit', {
+                title: 'Chỉnh sửa nhật ký - Bear Diary',
+                entry
+            });
+        } catch (error) {
+            console.error(error);
+            res.redirect('/diaries/timeline');
+        }
+    };
+
+    // UPDATE entry
+    exports.updateEntry = async (req, res) => {
+        try {
+            const userId = req.session.user._id;
+            const entryId = req.params.id;
+            const { content, mood } = req.body;
+
+            await Diary.findOneAndUpdate(
+                { _id: entryId, userId },
+                { 
+                    content: content.trim(),
+                    mood: mood || '😊 Happy'
+                },
+                { new: true }
+            );
+
+            res.redirect('/diaries/timeline');
+        } catch (error) {
+            console.error(error);
+            res.redirect('/diaries/timeline');
+        }
+    };
+
+    // DELETE entry
+    exports.deleteEntry = async (req, res) => {
+        try {
+            const userId = req.session.user._id;
+            const entryId = req.params.id;
+
+            await Diary.findOneAndDelete({ _id: entryId, userId });
+
+            
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.json({ ok: true });
+            }
+
+            res.redirect('/diaries/timeline');
+        } catch (error) {
+            console.error(error);
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.status(500).json({ ok: false });
+            }
+            res.redirect('/diaries/timeline');
+        }
+    };
+
 exports.getReport = async (req, res) => {
     try {
         const userId = req.session.user._id;
@@ -222,5 +292,155 @@ exports.getReport = async (req, res) => {
 };
 
 exports.getProfile = async (req, res) => {
-    res.render('diaries/profile', { title: 'Hồ sơ - Moodiary' });
+    try {
+        const userId = req.session.user._id;
+        const user = await User.findById(userId).lean();
+        if (!user) return res.redirect('/auth/login');
+
+        // Lấy tất cả entry của user để tính thống kê
+        const entries = await Diary.find({ userId }).sort({ date: -1 }).lean();
+
+        const totalEntries = entries.length;
+        const starredEntries = entries.filter(e => e.isStarred).length;
+
+        // daysJournaled: số ngày khác nhau user đã viết
+        const uniqueDays = new Set(entries.map(e => new Date(e.date).toDateString()));
+        const daysJournaled = uniqueDays.size;
+
+        // dayStreak: số ngày liên tiếp tính từ hôm nay ngược lên
+        let dayStreak = 0;
+        if (entries.length > 0) {
+            const today = new Date();
+            let streakDate = new Date();
+
+            // tạo set các ngày có entry (YYYY-MM-DD)
+            const daySet = new Set(entries.map(e => new Date(e.date).toISOString().slice(0,10)));
+
+            while (true) {
+                const key = streakDate.toISOString().slice(0,10);
+                if (daySet.has(key)) {
+                    dayStreak++;
+                    // lùi 1 ngày
+                    streakDate.setDate(streakDate.getDate() - 1);
+                } else break;
+            }
+        }
+
+        // memberSince: format ngày tạo tài khoản
+        const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
+
+        // avatar fallback: chữ cái đầu của tên
+        const avatar = user.avatar || (user.name ? user.name.charAt(0).toUpperCase() : 'U');
+
+        res.render('diaries/profile', {
+            title: 'Hồ sơ - Moodiary',
+            user: {
+                name: user.name,
+                email: user.email,
+                avatar,
+                memberSince,
+                dayStreak,
+                totalEntries,
+                daysJournaled,
+                starredEntries
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/diaries/home');
+    }
+};
+
+// GET edit profile form
+exports.getEditProfile = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const user = await User.findById(userId).lean();
+        if (!user) return res.redirect('/auth/login');
+
+        res.render('diaries/editProfile', {
+            title: 'Chỉnh sửa hồ sơ - Bear Diary',
+            user
+        });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/diaries/profile');
+    }
+};
+
+// POST update profile (phần cần sửa)
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const { name, email } = req.body;
+        
+        let avatarPath;
+        
+        // Xử lý upload file avatar mới
+        if (req.file) {
+            // Xóa avatar cũ nếu có và không phải là ảnh mặc định
+            const oldUser = await User.findById(userId);
+            if (oldUser && oldUser.avatar && !oldUser.avatar.includes('default-avatars')) {
+                const oldAvatarPath = path.join(__dirname, '../public', oldUser.avatar);
+                try {
+                    if (fs.existsSync(oldAvatarPath)) {
+                        fs.unlinkSync(oldAvatarPath);
+                    }
+                } catch (err) {
+                    console.error('Lỗi xóa avatar cũ:', err);
+                }
+            }
+            // Lưu avatar mới
+            avatarPath = '/uploads/' + req.file.filename;
+        } else if (req.body.avatar) {
+            avatarPath = req.body.avatar.trim();
+        }
+
+        if (!name || !email) {
+            return res.redirect('/diaries/profile');
+        }
+
+        // Check email uniqueness
+        const existing = await User.findOne({ email: email.trim().toLowerCase() });
+        if (existing && String(existing._id) !== String(userId)) {
+            req.flash('error_msg', 'Email đã được sử dụng!');
+            return res.redirect('/diaries/profile/edit');
+        }
+
+        // Cập nhật thông tin
+        const updateData = {
+            name: name.trim(),
+            email: email.trim().toLowerCase()
+        };
+        
+        if (avatarPath !== undefined) {
+            updateData.avatar = avatarPath;
+        }
+
+        const updated = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true }).lean();
+
+        // Update session
+        req.session.user.name = updated.name;
+        req.session.user.email = updated.email;
+        req.session.user.avatar = updated.avatar;
+
+        // Response cho AJAX request
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.json({ 
+                ok: true, 
+                redirect: '/diaries/profile',
+                avatar: updated.avatar
+            });
+        }
+
+        req.flash('success_msg', 'Cập nhật thành công!');
+        res.redirect('/diaries/profile');
+    } catch (err) {
+        console.error(err);
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({ ok: false, error: 'Có lỗi xảy ra' });
+        }
+        req.flash('error_msg', 'Có lỗi xảy ra!');
+        res.redirect('/diaries/profile');
+    }
 };

@@ -53,4 +53,14 @@ router.post('/create', diaryController.createDiary);
 
 // GET: Timeline có hỗ trợ hiển thị highlight (không đè lên route cũ)
 router.get('/timeline-highlight', diaryController.getTimelineWithHighlight);
+
+// ====================== TASK MANAGEMENT ======================
+// GET: Trang quản lý công việc (client-side state via localStorage)
+router.get('/tasks', function(req, res) {
+  res.render('diaries/tasks', {
+    title: 'Công việc - Moodiary',
+    user: req.user || null
+  });
+});
+
 module.exports = router;

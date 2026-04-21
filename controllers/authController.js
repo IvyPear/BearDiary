@@ -122,10 +122,16 @@ exports.postLogin = async (req, res) => {
             return res.redirect('/auth/verify-2fa');
         }
 
-        // Nếu chưa bật 2FA thì đăng nhập như bình thường
+        // Xử lý thông tin thiết bị thân thiện với giao diện
+        const userAgent = req.headers['user-agent'] || '';
+        let device = 'Thiết bị lạ';
+        if (userAgent.includes('Windows')) device = 'Chrome / Windows';
+        else if (userAgent.includes('Macintosh')) device = 'Safari / MacOS';
+        else if (userAgent.includes('iPhone') || userAgent.includes('Android')) device = 'Mobile App';
+
         user.lastLogin = {
             time: Date.now(),
-            device: req.headers['user-agent'] || 'Không xác định',
+            device: device,
             ip: req.ip
         };
         await user.save();
@@ -157,16 +163,22 @@ exports.postVerify2FA = async (req, res) => {
 
         const user = await User.findById(tempUser._id);
         
+        // Rà soát: Thêm window: 1 để tránh lỗi lệch giây
         const verified = speakeasy.totp.verify({
             secret: user.twoFactorSecret,
             encoding: 'base32',
-            token: token
+            token: token,
+            window: 1 
         });
 
         if (verified) {
+            const userAgent = req.headers['user-agent'] || '';
+            let device = 'Thiết bị lạ';
+            if (userAgent.includes('Windows')) device = 'Chrome / Windows';
+            
             user.lastLogin = {
                 time: Date.now(),
-                device: req.headers['user-agent'] || 'Không xác định',
+                device: device,
                 ip: req.ip
             };
             await user.save();
@@ -219,10 +231,12 @@ exports.postEnable2FA = async (req, res) => {
         const { token } = req.body;
         const secret = req.session.tempSecret;
 
+        // Rà soát: Thêm window: 1 để quét mã lần đầu dễ hơn
         const verified = speakeasy.totp.verify({
             secret: secret,
             encoding: 'base32',
-            token: token
+            token: token,
+            window: 1
         });
 
         if (verified) {

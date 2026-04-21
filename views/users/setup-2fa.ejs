@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thiết lập 2FA - Bear Diary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Nunito', sans-serif; background: #F8FBFF; }
+    .card-2fa { background: white; border-radius: 2.5rem; border: 1px solid #E0ECF9; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); }
+    .qr-container { background: #F0F6FF; border-radius: 2rem; padding: 1.5rem; display: inline-block; }
+    .qr-container img { mix-blend-mode: multiply; width: 200px; height: 200px; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <div class="card-2fa w-full max-w-2xl p-10 relative overflow-hidden">
+    <div class="flex flex-col md:flex-row gap-10 items-center">
+      
+      <div class="text-center md:w-1/2">
+        <div class="qr-container mb-6">
+          <img src="<%= qrCodeUrl %>" alt="Mã QR 2FA">
+        </div>
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Bước 1: Quét mã này</p>
+        <p class="text-[11px] text-slate-400 mt-2 px-4 italic">Sử dụng Google Authenticator hoặc Authy để quét mã 🐻</p>
+      </div>
+
+      <div class="md:w-1/2">
+        <div class="mb-6">
+          <div class="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg mb-4">
+            <i class="fa-solid fa-shield-check"></i>
+          </div>
+          <h2 class="text-2xl font-extrabold text-[#1E3A8A]">Kích hoạt 2FA</h2>
+          <p class="text-slate-400 font-bold text-sm mt-1">Để bảo vệ tài khoản tốt hơn</p>
+        </div>
+
+        <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+          <div class="bg-red-50 text-red-600 px-4 py-3 rounded-xl mb-4 font-bold text-xs">
+            <%= error_msg %>
+          </div>
+        <% } %>
+
+        <form action="/auth/enable-2fa" method="POST" class="space-y-5">
+          <div>
+            <label class="block text-xs font-black text-slate-400 uppercase mb-2">Bước 2: Nhập mã 6 số</label>
+            <input type="text" name="token" maxlength="6" placeholder="000000" 
+                   class="w-full bg-[#F8FBFF] border border-[#EBF4FF] rounded-2xl p-4 text-2xl font-black text-center tracking-[0.3em] focus:outline-none focus:border-blue-500 transition-all" required>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-2xl font-extrabold shadow-lg transition-all">
+            Xác nhận & Kích hoạt
+          </button>
+          
+          <a href="/diaries/profile" class="block text-center text-sm font-bold text-slate-300 hover:text-slate-500 transition-colors">
+            Hủy thiết lập
+          </a>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -135,6 +135,10 @@
       background: #2D1B3A;
       color: #C084FC;
     }
+    
+    /* Màu riêng cho 2FA */
+    .icon-wrap.bg-emerald-50 { background: #ECFDF5; color: #10B981; }
+    [data-theme="dark"] .icon-wrap.bg-emerald-50 { background: #064E3B; color: #34D399; }
 
     [data-theme="dark"] .avatar-container {
       background: #1E2A3E;
@@ -265,16 +269,45 @@
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
 
+      <div class="setting-row group cursor-pointer" id="setup2FABtn">
+        <div class="flex items-center gap-5">
+          <div class="icon-wrap bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-all"><i
+              class="fa-solid fa-shield-check"></i></div>
+          <div>
+            <p class="font-extrabold text-slate-700">Xác thực 2 lớp (2FA)</p>
+            <p class="text-[11px] text-slate-400 font-bold">
+                <%= user.isTwoFactorEnabled ? 'Đã bật - Google Authenticator' : 'Chưa bật - Tăng cường bảo mật' %>
+            </p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+      </div>
+
       <div class="setting-row group cursor-pointer" id="changePasswordBtn">
         <div class="flex items-center gap-5">
           <div class="icon-wrap bg-purple-50 text-purple-500 group-hover:scale-110 transition-all"><i
               class="fa-solid fa-shield-halved"></i></div>
           <div>
             <p class="font-extrabold text-slate-700">Bảo mật</p>
-            <p class="text-[11px] text-slate-400 font-bold">Mật khẩu và xác thực</p>
+            <p class="text-[11px] text-slate-400 font-bold">
+                Lần cuối đổi: <%= user.passwordChangedAt || 'Chưa đổi mật khẩu' %>
+            </p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+      </div>
+
+      <div class="setting-row">
+        <div class="flex items-center gap-5">
+          <div class="icon-wrap bg-blue-50 text-blue-500"><i class="fa-solid fa-laptop-code"></i></div>
+          <div>
+            <p class="font-extrabold text-slate-700">Đăng nhập gần nhất</p>
+            <p class="text-[11px] text-slate-400 font-bold">
+                <%= user.lastLoginDevice || 'Thiết bị này' %>
+            </p>
+          </div>
+        </div>
+        <div class="text-[10px] font-bold text-slate-400"><%= user.lastLoginTime || 'Vừa xong' %></div>
       </div>
 
       <div class="setting-row">
@@ -302,7 +335,6 @@
     </div>
 </div>
 
-<!-- Theme Picker Modal -->
 <div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
       <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
@@ -328,15 +360,10 @@
 <script>
     // Các hàm riêng của profile
     function editProfile() {
-        console.log('Navigating to edit profile...');
         window.location.href = '/diaries/profile/edit';
     }
 
-    function changePassword() {
-        alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
-    }
-    
-    // Cập nhật trạng thái appearanceStatus, đồng thời thêm event listeners (không dùng inline handlers)
+    // Cập nhật trạng thái appearanceStatus, đồng thời thêm event listeners
     document.addEventListener('DOMContentLoaded', function() {
       const currentTheme = document.documentElement.getAttribute('data-theme');
       const statusEl = document.getElementById('appearanceStatus');
@@ -352,11 +379,19 @@
         });
       }
 
+      // Setup 2FA navigation (NEW)
+      const setup2FABtn = document.getElementById('setup2FABtn');
+      if (setup2FABtn) {
+        setup2FABtn.addEventListener('click', function () {
+          window.location.href = '/auth/setup-2fa';
+        });
+      }
+
       // Change password action
       const pwdBtn = document.getElementById('changePasswordBtn');
       if (pwdBtn) {
         pwdBtn.addEventListener('click', function () {
-          alert('🔒 Chức năng đổi mật khẩu sẽ sớm được cập nhật!');
+          alert('🔒 Tính năng đổi mật khẩu đang sử dụng luồng Quên mật khẩu nội bộ để bảo mật nhất!');
         });
       }
 
@@ -378,23 +413,19 @@
       const themeClose = document.getElementById('themePickerCloseBtn');
       if (themeClose) themeClose.addEventListener('click', window.toggleThemePicker);
 
-      // Theme color pickers (only swatches)
+      // Theme color pickers
       document.querySelectorAll('.theme-swatch').forEach(function (el) {
         el.addEventListener('click', function (ev) {
           ev.stopPropagation();
           const t = el.getAttribute('data-theme');
           if (t) {
             const accent = (window.THEME_ACCENTS && window.THEME_ACCENTS[t]) || null;
-            // persist theme name and accent hex
             localStorage.setItem('moodiary-theme', t);
             if (accent) localStorage.setItem('moodiary-accent', accent);
-
-            // If dark mode is active, keep data-theme 'dark' but update accent only
             const isDark = localStorage.getItem('moodiary-is-dark') === '1';
             if (isDark) {
               if (accent) document.documentElement.style.setProperty('--accent', accent);
             } else {
-              // apply theme immediately (this will also update accent and clear dark flag)
               if (window.setTheme) window.setTheme(t);
             }
           }

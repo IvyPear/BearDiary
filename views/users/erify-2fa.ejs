@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác thực 2 lớp - Bear Diary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Nunito', sans-serif; background: #F8FBFF; }
+    .otp-input:focus { border-color: #3B82F6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); outline: none; }
+    .bear-float { animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  </style>
+</head>
+<body class="h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-xl border border-blue-50 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+    
+    <div class="text-center mb-8 relative z-10">
+      <div class="text-6xl mb-4 bear-float">🛡️</div>
+      <h2 class="text-2xl font-extrabold text-[#1E3A8A]">Xác thực 2 lớp</h2>
+      <p class="text-slate-400 font-bold mt-2 text-sm">
+        Mở ứng dụng <span class="text-blue-500">Google Authenticator</span> và nhập mã 6 số để tiếp tục 🐻
+      </p>
+    </div>
+
+    <% if (typeof error_msg !== 'undefined' && error_msg.length > 0) { %>
+      <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl mb-6 font-bold text-sm text-center">
+        <%= error_msg %>
+      </div>
+    <% } %>
+
+    <form action="/auth/verify-2fa" method="POST" class="space-y-6 relative z-10">
+      <div>
+        <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 text-center">Mã xác thực 6 chữ số</label>
+        <input type="text" name="token" maxlength="6" autofocus
+               placeholder="0 0 0 0 0 0"
+               class="w-full text-center text-3xl font-black tracking-[0.5em] bg-[#F8FBFF] border border-[#EBF4FF] rounded-2xl p-4 otp-input transition-all placeholder:text-slate-200" 
+               required>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-2xl font-extrabold text-lg transition-all shadow-lg hover:shadow-blue-500/30">
+        Xác nhận Đăng nhập <i class="fa-solid fa-chevron-right ml-2"></i>
+      </button>
+    </form>
+
+    <div class="mt-8 text-center relative z-10 border-t border-slate-50 pt-6">
+      <a href="/auth/logout" class="text-slate-400 hover:text-blue-500 font-bold text-sm transition-colors">
+        <i class="fa-solid fa-arrow-left-long mr-2"></i> Quay lại Đăng nhập
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

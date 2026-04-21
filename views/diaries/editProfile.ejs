@@ -1,174 +1,248 @@
 <% title = 'Chỉnh sửa hồ sơ - Bear Diary'; %>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <style>
-  .edit-profile-card { max-width: 820px; margin: 0 auto; padding: 2rem; border-radius: 1rem; background: var(--card-bg, white); border: 1px solid var(--card-border); }
-  .avatar-preview { width: 120px; height: 120px; border-radius: 999px; overflow: hidden; display: inline-block; border: 2px solid var(--card-border); background: var(--card-bg); position: relative; }
-  .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%); color: white; }
-  
-  /* Dark mode styles */
-  /* Use theme variables so dark/light share the same rules */
-  .edit-profile-card { background: var(--card-bg); border-color: var(--card-border); }
-  .form-label { color: var(--muted); }
-  .avatar-preview { border-color: var(--card-border); background: var(--card-bg); }
-  
-  /* Dark mode cho input và textarea */
-  input,
-  textarea {
-    background-color: var(--card-bg);
-    border-color: var(--card-border);
-    color: var(--primary-dark);
+  :root {
+    --primary-color: #2563eb;
+    --bg-card: #ffffff;
+    --border-color: #f1f5f9;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
   }
-  
-  [data-theme="dark"] input:focus,
-  [data-theme="dark"] textarea:focus {
-    border-color: var(--accent, #60A5FA);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+
+  [data-theme="dark"] {
+    --bg-card: #1e293b;
+    --border-color: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
   }
-  
-  input::placeholder,
-  textarea::placeholder {
-    color: var(--muted);
+
+  .edit-profile-card {
+    max-width: 650px;
+    margin: 3rem auto;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    background: var(--bg-card);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
   }
-  
-  .border {
-    border-color: var(--card-border);
+
+  .profile-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
   }
-  
-  .hover\:bg-gray-50:hover {
-    background-color: var(--card-border) !important;
+
+  .profile-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
   }
-  
-  a { color: var(--muted); }
-  a:hover { color: var(--primary-dark); }
-  
-  .small-muted { font-size: .85rem; color: var(--muted,#6B7280); }
-  
-  .crop-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
+
+  /* Avatar Section Layout */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .avatar-section {
+    text-align: center;
+  }
+
+  .avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+  }
+
+  .avatar-preview {
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 1000;
-    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #f8fafc;
+  }
+
+  .avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: white;
+  }
+
+  /* Custom File Upload Button */
+  .btn-upload-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--bg-card);
+    color: var(--text-main);
+    transition: all 0.2s;
+  }
+
+  .btn-upload-custom:hover {
+    background: var(--border-color);
+  }
+
+  #avatarFile { display: none; }
+
+  /* Form Styling */
+  .form-group { margin-bottom: 1.5rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .styled-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .styled-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+
+  /* Actions */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-save { background: var(--primary-color); color: white; }
+  .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
+  .btn-cancel:hover { background: var(--border-color); }
+
+  /* Cropper Modal */
+  .crop-modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
   }
   .crop-modal.active { display: flex; }
   .crop-container {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow: auto;
+    background: var(--bg-card); width: 90%; max-width: 500px; padding: 2rem; border-radius: 1.5rem;
   }
-  .crop-container { background: var(--card-bg); }
-  .crop-image-container {
-    max-width: 70vw;
-    max-height: 60vh;
-    margin: 1rem 0;
-    overflow: hidden;
-  }
-  .crop-image-container img { max-width: 100%; display: block; }
-  .crop-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
-  .crop-buttons button { padding: 0.5rem 1.5rem; border-radius: 0.5rem; font-weight: bold; cursor: pointer; border: none; }
-  .btn-crop { background: var(--accent); color: white; }
-  .btn-cancel { background: var(--card-border); color: var(--primary-dark); }
-  .loading {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 0.5rem;
-    z-index: 1001;
-    display: none;
-    font-size: 14px;
-  }
-  .toast-message {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #333;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    z-index: 1002;
-    display: none;
-    animation: slideIn 0.3s ease;
-  }
-  .toast-message.success { background: #10b981; }
-  .toast-message.error { background: #ef4444; }
-  @keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+  .crop-image-container { height: 300px; margin: 1.5rem 0; background: #000; border-radius: 0.5rem; overflow: hidden; }
+
+  @media (max-width: 640px) {
+    .profile-grid { grid-template-columns: 1fr; }
+    .avatar-section { margin-bottom: 1rem; }
   }
 </style>
 
 <div class="edit-profile-card">
-  <h2 class="text-2xl font-bold mb-4">Chỉnh sửa hồ sơ</h2>
+  <div class="profile-header">
+    <h2>Hồ sơ của tôi</h2>
+  </div>
 
   <form id="editProfileForm">
-    <div class="flex gap-8 items-start flex-wrap">
-      <div class="text-center">
-        <label class="form-label block mb-2">Ảnh đại diện</label>
-        <div class="avatar-preview mb-3" id="currentAvatar">
-          <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
-            <img id="avatarImg" src="<%= user.avatar %>" alt="avatar">
-          <% } else { %>
-            <div id="avatarFallback" class="avatar-fallback"><%= (user.name || 'U').charAt(0).toUpperCase() %></div>
-          <% } %>
+    <div class="profile-grid">
+      <div class="avatar-section">
+        <div class="avatar-wrapper">
+          <div class="avatar-preview" id="currentAvatar">
+            <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
+              <img id="avatarImg" src="<%= user.avatar %>" alt="avatar">
+            <% } else { %>
+              <div id="avatarFallback" class="avatar-fallback"><%= (user.name || 'U').charAt(0).toUpperCase() %></div>
+            <% } %>
+          </div>
         </div>
-
-        <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/jpg,image/gif" class="mb-2" />
-        <div class="small-muted">Bạn có thể chọn ảnh từ máy tính. Kích thước tối đa 2MB.</div>
-        <div id="fileError" class="error-message" style="color: #ef4444; font-size: 12px; margin-top: 5px;"></div>
+        
+        <label for="avatarFile" class="btn-upload-custom">
+          <i class="fa-regular fa-image"></i> Thay đổi
+        </label>
+        <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/jpg" />
+        <div id="fileError" style="color: #ef4444; font-size: 11px; margin-top: 8px;"></div>
       </div>
 
-      <div class="flex-1">
-        <label class="form-label block mb-2">Tên</label>
-        <input name="name" id="userName" type="text" value="<%= user.name %>" required class="w-full border rounded px-3 py-2 mb-4" />
+      <div class="form-content">
+        <div class="form-group">
+          <label class="form-label">Tên</label>
+          <input name="name" id="userName" type="text" value="<%= user.name %>" required class="styled-input" placeholder="Enter your name" />
+        </div>
 
-        <label class="form-label block mb-2">Email</label>
-        <input name="email" id="userEmail" type="email" value="<%= user.email %>" required class="w-full border rounded px-3 py-2" />
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input name="email" id="userEmail" type="email" value="<%= user.email %>" required class="styled-input" placeholder="your@email.com" />
+        </div>
       </div>
     </div>
 
-    <div class="flex gap-3 mt-6">
-      <button type="button" id="saveBtn" class="px-4 py-2 accent-bg btn-accent text-white rounded font-bold transition-colors">Lưu</button>
-      <a href="/diaries/profile" class="px-4 py-2 border rounded hover:bg-gray-50 transition-colors">Hủy</a>
+    <div class="form-actions">
+      <a href="/diaries/profile" class="btn btn-cancel">Hủy</a>
+      <button type="button" id="saveBtn" class="btn btn-save">Lưu thay đổi</button>
     </div>
   </form>
 </div>
 
-<div id="loading" class="loading">
-  <i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...
-</div>
-
-<div id="toast" class="toast-message"></div>
-
 <div id="cropModal" class="crop-modal">
   <div class="crop-container">
-    <h3 class="text-xl font-bold mb-4 text-center">Cắt ảnh đại diện</h3>
-    <p class="text-sm text-gray-500 text-center mb-2">👆 Kéo thả để chọn vùng ảnh</p>
+    <h3 style="text-align:center; font-weight: bold; color: var(--text-main)">Cắt ảnh</h3>
     <div class="crop-image-container">
       <img id="cropImage" src="" alt="Image to crop">
     </div>
-    <div class="crop-buttons">
-      <button id="cropCancelBtn" class="btn-cancel">Hủy</button>
-      <button id="cropSaveBtn" class="btn-crop">Cắt & Lưu</button>
+    <div style="display:flex; gap:10px; justify-content: center">
+      <button id="cropCancelBtn" class="btn btn-cancel">Hủy</button>
+      <button id="cropSaveBtn" class="btn btn-save">Cắt & Lưu</button>
     </div>
   </div>
 </div>
+
+<div id="loading" class="loading" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.7); color:white; padding: 1rem 2rem; border-radius: 8px; z-index:9999;">
+  <i class="fas fa-spinner fa-spin"></i> Processing...
+</div>
+
+<div id="toast" class="toast-message" style="display:none; position:fixed; bottom:20px; right:20px; padding: 12px 24px; border-radius: 8px; color:white; z-index:9999;"></div>
 
 <script>
   let cropper = null;

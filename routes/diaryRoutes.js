@@ -41,4 +41,16 @@ router.post('/profile/update', upload.single('avatarFile'), diaryController.upda
 // Route này cho phép upload avatar riêng biệt, không cần update toàn bộ profile
 router.post('/profile/upload-avatar', upload.single('avatar'), authController.updateAvatar);
 
+// ====================== ROUTES MỚI CHO TASK CỦA @TRƯƠNG THỦY LAM ======================
+// Viết & lưu nhật ký (có upload nhiều ảnh + highlight quan trọng)
+// Phải có trong commit tối nay
+
+// GET: Hiển thị form viết nhật ký mới
+router.get('/create', diaryController.getCreateDiary);
+
+// POST: Lưu nhật ký mới (upload nhiều ảnh + highlight)
+router.post('/create', diaryController.createDiary);
+
+// GET: Timeline có hỗ trợ hiển thị highlight (không đè lên route cũ)
+router.get('/timeline-highlight', diaryController.getTimelineWithHighlight);
 module.exports = router;

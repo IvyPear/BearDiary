@@ -2,11 +2,24 @@ const Diary = require('../models/Diary');
 const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
+
+// ====================== MULTER CONFIG ======================
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/uploads/diary/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage: storage });
+
+// ====================== CONTROLLERS ======================
 
 exports.getHome = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        // Lấy 3 bài viết gần nhất
         const recentEntries = await Diary.find({ userId }).sort({ date: -1 }).limit(3);
         const totalEntries = await Diary.countDocuments({ userId });
         const totalStarred = await Diary.countDocuments({ userId, isStarred: true });
@@ -25,17 +38,23 @@ exports.getHome = async (req, res) => {
 
 exports.createEntry = async (req, res) => {
     try {
+        // 1. Kiểm tra an toàn: Đảm bảo session và thông tin user tồn tại
+        if (!req.session || !req.session.user || !req.session.user._id) {
+            console.log('⚠️ Bắt được lỗi: Chưa có session user. Chuyển hướng về Login.');
+            return res.redirect('/auth/login');
+        }
+
         const { content, mood } = req.body;
         const newDiary = new Diary({
             userId: req.session.user._id,
             content: content,
-            mood: mood || '😊 Happy' 
+            mood: mood || '😊 Happy'
         });
-
+        
         await newDiary.save();
         res.redirect('/diaries/home');
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi khi tạo nhật ký:', error);
         res.redirect('/diaries/home');
     }
 };
@@ -44,7 +63,6 @@ exports.getTimeline = async (req, res) => {
     try {
         const userId = req.session.user._id;
 
-        // Lấy tháng và năm từ query URL, mặc định là trống 
         let query = { userId };
         const currentMonth = req.query.month || '';
         const currentYear = req.query.year || new Date().getFullYear().toString();
@@ -55,16 +73,14 @@ exports.getTimeline = async (req, res) => {
             query.date = { $gte: startDate, $lte: endDate };
         }
 
-        // Lấy dữ liệu thật từ MongoDB
         const rawEntries = await Diary.find(query).sort({ date: -1 });
 
-        // Tạo hàm phụ để chuyển đổi mood thành Color và Icon 
         const parseMood = (moodString) => {
             const str = moodString || '😊 Happy';
             const parts = str.split(' ');
             const icon = parts[0] || '😐';
             const name = parts.slice(1).join(' ') || 'Normal';
-            
+
             let color = 'blue';
             const nLower = name.toLowerCase();
             if (nLower.includes('happy') || nLower.includes('vui')) color = 'yellow';
@@ -79,11 +95,10 @@ exports.getTimeline = async (req, res) => {
         let moodCounts = { all: rawEntries.length };
         let uniqueMoods = {};
 
-        // Biến đổi dữ liệu DB 
         const entries = rawEntries.map((e, index) => {
             const { icon, name, color } = parseMood(e.mood);
             const moodKey = name.toLowerCase();
-            
+
             moodCounts[moodKey] = (moodCounts[moodKey] || 0) + 1;
             if (!uniqueMoods[moodKey]) uniqueMoods[moodKey] = { icon, name };
 
@@ -94,14 +109,14 @@ exports.getTimeline = async (req, res) => {
 
             return {
                 _id: e._id,
-                date: dateStr, // Định dạng lại ngày giống code gốc của bạn
+                date: dateStr,
                 mood: name,
                 moodIcon: icon,
                 moodColor: color,
                 content: e.content,
                 image: e.image || null,
                 isStarred: e.isStarred || false,
-                side: index % 2 === 0 ? 'left' : 'right' // Tạo xen kẽ trái phải
+                side: index % 2 === 0 ? 'left' : 'right'
             };
         });
 
@@ -117,87 +132,72 @@ exports.getTimeline = async (req, res) => {
         console.error(error);
         res.send('Lỗi tải Timeline');
     }
-    
 };
 
-    // GET form chỉnh sửa
-    exports.getEditEntry = async (req, res) => {
-        try {
-            const userId = req.session.user._id;
-            const entryId = req.params.id;
+exports.getEditEntry = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const entryId = req.params.id;
+        const entry = await Diary.findOne({ _id: entryId, userId });
 
-            const entry = await Diary.findOne({ _id: entryId, userId });
+        if (!entry) return res.redirect('/diaries/timeline');
 
-            if (!entry) {
-                return res.redirect('/diaries/timeline');
-            }
+        res.render('diaries/edit', {
+            title: 'Chỉnh sửa nhật ký - Bear Diary',
+            entry
+        });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/diaries/timeline');
+    }
+};
 
-            res.render('diaries/edit', {
-                title: 'Chỉnh sửa nhật ký - Bear Diary',
-                entry
-            });
-        } catch (error) {
-            console.error(error);
-            res.redirect('/diaries/timeline');
+exports.updateEntry = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const entryId = req.params.id;
+        const { content, mood } = req.body;
+
+        await Diary.findOneAndUpdate(
+            { _id: entryId, userId },
+            { content: content.trim(), mood: mood || '😊 Happy' },
+            { new: true }
+        );
+
+        res.redirect('/diaries/timeline');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/diaries/timeline');
+    }
+};
+
+exports.deleteEntry = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const entryId = req.params.id;
+
+        await Diary.findOneAndDelete({ _id: entryId, userId });
+
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.json({ ok: true });
         }
-    };
-
-    // UPDATE entry
-    exports.updateEntry = async (req, res) => {
-        try {
-            const userId = req.session.user._id;
-            const entryId = req.params.id;
-            const { content, mood } = req.body;
-
-            await Diary.findOneAndUpdate(
-                { _id: entryId, userId },
-                { 
-                    content: content.trim(),
-                    mood: mood || '😊 Happy'
-                },
-                { new: true }
-            );
-
-            res.redirect('/diaries/timeline');
-        } catch (error) {
-            console.error(error);
-            res.redirect('/diaries/timeline');
+        res.redirect('/diaries/timeline');
+    } catch (error) {
+        console.error(error);
+        if (req.xhr || req.headers.accept?.includes('application/json')) {
+            return res.status(500).json({ ok: false });
         }
-    };
-
-    // DELETE entry
-    exports.deleteEntry = async (req, res) => {
-        try {
-            const userId = req.session.user._id;
-            const entryId = req.params.id;
-
-            await Diary.findOneAndDelete({ _id: entryId, userId });
-
-            
-            if (req.xhr || req.headers.accept?.includes('application/json')) {
-                return res.json({ ok: true });
-            }
-
-            res.redirect('/diaries/timeline');
-        } catch (error) {
-            console.error(error);
-            if (req.xhr || req.headers.accept?.includes('application/json')) {
-                return res.status(500).json({ ok: false });
-            }
-            res.redirect('/diaries/timeline');
-        }
-    };
+        res.redirect('/diaries/timeline');
+    }
+};
 
 exports.getReport = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        
-        // Lấy tháng và năm từ query URL, mặc định là tháng hiện tại
         const today = new Date();
         let year = parseInt(req.query.year) || today.getFullYear();
         let month = parseInt(req.query.month) || (today.getMonth() + 1);
 
-        // Xử lý logic chuyển đổi năm khi qua tháng 12 hoặc lùi qua tháng 1
         if (month < 1) { month = 12; year--; }
         if (month > 12) { month = 1; year++; }
 
@@ -206,54 +206,40 @@ exports.getReport = async (req, res) => {
         const nextMonth = month === 12 ? 1 : month + 1;
         const nextYear = month === 12 ? year + 1 : year;
 
-        // Lấy ngày đầu và ngày cuối của tháng được chọn
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
-        // Truy vấn MongoDB các bài viết nằm trong khoảng tháng này
-        const entries = await Diary.find({ 
-            userId, 
-            date: { $gte: startDate, $lte: endDate } 
+        const entries = await Diary.find({
+            userId,
+            date: { $gte: startDate, $lte: endDate }
         });
 
-        // 1. TÍNH TOÁN LƯỚI LỊCH (CALENDAR GRID)
-        const firstDayIndex = startDate.getDay(); // 0 (CN) -> 6 (T7)
+        const firstDayIndex = startDate.getDay();
         const daysInMonth = new Date(year, month, 0).getDate();
         const daysInPrevMonth = new Date(year, month - 1, 0).getDate();
-        
+
         let calendarDays = [];
-        
-        // Thêm các ngày của tháng trước (in mờ)
+
         for (let i = firstDayIndex; i > 0; i--) {
             calendarDays.push({ day: daysInPrevMonth - i + 1, isOtherMonth: true, hasJournal: false });
         }
-        
-        // Thêm các ngày của tháng hiện tại
+
         for (let i = 1; i <= daysInMonth; i++) {
             const currentDate = new Date(year, month - 1, i);
             const isToday = currentDate.toDateString() === today.toDateString();
-            
-            // Lọc ra các bài viết thuộc ngày 'i'
-            const dayEntries = entries.filter(e => {
-                const eDate = e.date;
-                return new Date(eDate).getDate() === i;
-            });
-
+            const dayEntries = entries.filter(e => new Date(e.date).getDate() === i);
             const hasJournal = dayEntries.length > 0;
             const isStarred = dayEntries.some(e => e.isStarred);
             const image = dayEntries.find(e => e.image)?.image || null;
-
             calendarDays.push({ day: i, isOtherMonth: false, isToday, hasJournal, isStarred, image });
         }
-        
-        // Thêm các ngày của tháng sau cho đủ khung (35 hoặc 42 ô)
+
         const totalGridCells = calendarDays.length > 35 ? 42 : 35;
         const remainingCells = totalGridCells - calendarDays.length;
         for (let i = 1; i <= remainingCells; i++) {
             calendarDays.push({ day: i, isOtherMonth: true, hasJournal: false });
         }
 
-        // 2. TÍNH TOÁN DỮ LIỆU BIỂU ĐỒ TRÒN
         let moodCounts = {};
         entries.forEach(e => {
             const moodStr = e.mood || '😊 Vui vẻ';
@@ -262,23 +248,23 @@ exports.getReport = async (req, res) => {
 
         const chartLabels = Object.keys(moodCounts);
         const chartData = Object.values(moodCounts);
-        const totalEntries = await Diary.countDocuments({ userId }); // Tổng bài của user từ trước đến nay
+        const totalEntries = await Diary.countDocuments({ userId });
         const totalStarred = await Diary.countDocuments({ userId, isStarred: true });
-        
+
         let topMood = 'Chưa có dữ liệu';
         let maxCount = 0;
         for (const [mood, count] of Object.entries(moodCounts)) {
             if (count > maxCount) { maxCount = count; topMood = mood; }
         }
 
-        res.render('diaries/report', { 
+        res.render('diaries/report', {
             title: 'Báo cáo - Moodiary',
             currentMonth: month,
             currentYear: year,
             prevMonth, prevYear,
             nextMonth, nextYear,
             calendarDays,
-            chartLabels: JSON.stringify(chartLabels), // Ép kiểu chuỗi để truyền xuống Frontend an toàn
+            chartLabels: JSON.stringify(chartLabels),
             chartData: JSON.stringify(chartData),
             totalEntries,
             totalStarred,
@@ -297,53 +283,32 @@ exports.getProfile = async (req, res) => {
         const user = await User.findById(userId).lean();
         if (!user) return res.redirect('/auth/login');
 
-        // Lấy tất cả entry của user để tính thống kê
         const entries = await Diary.find({ userId }).sort({ date: -1 }).lean();
-
         const totalEntries = entries.length;
         const starredEntries = entries.filter(e => e.isStarred).length;
 
-        // daysJournaled: số ngày khác nhau user đã viết
         const uniqueDays = new Set(entries.map(e => new Date(e.date).toDateString()));
         const daysJournaled = uniqueDays.size;
 
-        // dayStreak: số ngày liên tiếp tính từ hôm nay ngược lên
         let dayStreak = 0;
         if (entries.length > 0) {
-            const today = new Date();
             let streakDate = new Date();
-
-            // tạo set các ngày có entry (YYYY-MM-DD)
-            const daySet = new Set(entries.map(e => new Date(e.date).toISOString().slice(0,10)));
-
+            const daySet = new Set(entries.map(e => new Date(e.date).toISOString().slice(0, 10)));
             while (true) {
-                const key = streakDate.toISOString().slice(0,10);
+                const key = streakDate.toISOString().slice(0, 10);
                 if (daySet.has(key)) {
                     dayStreak++;
-                    // lùi 1 ngày
                     streakDate.setDate(streakDate.getDate() - 1);
                 } else break;
             }
         }
 
-        // memberSince: format ngày tạo tài khoản
         const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
-
-        // avatar fallback: chữ cái đầu của tên
         const avatar = user.avatar || (user.name ? user.name.charAt(0).toUpperCase() : 'U');
 
         res.render('diaries/profile', {
             title: 'Hồ sơ - Moodiary',
-            user: {
-                name: user.name,
-                email: user.email,
-                avatar,
-                memberSince,
-                dayStreak,
-                totalEntries,
-                daysJournaled,
-                starredEntries
-            }
+            user: { name: user.name, email: user.email, avatar, memberSince, dayStreak, totalEntries, daysJournaled, starredEntries }
         });
     } catch (error) {
         console.error(error);
@@ -351,7 +316,6 @@ exports.getProfile = async (req, res) => {
     }
 };
 
-// GET edit profile form
 exports.getEditProfile = async (req, res) => {
     try {
         const userId = req.session.user._id;
@@ -368,69 +332,48 @@ exports.getEditProfile = async (req, res) => {
     }
 };
 
-// POST update profile (phần cần sửa)
+// POST update profile
 exports.updateProfile = async (req, res) => {
     try {
         const userId = req.session.user._id;
         const { name, email } = req.body;
-        
+
         let avatarPath;
-        
-        // Xử lý upload file avatar mới
+
         if (req.file) {
-            // Xóa avatar cũ nếu có và không phải là ảnh mặc định
             const oldUser = await User.findById(userId);
             if (oldUser && oldUser.avatar && !oldUser.avatar.includes('default-avatars')) {
                 const oldAvatarPath = path.join(__dirname, '../public', oldUser.avatar);
                 try {
-                    if (fs.existsSync(oldAvatarPath)) {
-                        fs.unlinkSync(oldAvatarPath);
-                    }
+                    if (fs.existsSync(oldAvatarPath)) fs.unlinkSync(oldAvatarPath);
                 } catch (err) {
                     console.error('Lỗi xóa avatar cũ:', err);
                 }
             }
-            // Lưu avatar mới
             avatarPath = '/uploads/' + req.file.filename;
         } else if (req.body.avatar) {
             avatarPath = req.body.avatar.trim();
         }
 
-        if (!name || !email) {
-            return res.redirect('/diaries/profile');
-        }
+        if (!name || !email) return res.redirect('/diaries/profile');
 
-        // Check email uniqueness
         const existing = await User.findOne({ email: email.trim().toLowerCase() });
         if (existing && String(existing._id) !== String(userId)) {
             req.flash('error_msg', 'Email đã được sử dụng!');
             return res.redirect('/diaries/profile/edit');
         }
 
-        // Cập nhật thông tin
-        const updateData = {
-            name: name.trim(),
-            email: email.trim().toLowerCase()
-        };
-        
-        if (avatarPath !== undefined) {
-            updateData.avatar = avatarPath;
-        }
+        const updateData = { name: name.trim(), email: email.trim().toLowerCase() };
+        if (avatarPath !== undefined) updateData.avatar = avatarPath;
 
         const updated = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true }).lean();
 
-        // Update session
         req.session.user.name = updated.name;
         req.session.user.email = updated.email;
         req.session.user.avatar = updated.avatar;
 
-        // Response cho AJAX request
         if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.json({ 
-                ok: true, 
-                redirect: '/diaries/profile',
-                avatar: updated.avatar
-            });
+            return res.json({ ok: true, redirect: '/diaries/profile', avatar: updated.avatar });
         }
 
         req.flash('success_msg', 'Cập nhật thành công!');
@@ -442,5 +385,93 @@ exports.updateProfile = async (req, res) => {
         }
         req.flash('error_msg', 'Có lỗi xảy ra!');
         res.redirect('/diaries/profile');
+    }
+// ↑ THIS WAS THE MISSING }; — now correctly closed above
+};
+
+// ====================== THÊM MỚI CHO TASK ======================
+
+exports.getCreateDiary = (req, res) => {
+    res.render('diaries/create', {
+        title: 'Viết Nhật Ký - Bear Diary'
+    });
+};
+
+exports.createDiary = [
+    upload.array('images', 10),
+    async (req, res) => {
+        try {
+            // Kiểm tra an toàn session
+            if (!req.session || !req.session.user || !req.session.user._id) {
+                console.log('⚠️ Bắt được lỗi: Chưa có session user. Chuyển hướng về Login.');
+                return res.redirect('/auth/login');
+            }
+
+            const { title, content, mood, highlights } = req.body;
+            const userId = req.session.user._id;
+
+            let highlightArray = [];
+            if (highlights) {
+                if (Array.isArray(highlights)) {
+                    highlightArray = highlights
+                        .filter(text => text && text.trim() !== '')
+                        .map(text => ({ text: text.trim(), star: 3 }));
+                } else if (typeof highlights === 'string' && highlights.trim() !== '') {
+                    highlightArray = [{ text: highlights.trim(), star: 3 }];
+                }
+            }
+
+            const newDiary = new Diary({
+                userId,
+                title: title || 'Nhật ký trong ngày',
+                content: content.trim(),
+                mood: mood || '😊 Happy',
+                images: req.files ? req.files.map(file => `/uploads/diary/${file.filename}`) : [],
+                highlights: highlightArray,
+                isStarred: highlightArray.length > 0
+            });
+
+            await newDiary.save();
+            res.redirect('/diaries/timeline');
+        } catch (error) {
+            console.error('Lỗi tạo nhật ký (kèm ảnh):', error);
+            res.redirect('/diaries/home');
+        }
+    }
+];
+
+exports.getTimelineWithHighlight = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const rawEntries = await Diary.find({ userId }).sort({ date: -1 });
+
+        const entries = rawEntries.map((e, index) => {
+            const dateObj = new Date(e.date);
+            const dateStr = dateObj.toLocaleDateString('vi-VN', {
+                weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+            });
+
+            return {
+                _id: e._id,
+                date: dateStr,
+                mood: e.mood || '😊 Happy',
+                content: e.content,
+                images: e.images || (e.image ? [e.image] : []),
+                highlights: e.highlights || [],
+                isStarred: e.isStarred || (e.highlights && e.highlights.length > 0),
+                side: index % 2 === 0 ? 'left' : 'right'
+            };
+        });
+
+        res.render('diaries/timeline', {
+            title: 'Dòng thời gian - Bear Diary',
+            entries,
+            showHighlights: true,
+            currentMonth: '',
+            currentYear: new Date().getFullYear().toString()
+        });
+    } catch (error) {
+        console.error('Lỗi tải Timeline với highlight:', error);
+        res.send('Lỗi tải Timeline');
     }
 };

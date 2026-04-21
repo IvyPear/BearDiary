@@ -1,0 +1,72 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-3xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-3xl shadow-xl p-10">
+        <h1 class="text-4xl font-bold text-center mb-10 text-gray-800 flex items-center justify-center gap-3">
+            ✍️ Viết Nhật Ký Mới
+        </h1>
+
+        <form action="/diaries/create" method="POST" enctype="multipart/form-data" class="space-y-8">
+            
+            <!-- Tiêu đề -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Tiêu đề</label>
+                <input type="text" name="title" value="Nhật ký trong ngày" 
+                       class="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-pink-500 text-lg">
+            </div>
+
+            <!-- Mood -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Tâm trạng hôm nay</label>
+                <select name="mood" class="w-full px-6 py-4 border border-gray-300 rounded-2xl focus:outline-none focus:border-pink-500 text-lg">
+                    <option value="😊 Happy">😊 Happy - Vui vẻ</option>
+                    <option value="🥳 Excited">🥳 Excited - Hào hứng</option>
+                    <option value="😌 Calm">😌 Calm - Bình tĩnh</option>
+                    <option value="🙏 Grateful">🙏 Grateful - Biết ơn</option>
+                    <option value="😢 Sad">😢 Sad - Buồn</option>
+                    <option value="😨 Anxious">😨 Anxious - Lo lắng</option>
+                    <option value="😴 Tired">😴 Tired - Mệt mỏi</option>
+                    <option value="😡 Angry">😡 Angry - Giận dữ</option>
+                </select>
+            </div>
+
+            <!-- Nội dung nhật ký -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">Nội dung nhật ký</label>
+                <textarea name="content" rows="9" required
+                    class="w-full px-6 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:border-pink-500 resize-y min-h-[200px]"
+                    placeholder="Hôm nay mình..."></textarea>
+            </div>
+
+            <!-- Upload nhiều ảnh -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">📸 Upload ảnh (có thể chọn nhiều ảnh)</label>
+                <input type="file" name="images" multiple accept="image/*"
+                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100">
+                <p class="text-xs text-gray-500 mt-2">Tối đa 10 ảnh • jpg, png, webp</p>
+            </div>
+
+            <!-- Highlight quan trọng với dấu sao -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2">⭐ Highlight những điểm quan trọng</label>
+                <textarea name="highlights" rows="5"
+                    class="w-full px-6 py-5 border border-gray-300 rounded-2xl focus:outline-none focus:border-pink-500 resize-y"
+                    placeholder="Mỗi dòng một highlight...&#10;Ví dụ:&#10;Được sếp khen dự án hôm nay&#10;Ăn trưa ngon với đồng nghiệp"></textarea>
+                <p class="text-xs text-gray-500 mt-2">Những dòng này sẽ được đánh dấu ⭐ và hiện trên Timeline</p>
+            </div>
+
+            <div class="pt-6 flex gap-4">
+                <a href="/diaries/timeline" 
+                   class="flex-1 py-4 text-center border-2 border-gray-300 rounded-2xl font-medium hover:bg-gray-50 transition">
+                    ← Quay lại Timeline
+                </a>
+                <button type="submit"
+                        class="flex-1 py-4 bg-gradient-to-r from-pink-500 to-violet-600 text-white font-semibold rounded-2xl hover:from-pink-600 hover:to-violet-700 transition shadow-lg">
+                    💾 Lưu &amp; Đăng Nhật Ký
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,189 +1,365 @@
-<% title = 'Cá nhân - Bear Diary'; %>
 <% 
-  // Dữ liệu được truyền từ controller 
+  // Đảm bảo title chính xác để active menu
+  title = 'Cá nhân - Moodiary'; 
 %>
+
 <style>
+    /* Profile card layout mới */
     .profile-card-main {
-      background: white;
-      border-radius: 2.5rem;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        background: white;
+        border-radius: 2.5rem;
+        overflow: hidden;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        position: relative;
     }
 
+    /* Banner gradient - ĐẬM VỪA PHẢI */
     .banner-box {
-      height: 160px;
-      background: var(--banner);
-      position: relative;
+        height: 140px;
+        position: relative;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 45%, white), color-mix(in srgb, var(--accent) 30%, white));
+        transition: background 0.3s ease;
+    }
+    
+    /* Hiệu ứng tròn mờ giống home */
+    .banner-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* Avatar wrapper */
+    .avatar-wrapper {
+        padding: 0 32px;
+        margin-top: -50px;
+        margin-bottom: 16px;
     }
 
     .avatar-container {
-      width: 100px;
-      height: 100px;
-      background: #DBEAFE;
-      border: 6px solid var(--accent);
-      border-radius: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--accent);
-      margin-top: -50px;
-      margin-left: 40px;
-      position: relative;
-      z-index: 10;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-    }
-    
-    .avatar-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .avatar-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 40px;
-      font-weight: bold;
+        width: 100px;
+        height: 100px;
+        background: white;
+        border: 5px solid var(--accent);
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 900;
+        color: var(--accent);
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
+    /* Shadow cho viền avatar */
+    .avatar-container::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        background: var(--accent);
+        border-radius: 2rem;
+        z-index: -1;
+        opacity: 0.3;
+        filter: blur(3px);
+    }
+
+    .avatar-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, white));
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+    }
+
+    /* Profile info */
+    .profile-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 32px 28px 32px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .profile-text {
+        flex: 1;
+    }
+
+    .user-name {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--primary-dark);
+        margin-bottom: 6px;
+        line-height: 1.2;
+    }
+
+    .user-email {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .member-since {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(224, 236, 249, 0.9);
+        backdrop-filter: blur(4px);
+        color: var(--accent);
+        padding: 6px 14px;
+        border-radius: 40px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .bear-icon {
+        flex-shrink: 0;
+    }
+
+    .bear-circle {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .bear-circle:hover {
+        transform: scale(1.05);
+    }
+
+    /* Stat items */
     .stat-item {
-      border-radius: 1.5rem;
-      padding: 24px 10px;
-      text-align: center;
-      transition: transform 0.2s;
-      background: white;
-      border: 1px solid var(--card-border);
+        border-radius: 1.5rem;
+        padding: 24px 10px;
+        text-align: center;
+        transition: transform 0.2s;
+        background: white;
+        border: 1px solid var(--card-border);
     }
 
     .stat-item:hover {
-      transform: translateY(-4px);
+        transform: translateY(-4px);
     }
 
+    /* Setting rows */
     .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 24px;
-      border-radius: 1.5rem;
-      cursor: pointer;
-      transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        border-radius: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
     }
 
     .setting-row:hover {
-      background: #F8FAFF;
+        background: #F8FAFF;
     }
 
     .icon-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    /* Theme Picker Modal - KHÔNG MÀN ĐEN */
+    .theme-picker-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        display: none;
+    }
+    
+    .theme-picker-modal.show {
+        display: block;
+    }
+    
+    .theme-picker-content {
+        background: white;
+        border-radius: 2rem;
+        padding: 1.5rem;
+        width: 380px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--card-border);
+    }
+    
+    [data-theme="dark"] .theme-picker-content {
+        background: #1E2937;
+        border-color: #334155;
     }
 
     /* Dark mode styles */
     [data-theme="dark"] .profile-card-main {
-      background: #1E2937;
-      border-color: #334155;
+        background: #1E2937;
+        border-color: #334155;
+    }
+
+    [data-theme="dark"] .banner-box {
+        background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 35%, #1E2937), color-mix(in srgb, var(--accent) 20%, #1E2937));
+    }
+
+    [data-theme="dark"] .user-name {
+        color: #F1F5F9;
+    }
+
+    [data-theme="dark"] .user-email {
+        color: #94A3B8;
+    }
+
+    [data-theme="dark"] .member-since {
+        background: #1E2A3E;
+        color: var(--accent);
+    }
+
+    [data-theme="dark"] .avatar-container {
+        background: #1E2A3E;
+        border-color: var(--accent);
+    }
+
+    [data-theme="dark"] .bear-circle {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     [data-theme="dark"] .stat-item {
-      background: #1E2937;
-      border-color: #334155;
+        background: #1E2937;
+        border-color: #334155;
     }
 
     [data-theme="dark"] .setting-row:hover {
-      background: #334155;
+        background: #334155;
     }
 
     [data-theme="dark"] .text-slate-400,
     [data-theme="dark"] .setting-row p {
-      color: #94A3B8 !important;
+        color: #94A3B8 !important;
     }
 
     [data-theme="dark"] .text-slate-700 {
-      color: #E2E8F0 !important;
+        color: #E2E8F0 !important;
     }
 
     [data-theme="dark"] .icon-wrap.bg-blue-50 {
-      background: #1E2A3E;
-      color: #60A5FA;
+        background: #1E2A3E;
+        color: #60A5FA;
     }
 
     [data-theme="dark"] .icon-wrap.bg-purple-50 {
-      background: #2D1B3A;
-      color: #A78BFA;
+        background: #2D1B3A;
+        color: #A78BFA;
     }
 
     [data-theme="dark"] .icon-wrap.bg-yellow-50 {
-      background: #3D3A1A;
-      color: #FACC15;
+        background: #3D3A1A;
+        color: #FACC15;
     }
 
     [data-theme="dark"] .icon-wrap.bg-violet-50 {
-      background: #2D1B3A;
-      color: #C084FC;
-    }
-    
-    /* Màu riêng cho 2FA */
-    .icon-wrap.bg-emerald-50 { background: #ECFDF5; color: #10B981; }
-    [data-theme="dark"] .icon-wrap.bg-emerald-50 { background: #064E3B; color: #34D399; }
-
-    [data-theme="dark"] .avatar-container {
-      background: #1E2A3E;
-      border-color: #334155;
-      color: #60A5FA;
+        background: #2D1B3A;
+        color: #C084FC;
     }
 
-    [data-theme="dark"] #themePicker .bg-white {
-      background-color: #1E2937;
+    [data-theme="dark"] .icon-wrap.bg-emerald-50 {
+        background: #064E3B;
+        color: #34D399;
     }
 
-    [data-theme="dark"] #themePicker h3 {
-      color: #F1F5F9;
-    }
-    
-    [data-theme="dark"] .banner-box {
-      background: linear-gradient(135deg, #1E2937 0%, #0F172A 100%);
-    }
-    
     [data-theme="dark"] .bg-rose-50 {
-      background: #3D1A1A !important;
+        background: #3D1A1A !important;
     }
-    
+
     [data-theme="dark"] .bg-emerald-50 {
-      background: #1A3D2A !important;
+        background: #1A3D2A !important;
     }
-    
+
     [data-theme="dark"] .bg-yellow-50 {
-      background: #3D3A1A !important;
+        background: #3D3A1A !important;
     }
-    
+
     [data-theme="dark"] .bg-\[\#E0ECF9\] {
-      background: #1E2A3E !important;
+        background: #1E2A3E !important;
     }
-    
+
     [data-theme="dark"] .text-rose-500 {
-      color: #F87171 !important;
+        color: #F87171 !important;
     }
-    
+
     [data-theme="dark"] .text-emerald-500 {
-      color: #34D399 !important;
+        color: #34D399 !important;
     }
-    
+
     [data-theme="dark"] .text-yellow-600 {
-      color: #FACC15 !important;
+        color: #FACC15 !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .profile-info {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 24px 24px 24px;
+        }
+        
+        .bear-icon {
+            align-self: flex-end;
+            margin-top: -50px;
+        }
+        
+        .bear-circle {
+            width: 55px;
+            height: 55px;
+            font-size: 32px;
+        }
+        
+        .user-name {
+            font-size: 22px;
+        }
+        
+        .avatar-wrapper {
+            padding: 0 24px;
+        }
+        
+        .theme-picker-content {
+            width: 320px;
+            padding: 1.25rem;
+        }
     }
 </style>
 
@@ -198,69 +374,71 @@
     </div>
 </div>
 
+<!-- Profile Card -->
 <div class="profile-card-main mb-8">
     <div class="banner-box"></div>
-    <div class="avatar-container">
-      <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
-        <img src="<%= user.avatar %>" alt="<%= user.name %>">
-      <% } else { %>
-        <div class="avatar-fallback"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
-      <% } %>
-    </div>
-    <div class="px-10 pb-10">
-      <div class="flex justify-between items-start">
-        <div>
-          <h3 class="text-3xl font-black">
-            <%= user.name %>
-          </h3>
-          <p class="text-slate-400 font-bold text-sm mt-1">
-            <%= user.email %>
-          </p>
-          <div
-            class="inline-flex items-center gap-2 bg-[#E0ECF9] accent-text px-4 py-2 rounded-full mt-5 text-[11px] font-black uppercase tracking-widest">
-            <i class="fa-solid fa-calendar-check"></i>
-            Thành viên  <%= user.memberSince %>
-          </div>
+    <div class="avatar-wrapper">
+        <div class="avatar-container">
+          <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
+            <img src="<%= user.avatar %>" alt="<%= user.name %>">
+          <% } else { %>
+            <div class="avatar-fallback"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+          <% } %>
         </div>
-        <div class="text-5xl bear-float pt-2">🐻</div>
-      </div>
+    </div>
+    <div class="profile-info">
+        <div class="profile-text">
+            <h3 class="user-name"><%= user.name %></h3>
+            <p class="user-email"><%= user.email %></p>
+            <div class="member-since">
+                <i class="fa-regular fa-calendar-check"></i>
+                Thành viên <%= user.memberSince %>
+            </div>
+        </div>
+        <div class="bear-icon">
+            <div class="bear-circle">🐻</div>
+        </div>
     </div>
 </div>
 
-<div class="grid grid-cols-4 gap-6 mb-10">
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
     <div class="stat-item bg-rose-50">
-      <p class="text-rose-500 text-3xl font-black mb-1">
+      <p class="text-rose-500 text-2xl md:text-3xl font-black mb-1">
         <%= user.dayStreak %>
       </p>
-      <p class="text-[11px] font-black text-rose-300 uppercase tracking-tighter">Ngày liên tiếp</p>
+      <p class="text-[10px] md:text-[11px] font-black text-rose-300 uppercase tracking-tighter">Ngày liên tiếp</p>
     </div>
     <div class="stat-item bg-[#E0ECF9]">
-      <p class="accent-text text-3xl font-black mb-1">
+      <p class="accent-text text-2xl md:text-3xl font-black mb-1">
         <%= user.totalEntries %>
       </p>
-      <p class="text-[11px] font-black accent-text uppercase tracking-tighter">Tổng số bài</p>
+      <p class="text-[10px] md:text-[11px] font-black accent-text uppercase tracking-tighter">Tổng số bài</p>
     </div>
     <div class="stat-item bg-emerald-50">
-      <p class="text-emerald-500 text-3xl font-black mb-1">
+      <p class="text-emerald-500 text-2xl md:text-3xl font-black mb-1">
         <%= user.daysJournaled %>
       </p>
-      <p class="text-[11px] font-black text-emerald-300 uppercase tracking-tighter">Ngày viết</p>
+      <p class="text-[10px] md:text-[11px] font-black text-emerald-300 uppercase tracking-tighter">Ngày viết</p>
     </div>
     <div class="stat-item bg-yellow-50">
-      <p class="text-yellow-600 text-3xl font-black mb-1">
+      <p class="text-yellow-600 text-2xl md:text-3xl font-black mb-1">
         <%= user.starredEntries %>
       </p>
-      <p class="text-[11px] font-black text-yellow-400 uppercase tracking-tighter">Đã gắn sao</p>
+      <p class="text-[10px] md:text-[11px] font-black text-yellow-400 uppercase tracking-tighter">Đã gắn sao</p>
     </div>
 </div>
 
-<div class="profile-card-main p-8">
-    <h4 class="text-[12px] font-black accent-text uppercase tracking-[0.2em] mb-6 ml-4">Cài đặt tài khoản</h4>
+<!-- Settings -->
+<div class="profile-card-main p-6 md:p-8">
+    <h4 class="text-[12px] font-black accent-text uppercase tracking-[0.2em] mb-6 ml-2 md:ml-4">Cài đặt tài khoản</h4>
     <div class="space-y-1">
+      <!-- Chỉnh sửa hồ sơ -->
       <div class="setting-row group cursor-pointer" id="editProfileBtn">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-blue-50 text-blue-500 group-hover:scale-110 transition-all"><i
-              class="fa-solid fa-user-pen"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-blue-50 text-blue-500 group-hover:scale-110 transition-all">
+            <i class="fa-solid fa-user-pen"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Chỉnh sửa hồ sơ</p>
             <p class="text-[11px] text-slate-400 font-bold">Tên, email và tiểu sử</p>
@@ -269,62 +447,74 @@
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
 
+      <!-- Xác thực 2 lớp (2FA) -->
       <div class="setting-row group cursor-pointer" id="setup2FABtn">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-all"><i
-              class="fa-solid fa-shield-check"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-emerald-50 text-emerald-500 group-hover:scale-110 transition-all">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Xác thực 2 lớp (2FA)</p>
             <p class="text-[11px] text-slate-400 font-bold">
-                <%= user.isTwoFactorEnabled ? 'Đã bật - Google Authenticator' : 'Chưa bật - Tăng cường bảo mật' %>
+              <%= user.isTwoFactorEnabled ? 'Đã bật - Google Authenticator' : 'Chưa bật - Tăng cường bảo mật' %>
             </p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
 
+      <!-- Bảo mật -->
       <div class="setting-row group cursor-pointer" id="changePasswordBtn">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-purple-50 text-purple-500 group-hover:scale-110 transition-all"><i
-              class="fa-solid fa-shield-halved"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-purple-50 text-purple-500 group-hover:scale-110 transition-all">
+            <i class="fa-solid fa-key"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Bảo mật</p>
             <p class="text-[11px] text-slate-400 font-bold">
-                Lần cuối đổi: <%= user.passwordChangedAt || 'Chưa đổi mật khẩu' %>
+              Lần cuối đổi: <%= user.passwordChangedAt || 'Chưa đổi mật khẩu' %>
             </p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
       </div>
 
+      <!-- Đăng nhập gần nhất -->
       <div class="setting-row">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-blue-50 text-blue-500"><i class="fa-solid fa-laptop-code"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-blue-50 text-blue-500">
+            <i class="fa-solid fa-laptop-code"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Đăng nhập gần nhất</p>
             <p class="text-[11px] text-slate-400 font-bold">
-                <%= user.lastLoginDevice || 'Thiết bị này' %>
+              <%= user.lastLoginDevice || 'Thiết bị này' %>
             </p>
           </div>
         </div>
         <div class="text-[10px] font-bold text-slate-400"><%= user.lastLoginTime || 'Vừa xong' %></div>
       </div>
 
+      <!-- Giao diện -->
       <div class="setting-row">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-yellow-50 text-yellow-500"><i class="fa-solid fa-circle-half-stroke"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-yellow-50 text-yellow-500">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Giao diện</p>
             <p class="text-[11px] text-slate-400 font-bold">Chế độ tối và chủ đề</p>
           </div>
         </div>
-        <div class="text-sm font-bold text-slate-500" id="appearanceStatus">☀️ Sáng</div>
+        <div class="text-sm font-bold text-slate-500" id="appearanceStatus"> Sáng</div>
       </div>
 
+      <!-- Đổi chủ đề -->
       <div class="setting-row group cursor-pointer" id="themePickerBtn">
-        <div class="flex items-center gap-5">
-          <div class="icon-wrap bg-violet-50 text-violet-500 group-hover:scale-110 transition-all"><i
-              class="fa-solid fa-palette"></i></div>
+        <div class="flex items-center gap-4 md:gap-5">
+          <div class="icon-wrap bg-violet-50 text-violet-500 group-hover:scale-110 transition-all">
+            <i class="fa-solid fa-palette"></i>
+          </div>
           <div>
             <p class="font-extrabold text-slate-700">Đổi chủ đề</p>
             <p class="text-[11px] text-slate-400 font-bold">Chọn màu sắc yêu thích</p>
@@ -335,21 +525,20 @@
     </div>
 </div>
 
-<div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
-      <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
-      <div class="grid grid-cols-5 gap-6">
-          <div data-theme="blue" class="theme-swatch w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-          <div data-theme="pink" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F8B4D9] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-          <div data-theme="green" class="theme-swatch w-12 h-12 rounded-2xl bg-[#A8E6CF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-          <div data-theme="purple" class="theme-swatch w-12 h-12 rounded-2xl bg-[#D4B3FF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-          <div data-theme="yellow" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F9D77E] cursor-pointer hover:scale-110 transition-transform shadow"></div>
-      </div>
-      <div class="text-center mt-8">
-        <button id="themePickerCloseBtn" class="px-8 py-3 text-sm font-bold text-slate-500 hover:text-slate-700">
-          Đóng
-        </button>
-      </div>
+<!-- Theme Picker Modal - KHÔNG MÀN ĐEN -->
+<div id="themePicker" class="theme-picker-modal">
+    <div class="theme-picker-content">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold primary-text">Chọn chủ đề màu</h3>
+            <button id="themePickerCloseBtn" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+        </div>
+        <div class="grid grid-cols-5 gap-4">
+            <div data-theme="blue" class="theme-swatch w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+            <div data-theme="pink" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F8B4D9] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+            <div data-theme="green" class="theme-swatch w-12 h-12 rounded-2xl bg-[#A8E6CF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+            <div data-theme="purple" class="theme-swatch w-12 h-12 rounded-2xl bg-[#D4B3FF] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+            <div data-theme="yellow" class="theme-swatch w-12 h-12 rounded-2xl bg-[#F9D77E] cursor-pointer hover:scale-110 transition-transform shadow"></div>
+        </div>
     </div>
 </div>
 
@@ -363,13 +552,34 @@
         window.location.href = '/diaries/profile/edit';
     }
 
-    // Cập nhật trạng thái appearanceStatus, đồng thời thêm event listeners
+    // Hàm cập nhật trạng thái giao diện
+    function updateAppearanceStatus() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const statusEl = document.getElementById('appearanceStatus');
+        if (statusEl) {
+            if (currentTheme === 'dark') {
+                statusEl.innerHTML = '<i class="fa-regular fa-moon mr-1"></i> Tối';
+            } else {
+                statusEl.innerHTML = '<i class="fa-regular fa-sun mr-1"></i> Sáng';
+            }
+        }
+    }
+
+    // Cập nhật trạng thái appearanceStatus và lắng nghe sự thay đổi
     document.addEventListener('DOMContentLoaded', function() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const statusEl = document.getElementById('appearanceStatus');
-      if (statusEl && currentTheme) {
-        statusEl.innerHTML = currentTheme === 'dark' ? '🌙 Tối' : '☀️ Sáng';
-      }
+      // Cập nhật lần đầu
+      updateAppearanceStatus();
+
+      // Lắng nghe sự thay đổi của data-theme trên html
+      const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+              if (mutation.attributeName === 'data-theme') {
+                  updateAppearanceStatus();
+              }
+          });
+      });
+      
+      observer.observe(document.documentElement, { attributes: true });
 
       // Edit profile navigation
       const editBtn = document.getElementById('editProfileBtn');
@@ -379,7 +589,7 @@
         });
       }
 
-      // Setup 2FA navigation (NEW)
+      // Setup 2FA navigation
       const setup2FABtn = document.getElementById('setup2FABtn');
       if (setup2FABtn) {
         setup2FABtn.addEventListener('click', function () {
@@ -398,13 +608,15 @@
       // Theme picker toggle
       const themePickerBtn = document.getElementById('themePickerBtn');
       const themePickerModal = document.getElementById('themePicker');
+      
       window.toggleThemePicker = function () {
         if (!themePickerModal) return;
-        themePickerModal.classList.toggle('hidden');
+        themePickerModal.classList.toggle('show');
       };
 
       if (themePickerBtn) {
-        themePickerBtn.addEventListener('click', function () {
+        themePickerBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
           window.toggleThemePicker();
         });
       }
@@ -412,6 +624,15 @@
       // Theme picker close button
       const themeClose = document.getElementById('themePickerCloseBtn');
       if (themeClose) themeClose.addEventListener('click', window.toggleThemePicker);
+
+      // Click outside to close
+      window.addEventListener('click', function(e) {
+        if (themePickerModal && themePickerModal.classList.contains('show')) {
+          if (!themePickerModal.contains(e.target) && e.target !== themePickerBtn) {
+            themePickerModal.classList.remove('show');
+          }
+        }
+      });
 
       // Theme color pickers
       document.querySelectorAll('.theme-swatch').forEach(function (el) {
@@ -430,7 +651,29 @@
             }
           }
           window.toggleThemePicker();
+          // Cập nhật lại trạng thái sau khi đổi theme
+          setTimeout(updateAppearanceStatus, 50);
         });
       });
+      
+      // FORCE ACTIVE MENU - Đảm bảo menu Cá nhân luôn active
+      const navItems = document.querySelectorAll('.nav-item');
+      const currentPath = window.location.pathname;
+      
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === currentPath || 
+            (currentPath.includes('/profile') && item.getAttribute('href') === '/diaries/profile')) {
+          item.classList.add('active');
+        }
+      });
+      
+      // Lắng nghe sự kiện dark mode từ main toggle (nếu có)
+      const darkToggle = document.getElementById('darkToggle');
+      if (darkToggle) {
+        darkToggle.addEventListener('change', function() {
+          setTimeout(updateAppearanceStatus, 50);
+        });
+      }
     });
 </script>

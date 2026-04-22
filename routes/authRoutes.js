@@ -45,4 +45,7 @@ router.post('/verify-2fa', authController.postVerify2FA);
 router.get('/setup-2fa', ensureAuthenticated, authController.getSetup2FA);
 router.post('/enable-2fa', ensureAuthenticated, authController.postEnable2FA);
 
+// 4. Tắt 2FA (Bổ sung để nút gạt trên Profile hoạt động - KHÔNG XÓA)
+router.post('/disable-2fa', ensureAuthenticated, authController.postDisable2FA);
+
 module.exports = router;

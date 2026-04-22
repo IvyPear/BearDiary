@@ -308,7 +308,17 @@ exports.getProfile = async (req, res) => {
 
         res.render('diaries/profile', {
             title: 'Hồ sơ - Moodiary',
-            user: { name: user.name, email: user.email, avatar, memberSince, dayStreak, totalEntries, daysJournaled, starredEntries }
+            user: {
+                name: user.name,
+                email: user.email,
+                avatar,
+                memberSince,
+                dayStreak,
+                totalEntries,
+                daysJournaled,
+                starredEntries,
+                isTwoFactorEnabled: user.isTwoFactorEnabled // Thêm trường này để đồng bộ trạng thái 2FA
+            }
         });
     } catch (error) {
         console.error(error);

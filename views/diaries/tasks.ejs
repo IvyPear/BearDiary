@@ -3,12 +3,71 @@
 
 <!-- ==================== CSS ==================== -->
 <style>
-:root{--t-bg:#F8FAFF;--t-card:#fff;--t-border:#E2E8F0;--t-text:#334155;--t-muted:#94A3B8;--t-accent:#5A9BD4;--t-accent2:#7EB8E8;--t-success:#10B981;--t-warn:#F59E0B;--t-danger:#EF4444;--t-shadow:0 4px 12px rgba(0,0,0,.04);--t-shadow-lg:0 8px 24px rgba(0,0,0,.06)}
-[data-theme="dark"]{--t-bg:#0F172A;--t-card:#1E293B;--t-border:#334155;--t-text:#E2E8F0;--t-muted:#94A3B8;--t-shadow:0 4px 20px rgba(0,0,0,.3);--t-shadow-lg:0 12px 40px rgba(0,0,0,.5)}
-[data-theme="pink"]{--t-accent:#F472B6;--t-accent2:#FBCFE8}
-[data-theme="green"]{--t-accent:#34D399;--t-accent2:#A7F3D0}
-[data-theme="purple"]{--t-accent:#A78BFA;--t-accent2:#DDD6FE}
-[data-theme="yellow"]{--t-accent:#FBBF24;--t-accent2:#FDE68A}
+:root{
+  --t-bg:#F8FAFF;
+  --t-card:#ffffff;
+  --t-border:#E2E8F0;
+  --t-text:#334155;
+  --t-muted:#94A3B8;
+
+  --t-accent:#5A9BD4;
+  --t-accent2:#7EB8E8;
+  --t-accent-rgb:90,155,212;
+
+  --t-success:#10B981;
+  --t-warn:#F59E0B;
+  --t-danger:#EF4444;
+
+  /* background semantic */
+  --t-success-bg:#ECFDF5;
+  --t-warn-bg:#FFFBEB;
+  --t-danger-bg:#FEF2F2;
+
+  --t-shadow:0 4px 12px rgba(0,0,0,.04);
+  --t-shadow-lg:0 8px 24px rgba(0,0,0,.06);
+}
+
+/* DARK MODE */
+[data-theme="dark"]{
+  --t-bg:#0F172A;
+  --t-card:#1E293B;
+  --t-border:#334155;
+  --t-text:#E2E8F0;
+  --t-muted:#94A3B8;
+
+  /* giữ accent nhưng chỉnh RGB để hover dùng */
+  --t-accent-rgb:90,155,212;
+
+  /* background semantic cho dark */
+  --t-success-bg:#064E3B;
+  --t-warn-bg:#431407;
+  --t-danger-bg:#450A0A;
+
+  --t-shadow:0 4px 20px rgba(0,0,0,.3);
+  --t-shadow-lg:0 12px 40px rgba(0,0,0,.5);
+}
+
+/* COLOR THEMES (phải set luôn RGB, đừng ngu quên) */
+[data-theme="pink"]{
+  --t-accent:#F472B6;
+  --t-accent2:#FBCFE8;
+  --t-accent-rgb:244,114,182;
+}
+[data-theme="green"]{
+  --t-accent:#34D399;
+  --t-accent2:#A7F3D0;
+  --t-accent-rgb:52,211,153;
+}
+[data-theme="purple"]{
+  --t-accent:#A78BFA;
+  --t-accent2:#DDD6FE;
+  --t-accent-rgb:167,139,250;
+}
+[data-theme="yellow"]{
+  --t-accent:#FBBF24;
+  --t-accent2:#FDE68A;
+  --t-accent-rgb:251,191,36;
+}
 
 .task-page{background:var(--t-bg);min-height:100vh;color:var(--t-text)}
 .task-container{max-width:1400px;margin:0 auto;padding:0 1rem}

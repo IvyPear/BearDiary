@@ -46,7 +46,7 @@ function deleteOldAvatar(avatarPath) {
 }
 
 // ==========================================
-// RENDER GIAO DIỆN CƠ BẢN
+// RENDER GIAO DIỆN
 // ==========================================
 exports.getLogin = (req, res) => {
     res.render('users/login', { title: 'Đăng nhập - Bear Diary', layout: false });
@@ -61,7 +61,7 @@ exports.getForgotPassword = (req, res) => {
 };
 
 // ==========================================
-// LOGIC ĐĂNG KÝ
+// ĐĂNG KÝ
 // ==========================================
 exports.postRegister = async (req, res) => {
     try {
@@ -98,36 +98,25 @@ exports.postRegister = async (req, res) => {
 };
 
 // ==========================================
-// LOGIC ĐĂNG NHẬP (HỖ TRỢ CHỜ 2FA)
+// ĐĂNG NHẬP
 // ==========================================
 exports.postLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
-        if (!user) {
+        if (!user || !(await user.comparePassword(password))) {
             req.flash('error_msg', 'Email hoặc mật khẩu không chính xác!');
             return res.redirect('/auth/login');
         }
 
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            req.flash('error_msg', 'Email hoặc mật khẩu không chính xác!');
-            return res.redirect('/auth/login');
-        }
-
-        // Kiểm tra nếu User đã bật 2FA
         if (user.isTwoFactorEnabled) {
             req.session.tempUser = { _id: user._id };
             return res.redirect('/auth/verify-2fa');
         }
 
-        // Xử lý thông tin thiết bị thân thiện với giao diện
         const userAgent = req.headers['user-agent'] || '';
-        let device = 'Thiết bị lạ';
-        if (userAgent.includes('Windows')) device = 'Chrome / Windows';
-        else if (userAgent.includes('Macintosh')) device = 'Safari / MacOS';
-        else if (userAgent.includes('iPhone') || userAgent.includes('Android')) device = 'Mobile App';
+        let device = userAgent.includes('Windows') ? 'Chrome / Windows' : 'Thiết bị lạ';
 
         user.lastLogin = {
             time: Date.now(),
@@ -136,13 +125,7 @@ exports.postLogin = async (req, res) => {
         };
         await user.save();
 
-        req.session.user = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar
-        };
-
+        req.session.user = user.toObject();
         res.redirect('/diaries/home');
     } catch (error) {
         console.error("Lỗi Đăng nhập:", error);
@@ -152,7 +135,7 @@ exports.postLogin = async (req, res) => {
 };
 
 // ==========================================
-// XÁC THỰC MÃ 2FA KHI ĐĂNG NHẬP
+// XÁC THỰC 2FA KHI ĐĂNG NHẬP
 // ==========================================
 exports.postVerify2FA = async (req, res) => {
     try {
@@ -163,7 +146,6 @@ exports.postVerify2FA = async (req, res) => {
 
         const user = await User.findById(tempUser._id);
         
-        // Rà soát: Thêm window: 1 để tránh lỗi lệch giây
         const verified = speakeasy.totp.verify({
             secret: user.twoFactorSecret,
             encoding: 'base32',
@@ -172,23 +154,14 @@ exports.postVerify2FA = async (req, res) => {
         });
 
         if (verified) {
-            const userAgent = req.headers['user-agent'] || '';
-            let device = 'Thiết bị lạ';
-            if (userAgent.includes('Windows')) device = 'Chrome / Windows';
-            
             user.lastLogin = {
                 time: Date.now(),
-                device: device,
+                device: 'Chrome / Windows',
                 ip: req.ip
             };
             await user.save();
 
-            req.session.user = {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                avatar: user.avatar
-            };
+            req.session.user = user.toObject();
             delete req.session.tempUser;
             res.redirect('/diaries/home');
         } else {
@@ -202,14 +175,14 @@ exports.postVerify2FA = async (req, res) => {
 };
 
 // ==========================================
-// THIẾT LẬP 2FA (QUÉT MÃ QR)
+// THIẾT LẬP 2FA
 // ==========================================
 exports.getSetup2FA = async (req, res) => {
     try {
         const user = await User.findById(req.session.user._id);
-        
         const secret = speakeasy.generateSecret({
-            name: `BearDiary (${user.email})`
+            name: `BearDiary (${user.email})`,
+            issuer: 'BearDiary'
         });
 
         const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
@@ -230,20 +203,15 @@ exports.postEnable2FA = async (req, res) => {
     try {
         const { token } = req.body;
         const secret = req.session.tempSecret;
-
-        // Rà soát: Thêm window: 1 để quét mã lần đầu dễ hơn
-        const verified = speakeasy.totp.verify({
-            secret: secret,
-            encoding: 'base32',
-            token: token,
-            window: 1
-        });
+        const verified = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
 
         if (verified) {
-            await User.findByIdAndUpdate(req.session.user._id, {
+            const user = await User.findByIdAndUpdate(req.session.user._id, {
                 twoFactorSecret: secret,
                 isTwoFactorEnabled: true
-            });
+            }, { new: true });
+            
+            req.session.user = user.toObject();
             delete req.session.tempSecret;
             req.flash('success_msg', 'Đã bật xác thực 2 lớp thành công! 🔐');
             res.redirect('/diaries/profile');
@@ -258,7 +226,38 @@ exports.postEnable2FA = async (req, res) => {
 };
 
 // ==========================================
-// QUÊN VÀ ĐẶT LẠI MẬT KHẨU NỘI BỘ
+// TẮT 2FA (ĐÃ SỬA - CÓ LOG)
+// ==========================================
+exports.postDisable2FA = async (req, res) => {
+    try {
+        console.log('🔐 Disable 2FA called for user:', req.session.user._id);
+        const user = await User.findByIdAndUpdate(req.session.user._id, {
+            isTwoFactorEnabled: false,
+            twoFactorSecret: null 
+        }, { new: true });
+        
+        if (!user) {
+            console.log('❌ User not found');
+            return res.status(404).json({ ok: false, error: 'User not found' });
+        }
+        
+        req.session.user = user.toObject();
+        console.log('✅ 2FA disabled successfully');
+        
+        return res.json({ 
+            ok: true, 
+            message: 'Đã tắt bảo mật 2 lớp thành công',
+            isTwoFactorEnabled: false,
+            statusText: 'Chưa kích hoạt'
+        });
+    } catch (error) {
+        console.error("❌ Lỗi Disable 2FA:", error);
+        return res.status(500).json({ ok: false, error: error.message });
+    }
+};
+
+// ==========================================
+// QUÊN MẬT KHẨU
 // ==========================================
 exports.postForgotPassword = async (req, res) => {
     try {

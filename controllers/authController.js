@@ -1,13 +1,9 @@
-const User = require('../models/User'); // Vẫn giữ MongoDB để lưu Tên người dùng
-const { auth } = require('../config/firebase');
-const { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    sendPasswordResetEmail, 
-    signOut 
-} = require('firebase/auth');
+const User = require('../models/User');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 
 // ==========================================
 // HÀM HỖ TRỢ LẤY AVATAR MẶC ĐỊNH
@@ -34,7 +30,7 @@ function getDefaultAvatar(name) {
 }
 
 // ==========================================
-// XÓA AVATAR CŨ (KHI UPDATE)
+// XÓA AVATAR CŨ
 // ==========================================
 function deleteOldAvatar(avatarPath) {
     if (avatarPath && !avatarPath.includes('default-avatars')) {
@@ -49,6 +45,9 @@ function deleteOldAvatar(avatarPath) {
     }
 }
 
+// ==========================================
+// RENDER GIAO DIỆN
+// ==========================================
 exports.getLogin = (req, res) => {
     res.render('users/login', { title: 'Đăng nhập - Bear Diary', layout: false });
 };
@@ -57,8 +56,12 @@ exports.getRegister = (req, res) => {
     res.render('users/register', { title: 'Đăng ký - Bear Diary', layout: false });
 };
 
+exports.getForgotPassword = (req, res) => {
+    res.render('users/forgot-password', { title: 'Quên mật khẩu - Moodiary', layout: false });
+};
+
 // ==========================================
-// ĐĂNG KÝ BẰNG FIREBASE
+// ĐĂNG KÝ
 // ==========================================
 exports.postRegister = async (req, res) => {
     try {
@@ -69,63 +72,264 @@ exports.postRegister = async (req, res) => {
             return res.redirect('/auth/register');
         }
 
-        // 1. Nhờ Firebase tạo tài khoản (Tự động kiểm tra trùng email & pass > 6 ký tự)
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            req.flash('error_msg', 'Email này đã được sử dụng!');
+            return res.redirect('/auth/register');
+        }
 
-        // 2. Tạo avatar mặc định cho user
         const avatarPath = getDefaultAvatar(name);
 
-        // 3. Lưu thông tin phụ (Tên + Avatar) vào MongoDB
         const newUser = new User({ 
             name, 
             email, 
-            password: 'FIREBASE_AUTH', // Không cần lưu mật khẩu thật nữa
-            avatar: avatarPath // Thêm avatar mặc định
+            password, 
+            avatar: avatarPath 
         });
         await newUser.save(); 
 
         req.flash('success_msg', 'Đăng ký thành công! Hãy đăng nhập ngay 🐻');
         res.redirect('/auth/login');
     } catch (error) {
-        console.error("Lỗi Firebase Đăng ký:", error.code);
-        // Bắt lỗi tiếng Anh của Firebase và dịch sang tiếng Việt cho người dùng
-        if (error.code === 'auth/email-already-in-use') {
-            req.flash('error_msg', 'Email này đã được sử dụng!');
-        } else if (error.code === 'auth/weak-password') {
-            req.flash('error_msg', 'Mật khẩu quá yếu! Vui lòng nhập ít nhất 6 ký tự.');
-        } else {
-            req.flash('error_msg', 'Có lỗi xảy ra, vui lòng thử lại.');
-        }
+        console.error("Lỗi Đăng ký:", error);
+        req.flash('error_msg', 'Có lỗi xảy ra, vui lòng thử lại.');
         res.redirect('/auth/register');
     }
 };
 
 // ==========================================
-// ĐĂNG NHẬP BẰNG FIREBASE
+// ĐĂNG NHẬP
 // ==========================================
 exports.postLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // 1. Kiểm tra đăng nhập với Firebase
-        await signInWithEmailAndPassword(auth, email, password);
-
-        // 2. Lấy thông tin người dùng từ MongoDB (để lấy Tên và Avatar)
         const user = await User.findOne({ email });
+        if (!user || !(await user.comparePassword(password))) {
+            req.flash('error_msg', 'Email hoặc mật khẩu không chính xác!');
+            return res.redirect('/auth/login');
+        }
 
-        // 3. Lưu session (thêm avatar vào session)
-        req.session.user = {
-            _id: user ? user._id : null,
-            name: user ? user.name : 'Người dùng ẩn danh',
-            email: email,
-            avatar: user ? user.avatar : null // Thêm avatar vào session
+        if (user.isTwoFactorEnabled) {
+            req.session.tempUser = { _id: user._id };
+            return res.redirect('/auth/verify-2fa');
+        }
+
+        const userAgent = req.headers['user-agent'] || '';
+        let device = userAgent.includes('Windows') ? 'Chrome / Windows' : 'Thiết bị lạ';
+
+        user.lastLogin = {
+            time: Date.now(),
+            device: device,
+            ip: req.ip
         };
+        await user.save();
 
+        req.session.user = user.toObject();
         res.redirect('/diaries/home');
     } catch (error) {
-        console.error("Lỗi Firebase Đăng nhập:", error.code);
-        req.flash('error_msg', 'Email hoặc mật khẩu không chính xác!');
+        console.error("Lỗi Đăng nhập:", error);
+        req.flash('error_msg', 'Có lỗi xảy ra!');
         res.redirect('/auth/login');
+    }
+};
+
+// ==========================================
+// XÁC THỰC 2FA KHI ĐĂNG NHẬP
+// ==========================================
+exports.postVerify2FA = async (req, res) => {
+    try {
+        const { token } = req.body;
+        const tempUser = req.session.tempUser;
+
+        if (!tempUser) return res.redirect('/auth/login');
+
+        const user = await User.findById(tempUser._id);
+        
+        const verified = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: token,
+            window: 1 
+        });
+
+        if (verified) {
+            user.lastLogin = {
+                time: Date.now(),
+                device: 'Chrome / Windows',
+                ip: req.ip
+            };
+            await user.save();
+
+            req.session.user = user.toObject();
+            delete req.session.tempUser;
+            res.redirect('/diaries/home');
+        } else {
+            req.flash('error_msg', 'Mã xác thực không chính xác!');
+            res.redirect('/auth/verify-2fa');
+        }
+    } catch (error) {
+        console.error("Lỗi Verify 2FA:", error);
+        res.redirect('/auth/login');
+    }
+};
+
+// ==========================================
+// THIẾT LẬP 2FA
+// ==========================================
+exports.getSetup2FA = async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user._id);
+        const secret = speakeasy.generateSecret({
+            name: `BearDiary (${user.email})`,
+            issuer: 'BearDiary'
+        });
+
+        const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+        req.session.tempSecret = secret.base32;
+
+        res.render('users/setup-2fa', { 
+            title: 'Cài đặt 2FA - Bear Diary', 
+            qrCodeUrl, 
+            layout: false 
+        });
+    } catch (error) {
+        console.error("Lỗi Setup 2FA:", error);
+        res.redirect('/diaries/profile');
+    }
+};
+
+exports.postEnable2FA = async (req, res) => {
+    try {
+        const { token } = req.body;
+        const secret = req.session.tempSecret;
+        const verified = speakeasy.totp.verify({ secret, encoding: 'base32', token, window: 1 });
+
+        if (verified) {
+            const user = await User.findByIdAndUpdate(req.session.user._id, {
+                twoFactorSecret: secret,
+                isTwoFactorEnabled: true
+            }, { new: true });
+            
+            req.session.user = user.toObject();
+            delete req.session.tempSecret;
+            req.flash('success_msg', 'Đã bật xác thực 2 lớp thành công! 🔐');
+            res.redirect('/diaries/profile');
+        } else {
+            req.flash('error_msg', 'Mã xác nhận không khớp, hãy thử lại.');
+            res.redirect('/auth/setup-2fa');
+        }
+    } catch (error) {
+        console.error("Lỗi Enable 2FA:", error);
+        res.redirect('/diaries/profile');
+    }
+};
+
+// ==========================================
+// TẮT 2FA (ĐÃ SỬA - CÓ LOG)
+// ==========================================
+exports.postDisable2FA = async (req, res) => {
+    try {
+        console.log('🔐 Disable 2FA called for user:', req.session.user._id);
+        const user = await User.findByIdAndUpdate(req.session.user._id, {
+            isTwoFactorEnabled: false,
+            twoFactorSecret: null 
+        }, { new: true });
+        
+        if (!user) {
+            console.log('❌ User not found');
+            return res.status(404).json({ ok: false, error: 'User not found' });
+        }
+        
+        req.session.user = user.toObject();
+        console.log('✅ 2FA disabled successfully');
+        
+        return res.json({ 
+            ok: true, 
+            message: 'Đã tắt bảo mật 2 lớp thành công',
+            isTwoFactorEnabled: false,
+            statusText: 'Chưa kích hoạt'
+        });
+    } catch (error) {
+        console.error("❌ Lỗi Disable 2FA:", error);
+        return res.status(500).json({ ok: false, error: error.message });
+    }
+};
+
+// ==========================================
+// QUÊN MẬT KHẨU
+// ==========================================
+exports.postForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            req.flash('error_msg', 'Không tìm thấy tài khoản với email này.');
+            return res.redirect('/auth/forgot-password');
+        }
+
+        const token = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; 
+        await user.save();
+
+        console.log(`Link reset pass: http://${req.headers.host}/auth/reset-password/${token}`);
+
+        req.flash('success_msg', 'Yêu cầu đã được ghi nhận. Hãy kiểm tra Terminal để lấy link reset.');
+        res.redirect('/auth/login');
+    } catch (error) {
+        console.error("Lỗi Forgot Password:", error);
+        res.redirect('/auth/forgot-password');
+    }
+};
+
+exports.getResetPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: req.params.token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            req.flash('error_msg', 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.');
+            return res.redirect('/auth/forgot-password');
+        }
+
+        res.render('users/reset-password', { title: 'Đặt lại mật khẩu', token: req.params.token, layout: false });
+    } catch (error) {
+        console.error("Lỗi Get Reset Password:", error);
+        res.redirect('/auth/forgot-password');
+    }
+};
+
+exports.postResetPassword = async (req, res) => {
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: req.params.token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            req.flash('error_msg', 'Có lỗi xảy ra, vui lòng thử lại.');
+            return res.redirect('/auth/forgot-password');
+        }
+
+        if (req.body.password !== req.body.confirmPassword) {
+            req.flash('error_msg', 'Mật khẩu xác nhận không khớp.');
+            return res.redirect('back');
+        }
+
+        user.password = req.body.password; 
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        req.flash('success_msg', 'Mật khẩu đã được cập nhật. Hãy đăng nhập lại.');
+        res.redirect('/auth/login');
+    } catch (error) {
+        console.error("Lỗi Post Reset Password:", error);
+        res.redirect('/auth/forgot-password');
     }
 };
 
@@ -133,91 +337,30 @@ exports.postLogin = async (req, res) => {
 // ĐĂNG XUẤT
 // ==========================================
 exports.logout = (req, res) => {
-    // Đăng xuất khỏi Firebase trước
-    signOut(auth).then(() => {
-        // Sau đó hủy Session của hệ thống
-        req.session.destroy((err) => {
-            if (err) console.error(err);
-            res.redirect('/auth/login');
-        });
-    }).catch((error) => {
-        console.error(error);
-        res.redirect('/diaries/home');
+    req.session.destroy((err) => {
+        if (err) console.error(err);
+        res.redirect('/auth/login');
     });
 };
 
 // ==========================================
-// QUÊN MẬT KHẨU (GỬI MAIL TỰ ĐỘNG)
-// ==========================================
-exports.getForgotPassword = (req, res) => {
-    res.render('users/forgot-password', { title: 'Quên mật khẩu - Moodiary', layout: false });
-};
-
-exports.postForgotPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-        
-        // Chỉ 1 dòng code duy nhất: Ra lệnh cho Firebase gửi mail
-        await sendPasswordResetEmail(auth, email);
-
-        req.flash('success_msg', 'Đã gửi link khôi phục! Vui lòng kiểm tra hộp thư của bạn.');
-        res.redirect('/auth/login');
-    } catch (error) {
-        console.error("Lỗi Firebase Gửi Mail:", error.code);
-        req.flash('error_msg', 'Không tìm thấy tài khoản với email này hoặc có lỗi xảy ra.');
-        res.redirect('/auth/forgot-password');
-    }
-};
-
-// ==========================================
-// THÊM MỚI: CẬP NHẬT AVATAR
+// CẬP NHẬT AVATAR
 // ==========================================
 exports.updateAvatar = async (req, res) => {
     try {
         const userId = req.session.user._id;
-        
-        if (!req.file) {
-            return res.status(400).json({ ok: false, error: 'Không tìm thấy file ảnh' });
-        }
+        if (!req.file) return res.status(400).json({ ok: false, error: 'Không tìm thấy file ảnh' });
 
-        // Lấy thông tin user cũ
         const oldUser = await User.findById(userId);
-        
-        // Xóa avatar cũ nếu có
-        if (oldUser && oldUser.avatar) {
-            deleteOldAvatar(oldUser.avatar);
-        }
+        if (oldUser && oldUser.avatar) deleteOldAvatar(oldUser.avatar);
 
-        // Lưu avatar mới
         const avatarPath = '/uploads/' + req.file.filename;
-        
-        // Cập nhật database
-        const updated = await User.findByIdAndUpdate(
-            userId, 
-            { avatar: avatarPath },
-            { new: true }
-        );
+        await User.findByIdAndUpdate(userId, { avatar: avatarPath });
 
-        // Cập nhật session
         req.session.user.avatar = avatarPath;
-
-        // Trả về response cho AJAX
-        if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.json({ 
-                ok: true, 
-                avatar: avatarPath,
-                message: 'Cập nhật avatar thành công!'
-            });
-        }
-
-        req.flash('success_msg', 'Cập nhật avatar thành công!');
-        res.redirect('/diaries/profile');
+        return res.json({ ok: true, avatar: avatarPath, message: 'Cập nhật avatar thành công!' });
     } catch (error) {
         console.error('Lỗi updateAvatar:', error);
-        if (req.xhr || req.headers.accept?.includes('application/json')) {
-            return res.status(500).json({ ok: false, error: 'Có lỗi xảy ra!' });
-        }
-        req.flash('error_msg', 'Có lỗi xảy ra!');
-        res.redirect('/diaries/profile');
+        return res.status(500).json({ ok: false, error: 'Lỗi server' });
     }
 };

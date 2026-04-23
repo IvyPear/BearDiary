@@ -306,20 +306,21 @@ exports.getProfile = async (req, res) => {
         const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
         const avatar = user.avatar || (user.name ? user.name.charAt(0).toUpperCase() : 'U');
 
-        res.render('diaries/profile', {
-            title: 'Hồ sơ - Moodiary',
-            user: {
-                name: user.name,
-                email: user.email,
-                avatar,
-                memberSince,
-                dayStreak,
-                totalEntries,
-                daysJournaled,
-                starredEntries,
-                isTwoFactorEnabled: user.isTwoFactorEnabled // Thêm trường này để đồng bộ trạng thái 2FA
-            }
-        });
+            res.render('diaries/profile', {
+                title: 'Hồ sơ - Moodiary',
+                user: {
+                    name: user.name,
+                    email: user.email,
+                    avatar,
+                    memberSince,
+                    dayStreak,
+                    totalEntries,
+                    daysJournaled,
+                    starredEntries,
+                    isTwoFactorEnabled: user.isTwoFactorEnabled,
+                    passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null
+                }
+            });
     } catch (error) {
         console.error(error);
         res.redirect('/diaries/home');

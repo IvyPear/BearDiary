@@ -1,5 +1,6 @@
 <% title = 'Cá nhân - Bear Diary'; %>
 <style>
+    /* GIỮ NGUYÊN TOÀN BỘ CSS CŨ CỦA VIỆT */
     .profile-card-main {
       background: white;
       border-radius: 2.5rem;
@@ -133,6 +134,13 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         animation: slideInRight 0.3s ease;
     }
+
+    /* HIỆU ỨNG CHO MODAL MỚI */
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .modal-animate { animation: modalFadeIn 0.2s ease-out; }
 </style>
 
 <div class="flex items-center gap-4 mb-8">
@@ -263,6 +271,36 @@
     </div>
 </div>
 
+<div id="changePasswordModal" class="hidden fixed inset-0 bg-black/50 items-center justify-center z-[100] p-4 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl border border-blue-50 relative modal-animate">
+        <div class="text-center mb-6">
+            <div class="text-4xl mb-3">🔑</div>
+            <h3 class="text-2xl font-black text-[#1E3A8A] dark:text-white">Đổi mật khẩu</h3>
+            <p class="text-slate-400 text-sm font-bold">Nhập thông tin để cập nhật mật khẩu 🐻</p>
+        </div>
+
+        <form action="/auth/change-password" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Mật khẩu hiện tại</label>
+                <input type="password" name="currentPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Mật khẩu mới</label>
+                <input type="password" name="newPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Xác nhận mật khẩu</label>
+                <input type="password" name="confirmNewPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" id="closePwdModal" class="flex-1 py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors">Hủy bỏ</button>
+                <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg transition-all">Lưu 🐻</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
       <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
@@ -298,11 +336,10 @@
         editBtn.addEventListener('click', () => window.location.href = '/diaries/profile/edit');
       }
 
-      // 3. XỬ LÝ NÚT GẠT 2FA (CÓ DEBUG)
+      // 3. XỬ LÝ NÚT GẠT 2FA
       const twoFactorToggle = document.getElementById('2fa-toggle');
       const statusText = document.getElementById('2fa-status-text');
 
-      // Hàm hiển thị thông báo
       window.showNotification = function(message, type = 'info') {
           const oldNotif = document.querySelector('.custom-notification');
           if (oldNotif) oldNotif.remove();
@@ -311,14 +348,12 @@
           notification.className = 'custom-notification';
           if (type === 'success') {
               notification.style.backgroundColor = '#10B981';
-              notification.style.color = 'white';
           } else if (type === 'error') {
               notification.style.backgroundColor = '#EF4444';
-              notification.style.color = 'white';
           } else {
               notification.style.backgroundColor = '#3B82F6';
-              notification.style.color = 'white';
           }
+          notification.style.color = 'white';
           notification.textContent = message;
           document.body.appendChild(notification);
           
@@ -332,12 +367,10 @@
           let isUpdating = false;
           twoFactorToggle.addEventListener('change', async function() {
             if (isUpdating) return;
-            // Nếu bật 2FA
             if (this.checked) {
               window.location.href = '/auth/setup-2fa';
               return;
             }
-            // Nếu tắt 2FA
             const confirmDisable = confirm('Bạn có chắc chắn muốn tắt bảo mật 2 lớp không?');
             if (!confirmDisable) {
               this.checked = true;
@@ -359,18 +392,36 @@
               }
             } catch (error) {
               this.checked = true;
-              window.showNotification('Lỗi kết nối đến server!', 'error');
+              window.showNotification('Lỗi kết nối!', 'error');
             } finally {
               isUpdating = false;
             }
           });
         }
 
-      // 4. Bảo mật
+      // 4. XỬ LÝ MODAL ĐỔI MẬT KHẨU (THAY THẾ ALERT CŨ)
       const pwdBtn = document.getElementById('changePasswordBtn');
-      if (pwdBtn) {
-        pwdBtn.addEventListener('click', () => alert('🔒 Sử dụng luồng Quên mật khẩu nội bộ để bảo mật nhất!'));
+      const pwdModal = document.getElementById('changePasswordModal');
+      const closePwdBtn = document.getElementById('closePwdModal');
+
+      if (pwdBtn && pwdModal) {
+        pwdBtn.addEventListener('click', () => {
+          pwdModal.style.display = 'flex'; // Hiện modal
+        });
       }
+
+      if (closePwdBtn) {
+        closePwdBtn.addEventListener('click', () => {
+          pwdModal.style.display = 'none'; // Đóng modal
+        });
+      }
+
+      // Đóng khi click ra ngoài vùng trắng
+      window.addEventListener('click', (e) => {
+        if (e.target === pwdModal) {
+          pwdModal.style.display = 'none';
+        }
+      });
 
       // 5. Theme picker
       const themePickerBtn = document.getElementById('themePickerBtn');
@@ -387,14 +438,8 @@
           ev.stopPropagation();
           const t = el.getAttribute('data-theme');
           if (t) {
-            const accent = (window.THEME_ACCENTS && window.THEME_ACCENTS[t]) || null;
             localStorage.setItem('moodiary-theme', t);
-            if (accent) localStorage.setItem('moodiary-accent', accent);
-            if (localStorage.getItem('moodiary-is-dark') === '1') {
-              if (accent) document.documentElement.style.setProperty('--accent', accent);
-            } else if (window.setTheme) {
-              window.setTheme(t);
-            }
+            if (window.setTheme) window.setTheme(t);
           }
           themePickerModal.classList.add('hidden');
         });

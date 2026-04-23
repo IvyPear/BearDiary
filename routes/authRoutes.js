@@ -5,7 +5,10 @@ const { forwardAuthenticated, ensureAuthenticated } = require('../middleware/aut
 
 // Debug: Kiểm tra xem file route đã được load
 console.log('Auth routes loaded');
+// Thêm vào authRoutes.js
 
+//change password route (bảo vệ bằng ensureAuthenticated)
+router.post('/change-password', ensureAuthenticated, authController.postChangePassword);
 // ==========================================
 // QUÊN VÀ ĐẶT LẠI MẬT KHẨU (NỘI BỘ)
 // ==========================================

@@ -364,3 +364,39 @@ exports.updateAvatar = async (req, res) => {
         return res.status(500).json({ ok: false, error: 'Lỗi server' });
     }
 };
+// ==========================================
+// THAY ĐỔI MẬT KHẨU (KHI ĐANG ĐĂNG NHẬP)
+// ==========================================
+exports.postChangePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
+        
+        // 1. Tìm người dùng đang đăng nhập bằng ID từ session
+        const user = await User.findById(req.session.user._id);
+
+        // 2. Kiểm tra mật khẩu hiện tại (dùng hàm comparePassword trong Model User.js)
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            req.flash('error_msg', 'Mật khẩu hiện tại không chính xác!');
+            return res.redirect('/diaries/profile');
+        }
+
+        // 3. Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
+        if (newPassword !== confirmNewPassword) {
+            req.flash('error_msg', 'Mật khẩu mới xác nhận không khớp!');
+            return res.redirect('/diaries/profile');
+        }
+
+        // 4. Gán mật khẩu mới (Lưu ý: Middleware pre('save') trong User.js sẽ tự băm mật khẩu này)
+        user.password = newPassword;
+        await user.save();
+        // Cập nhật lại session user.passwordChangedAt để hiển thị đúng trên profile
+        req.session.user.passwordChangedAt = user.passwordChangedAt;
+        req.flash('success_msg', 'Đã thay đổi mật khẩu thành công! 🐻');
+        res.redirect('/diaries/profile');
+    } catch (error) {
+        console.error("Lỗi Change Password:", error);
+        req.flash('error_msg', 'Có lỗi xảy ra, vui lòng thử lại.');
+        res.redirect('/diaries/profile');
+    }
+};

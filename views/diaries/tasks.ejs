@@ -1,685 +1,810 @@
-<% title='Công việc - Bear Diary'; %>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<div class="task-page" id="taskPage">
 
-<style>
-:root {
-  --t-bg: #F8FAFF;
-  --t-card: #ffffff;
-  --t-border: #E2E8F0;
-  --t-text: #334155;
-  --t-muted: #94A3B8;
-  --t-accent: #5A9BD4;
-  --t-accent2: #7EB8E8;
-  --t-accent-rgb: 90,155,212;
-  --t-success: #10B981;
-  --t-warn: #F59E0B;
-  --t-danger: #EF4444;
-}
-
-[data-theme="dark"] {
-  --t-bg: #0F172A;
-  --t-card: #1E293B;
-  --t-border: #334155;
-  --t-text: #F8FAFC;
-  --t-muted: #94A3B8;
-  --t-accent: #60A5FA;
-  --t-accent2: #93C5FD;
-  --t-accent-rgb: 96,165,250;
-  --t-success: #34D399;
-  --t-warn: #FBBF24;
-  --t-danger: #F87171;
-}
-
-/* Color themes */
-[data-theme="pink"] { --t-accent:#F472B6; --t-accent2:#FBCFE8; }
-[data-theme="green"] { --t-accent:#34D399; --t-accent2:#A7F3D0; }
-[data-theme="purple"] { --t-accent:#A78BFA; --t-accent2:#DDD6FE; }
-[data-theme="yellow"] { --t-accent:#FBBF24; --t-accent2:#FDE68A; }
-
-.task-page { background:var(--t-bg); min-height:100vh; color:var(--t-text); }
-.task-container { max-width:1280px; margin:0 auto; padding:1rem; }
-
-.banner-gradient {
-  background: linear-gradient(135deg, var(--t-accent), var(--t-accent2));
-  border-radius: 2rem;
-  padding: 1.75rem 1.5rem;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-.banner-stat {
-  background: rgba(255,255,255,0.22);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 1rem;
-  padding: 0.5rem 0.75rem;
-  text-align: center;
-  min-width: 78px;
-}
-.banner-stat p:first-child { font-size: 0.75rem; opacity: 0.9; }
-.banner-stat p:last-child { font-size: 1.4rem; font-weight: 800; }
-
-.card {
-  background: var(--t-card);
-  border-radius: 1.75rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  border: 1px solid var(--t-border);
-  overflow: hidden;
-}
-.card-header {
-  padding: 1.1rem 1.5rem;
-  border-bottom: 1px solid var(--t-border);
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-.card-body { padding: 1.25rem; }
-
-.filter-bar { display:flex; flex-wrap:wrap; gap:8px; }
-.filter-chip {
-  padding: 0.45rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  border: 1px solid var(--t-border);
-  background: var(--t-card);
-  color: var(--t-muted);
-  cursor: pointer;
-  transition: all .2s;
-}
-.filter-chip.active {
-  background: var(--t-accent) !important;
-  color: #fff !important;
-  border-color: var(--t-accent) !important;
-}
-
-.task-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.1rem 1.5rem;
-  border-bottom: 1px solid var(--t-border);
-  cursor: pointer;
-  transition: background .2s;
-}
-.task-item:hover { background: rgba(var(--t-accent-rgb), 0.05); }
-.task-item:last-child { border-bottom: none; }
-
-.task-check {
-  width: 26px; height: 26px;
-  border: 2.5px solid var(--t-border);
-  border-radius: 9px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  cursor: pointer;
-  background: var(--t-card);
-  margin-top: 2px;
-}
-.task-check.done { background: var(--t-accent); border-color: var(--t-accent); color: white; }
-.task-check.inprog { background: var(--t-warn); border-color: var(--t-warn); color: white; }
-
-.priority-badge {
-  font-size: 0.73rem;
-  padding: 3px 9px;
-  border-radius: 9999px;
-  font-weight: 700;
-}
-.priority-badge.high { background:#FEE2E2; color:#DC2626; }
-.priority-badge.medium { background:#FEF3C7; color:#D97706; }
-.priority-badge.low { background:#D1FAE5; color:#059669; }
-
-[data-theme="dark"] .priority-badge.high { background:rgba(220,38,38,0.2); color:#FCA5A5; }
-[data-theme="dark"] .priority-badge.medium { background:rgba(217,119,6,0.2); color:#FCD34D; }
-[data-theme="dark"] .priority-badge.low { background:rgba(5,150,105,0.2); color:#6EE7B7; }
-
-.deadline-pill {
-  font-size: 0.75rem;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.deadline-pill.ok { background:#ECFDF5; color:#059669; }
-.deadline-pill.warn { background:#FFFBEB; color:#D97706; }
-.deadline-pill.over { background:#FEF2F2; color:#DC2626; }
-
-[data-theme="dark"] .deadline-pill.ok { background:rgba(5,150,105,0.15); color:#6EE7B7; }
-[data-theme="dark"] .deadline-pill.warn { background:rgba(217,119,6,0.15); color:#FCD34D; }
-[data-theme="dark"] .deadline-pill.over { background:rgba(220,38,38,0.15); color:#FCA5A5; }
-
-.progress-bar {
-  height: 6px;
-  background: var(--t-border);
-  border-radius: 9999px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--t-accent);
-  border-radius: 9999px;
-  transition: width .4s;
-}
-
-.view-btn {
-  padding: 0.5rem 1.1rem;
-  border-radius: 9999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid var(--t-border);
-  background: var(--t-card);
-  color: var(--t-muted);
-  cursor: pointer;
-  transition: all .2s;
-}
-.view-btn.active {
-  background: var(--t-accent) !important;
-  color: #fff !important;
-  border-color: var(--t-accent) !important;
-}
-
-.kanban-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.25rem;
-}
-.kanban-col {
-  background: var(--t-bg);
-  border: 1px solid var(--t-border);
-  border-radius: 1.5rem;
-  padding: 1rem;
-}
-
-.fab-btn {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--t-accent), var(--t-accent2));
-  color: white;
-  font-size: 1.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
-  z-index: 100;
-  transition: transform .2s;
-}
-.fab-btn:hover { transform: scale(1.08); }
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  z-index: 200;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.modal-overlay.show { display: flex; }
-.modal-content {
-  background: var(--t-card);
-  border-radius: 1.75rem;
-  width: 100%;
-  max-width: 520px;
-  max-height: 92vh;
-  overflow-y: auto;
-  margin: 1rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
-</style>
-
-<div class="task-page">
-<div class="task-container">
-
-  <!-- BANNER -->
-  <div class="banner-gradient">
-    <div class="flex justify-between items-center">
+  <div class="tk-banner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
       <div>
-        <p class="text-white/80 text-sm" id="tkDateLabel"></p>
-        <h2 class="text-2xl md:text-3xl font-extrabold mt-1">Công việc của tôi 🐻</h2>
-        <p class="text-white/75 text-sm mt-1">Quản lý công việc dễ dàng mỗi ngày</p>
+        <h2><i class="fa-solid fa-list-check" style="opacity:.9;margin-right:8px"></i>Công việc của tôi</h2>
+        <p id="tkDateLabel">Đang tải...</p>
       </div>
-      <button onclick="tkAddTodayQuick()" class="bg-white/25 hover:bg-white/35 backdrop-blur px-5 py-2.5 rounded-2xl text-sm font-semibold transition flex items-center gap-2">
-        <i class="fas fa-plus"></i> Thêm hôm nay
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="tk-view-btn active" id="btnListView" onclick="tkSetView('list')" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.4);color:white">
+          <i class="fa-solid fa-list"></i>
+        </button>
+        <button class="tk-view-btn" id="btnKanbanView" onclick="tkSetView('kanban')" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:white;opacity:.7">
+          <i class="fa-solid fa-table-columns"></i>
+        </button>
+      </div>
     </div>
-
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
-      <div class="banner-stat"><p>Hôm nay</p><p id="statToday" class="text-3xl">0</p></div>
-      <div class="banner-stat"><p>Hoàn thành tuần</p><p id="statDone" class="text-3xl">0</p></div>
-      <div class="banner-stat"><p>Chuyển tiếp</p><p id="statCarry" class="text-3xl">0</p></div>
-      <div class="banner-stat"><p>Tỉ lệ</p><p id="statPct" class="text-3xl">0%</p></div>
+   
+    <div class="tk-stats-row">
+      <div class="tk-stat">
+        <div class="tk-stat-num" id="statToday">0</div>
+        <div class="tk-stat-lbl">Hôm nay</div>
+      </div>
+      <div class="tk-stat">
+        <div class="tk-stat-num" id="statDone">0</div>
+        <div class="tk-stat-lbl">Xong tuần</div>
+      </div>
+      <div class="tk-stat">
+        <div class="tk-stat-num" id="statCarry">0</div>
+        <div class="tk-stat-lbl">Chuyển tiếp</div>
+      </div>
+      <div class="tk-stat">
+        <div class="tk-stat-num" id="statPct">0%</div>
+        <div class="tk-stat-lbl">Tỉ lệ xong</div>
+      </div>
     </div>
   </div>
 
-  <!-- FILTER -->
-  <div class="card mb-6">
-    <div class="card-body">
-      <div class="flex flex-wrap gap-3 justify-between items-center">
-        <div class="filter-bar" id="tkFilterBar">
-          <button class="filter-chip active" data-filter="all">Tất cả</button>
-          <button class="filter-chip" data-filter="today">Hôm nay</button>
-          <button class="filter-chip" data-filter="week">Tuần này</button>
-          <button class="filter-chip" data-filter="month">Tháng này</button>
-          <button class="filter-chip" data-filter="starred">Quan trọng</button>
+  <div class="tk-section">
+
+    <div class="tk-card" style="margin-bottom:14px;">
+      <div class="tk-card-body" style="padding:10px 14px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <div class="tk-filter-bar" id="tkFilterBar">
+            <button class="tk-chip active" data-filter="all">Tất cả</button>
+            <button class="tk-chip" data-filter="today">Hôm nay</button>
+            <button class="tk-chip" data-filter="week">Tuần này</button>
+            <button class="tk-chip" data-filter="cat-study">Học tập</button>
+            <button class="tk-chip" data-filter="cat-code">Code</button>
+            <button class="tk-chip" data-filter="cat-team">Nhóm</button>
+            <button class="tk-chip" data-filter="cat-personal">Cá nhân</button>
+            <button class="tk-chip" data-filter="pri-high">🔴 Cao</button>
+            <button class="tk-chip" data-filter="pri-med">🟡 Trung</button>
+            <button class="tk-chip" data-filter="overdue">⚠ Quá hạn</button>
+          </div>
+          <div class="tk-date-filter">
+            <input type="date" id="tkDateFrom" onchange="tkRender()">
+            <span style="font-size:11px;color:var(--t-muted);font-weight:700">→</span>
+            <input type="date" id="tkDateTo" onchange="tkRender()">
+          </div>
         </div>
-        <div class="flex gap-2">
-          <select id="tkMonthSelect" onchange="tkRender()" class="filter-chip">
-            <option value="0">Tháng này</option>
-            <option value="-1">Tháng trước</option>
-          </select>
-          <select id="tkYearSelect" onchange="tkRender()" class="filter-chip">
-            <option value="2025">2025</option>
-            <option value="2026" selected>2026</option>
-            <option value="2027">2027</option>
-          </select>
-        </div>
       </div>
     </div>
-  </div>
 
-  <!-- VIEW SWITCH -->
-  <div class="flex gap-3 mb-5">
-    <button id="btnListView" onclick="tkSetView('list')" class="view-btn active">📋 Danh sách</button>
-    <button id="btnKanbanView" onclick="tkSetView('kanban')" class="view-btn">📊 Kanban</button>
-  </div>
-
-  <!-- LIST VIEW -->
-  <div id="tkListView">
-    <!-- Hôm nay -->
-    <div class="card mb-6">
-      <div class="card-header">
-        <i class="fas fa-sun text-accent"></i>
-        <span>Hôm nay • <span id="tkTodayDateLabel"></span></span>
-        <span class="ml-auto text-sm text-muted" id="tkTodayProgress"></span>
-      </div>
-      <div class="card-body pt-2">
-        <div class="progress-bar mb-4"><div class="progress-fill" id="tkTodayBar" style="width:0%"></div></div>
+    <div id="tkListView">
+      <div class="tk-card" id="tkTodayCard">
+        <div class="tk-card-header">
+          <span class="tk-card-title"><i class="fa-solid fa-calendar-day" style="color:var(--t-accent)"></i> Hôm nay · <span id="tkTodayDateLabel"></span></span>
+          <span style="font-size:11px;color:var(--t-muted);font-weight:700" id="tkTodayProgress"></span>
+        </div>
+        <div id="tkCarryNote" style="display:none" class="tk-carry">
+          <i class="fa-solid fa-arrow-rotate-left" style="font-size:10px"></i>
+          <span id="tkCarryText"></span>
+        </div>
+        <div style="padding:6px 16px 0;" id="tkTodayBarWrap">
+          <div class="tk-pbar"><div class="tk-pbar-fill" id="tkTodayBar" style="width:0%"></div></div>
+          <div class="tk-pbar-pct" id="tkTodayPct"></div>
+        </div>
         <div id="tkTodayList"></div>
       </div>
-    </div>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      <!-- Sắp tới -->
-      <div class="card">
-        <div class="card-header"><i class="fas fa-clock text-accent"></i> Sắp tới</div>
-        <div class="card-body" id="tkUpcomingList"></div>
-      </div>
-
-      <!-- Đã hoàn thành -->
-      <div class="card">
-        <div class="card-header">
-          <span><i class="fas fa-check-circle text-success"></i> Đã hoàn thành</span>
-          <button onclick="tkToggleDoneList()" id="tkDoneToggle" class="ml-auto text-accent text-sm font-medium">Hiện</button>
+      <div class="tk-card" id="tkUpcomingCard" style="margin-top:14px;">
+        <div class="tk-card-header">
+          <span class="tk-card-title"><i class="fa-solid fa-calendar-check" style="color:var(--t-accent)"></i> Sắp tới</span>
         </div>
-        <div class="card-body" id="tkDoneList" style="display:none"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- KANBAN VIEW -->
-  <div id="tkKanbanView" style="display:none">
-    <div class="kanban-board" id="tkKanbanBoard"></div>
-  </div>
-
-  <!-- BÁO CÁO TUẦN -->
-  <div class="card mt-8">
-    <div class="card-header">
-      <i class="fas fa-chart-bar text-accent"></i>
-      <span>Báo cáo tuần</span>
-      <select id="tkWeekSelect" onchange="tkRenderReport()" class="filter-chip ml-auto">
-        <option value="0">Tuần này</option>
-        <option value="-1">Tuần trước</option>
-      </select>
-    </div>
-    <div class="card-body" id="tkReportBody"></div>
-  </div>
-
-</div>
-</div>
-
-<!-- FAB -->
-<button class="fab-btn" onclick="tkOpenModal()"><i class="fas fa-plus"></i></button>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="tkOverlay" onclick="if(event.target===this)tkCloseModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="card-header border-b-0">
-      <span id="tkModalTitle" class="text-xl">Thêm công việc</span>
-      <button onclick="tkCloseModal()" class="ml-auto text-3xl leading-none text-muted">×</button>
-    </div>
-    <form id="tkForm" onsubmit="tkSaveTask(event)" class="card-body space-y-6">
-      <input type="hidden" id="tkEditId">
-
-      <div>
-        <label class="block text-xs font-bold text-muted mb-1.5">TÊN CÔNG VIỆC *</label>
-        <input type="text" id="tkName" required class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl focus:outline-none focus:border-[var(--t-accent)]" placeholder="Nhập tên công việc...">
+        <div id="tkUpcomingList"></div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-muted mb-1.5">DANH MỤC</label>
-          <select id="tkCat" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
+      <div class="tk-card" style="margin-top:14px;">
+        <div class="tk-card-header">
+          <span class="tk-card-title"><i class="fa-solid fa-circle-check" style="color:var(--t-success)"></i> Đã hoàn thành</span>
+          <button class="tk-chip" onclick="tkToggleDoneList()" id="tkDoneToggle" style="font-size:10px;">Hiện</button>
+        </div>
+        <div id="tkDoneList" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div id="tkKanbanView" style="display:none;">
+      <div class="tk-card">
+        <div class="tk-card-body">
+          <div class="tk-kanban" id="tkKanbanBoard"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tk-card" style="margin-top:14px;">
+      <div class="tk-card-header">
+        <span class="tk-card-title"><i class="fa-solid fa-chart-bar" style="color:var(--t-accent)"></i> Báo cáo tuần</span>
+        
+        <select class="tk-view-btn" id="tkWeekSelect" onchange="tkRenderReport()" style="background:var(--t-card);color:var(--t-text);border-color:var(--t-border);padding:4px 8px;border-radius:8px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;">
+          <option value="0">Tuần này</option>
+          <option value="-1">Tuần trước</option>
+          <option value="-2">2 tuần trước</option>
+          <option value="-3">3 tuần trước</option>
+        </select>
+      </div>
+      <div class="tk-card-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;" id="tkReportStats">
+        </div>
+        <div class="tk-report-week" id="tkWeekChart"></div>
+        <div style="margin-top:14px;" id="tkCatBreakdown"></div>
+      </div>
+    </div>
+
+  </div></div><button class="tk-fab" onclick="tkOpenModal()" title="Thêm công việc">
+  <i class="fa-solid fa-plus"></i>
+</button>
+
+<div class="tk-overlay" id="tkOverlay" onclick="tkOverlayClick(event)">
+  <div class="tk-modal" id="tkModal">
+    <div class="tk-modal-title">
+      <i class="fa-solid fa-pen-to-square" style="color:var(--t-accent)"></i>
+      <span id="tkModalTitle">Thêm công việc</span>
+      <button class="tk-close" onclick="tkCloseModal()">✕</button>
+    </div>
+
+    <form id="tkForm" onsubmit="tkSaveTask(event)">
+      <input type="hidden" id="tkEditId" value="">
+
+      <div class="tk-form-row">
+        <label class="tk-label">Tên công việc *</label>
+        <input class="tk-input" type="text" id="tkName" required placeholder="Nhập tên công việc..." maxlength="120">
+      </div>
+
+      <div class="tk-form-row">
+        <label class="tk-label">Mô tả (tuỳ chọn)</label>
+        <textarea class="tk-textarea" id="tkDesc" placeholder="Ghi chú chi tiết..." rows="2"></textarea>
+      </div>
+
+      <div class="tk-form-grid">
+        <div class="tk-form-row">
+          <label class="tk-label">Danh mục</label>
+          <select class="tk-select" id="tkCat">
             <option value="study">📚 Học tập</option>
             <option value="code">💻 Code</option>
+            <option value="team">👥 Nhóm</option>
+            <option value="school">🏫 Trường</option>
             <option value="personal">🙂 Cá nhân</option>
             <option value="other">📌 Khác</option>
           </select>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-muted mb-1.5">DEADLINE</label>
-          <input type="date" id="tkDeadline" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-bold text-muted mb-1.5">TRẠNG THÁI</label>
-          <select id="tkStatus" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
-            <option value="todo">Cần làm</option>
-            <option value="inprog">Đang làm</option>
-            <option value="done">Hoàn thành</option>
+        <div class="tk-form-row">
+          <label class="tk-label">Ưu tiên</label>
+          <select class="tk-select" id="tkPri">
+            <option value="high">🔴 Cao</option>
+            <option value="med" selected>🟡 Trung bình</option>
+            <option value="low">🟢 Thấp</option>
           </select>
         </div>
-        <div>
-          <label class="block text-xs font-bold text-muted mb-1.5">ƯU TIÊN</label>
-          <div class="priority-select flex gap-2">
-            <div class="priority-option low flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer" data-priority="low">Thấp</div>
-            <div class="priority-option medium flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer" data-priority="medium">Trung bình</div>
-            <div class="priority-option high flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer selected" data-priority="high">Cao</div>
-          </div>
-          <input type="hidden" id="taskPriority" value="high">
+      </div>
+
+      <div class="tk-form-grid">
+        <div class="tk-form-row">
+          <label class="tk-label">Trạng thái</label>
+          <select class="tk-select" id="tkStatus">
+            <option value="todo">📋 Cần làm</option>
+            <option value="inprog">⚡ Đang làm</option>
+            <option value="done">✅ Hoàn thành</option>
+          </select>
+        </div>
+        <div class="tk-form-row">
+          <label class="tk-label">Deadline</label>
+          <input class="tk-input" type="date" id="tkDeadline">
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs font-bold text-muted mb-1.5">TIẾN TRÌNH: <span id="tkProgLabel" class="text-accent">0%</span></label>
-        <input type="range" id="tkProgress" min="0" max="100" step="5" value="0" class="w-full accent-[var(--t-accent)]">
+      <div class="tk-form-row">
+        <label class="tk-label">Tiến trình: <span id="tkProgLabel">0%</span></label>
+        <input type="range" class="tk-range" id="tkProgress" min="0" max="100" step="5" value="0"
+               oninput="document.getElementById('tkProgLabel').textContent=this.value+'%'">
+        <div class="tk-pbar" style="margin-top:6px;">
+          <div class="tk-pbar-fill" id="tkProgBar" style="width:0%;"></div>
+        </div>
       </div>
 
-      <button type="submit" class="w-full py-4 bg-gradient-to-r from-[var(--t-accent)] to-[var(--t-accent2)] text-white font-bold rounded-2xl text-lg">💾 Lưu công việc</button>
+      <div class="tk-form-row">
+        <label class="tk-label">Ảnh đính kèm (tuỳ chọn)</label>
+        <input type="file" id="tkImgInput" accept="image/*" multiple
+               style="display:none" onchange="tkHandleImages(event)">
+        <button type="button"
+                onclick="document.getElementById('tkImgInput').click()"
+                style="padding:7px 14px;border:1.5px dashed var(--t-border);border-radius:10px;background:var(--t-bg);color:var(--t-muted);font-size:11px;font-weight:700;cursor:pointer;width:100%;">
+          <i class="fa-solid fa-camera" style="margin-right:6px"></i>Chọn ảnh
+        </button>
+        <div class="tk-img-preview" id="tkImgPreview"></div>
+      </div>
+
+      <button type="submit" class="tk-btn-primary" id="tkSubmitBtn">
+        <i class="fa-solid fa-floppy-disk" style="margin-right:6px"></i>Lưu công việc
+      </button>
     </form>
   </div>
 </div>
 
+<div class="tk-overlay" id="tkDetailOverlay" onclick="tkDetailOverlayClick(event)">
+  <div class="tk-modal" id="tkDetailModal">
+    <div class="tk-modal-title">
+      <i class="fa-solid fa-circle-info" style="color:var(--t-accent)"></i>
+      <span id="tkDetailTitle">Chi tiết công việc</span>
+      <button class="tk-close" onclick="tkCloseDetail()">✕</button>
+    </div>
+    <div id="tkDetailBody"></div>
+  </div>
+</div>
+
 <script>
-// ==================== BEAR DIARY TASK MANAGER - CLEAN VERSION ====================
-const STORE_KEY = 'bd_tasks_v3';
-let tasks = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
-let activeFilter = 'all';
-let currentView = 'list';
-let showDone = false;
+(function(){
+  /* ── STORAGE ── */
+  var STORE_KEY = 'bd_tasks_v3';
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||[]; }catch(e){ return []; } }
+  function save(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
 
-const saveTasks = () => localStorage.setItem(STORE_KEY, JSON.stringify(tasks));
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-const todayStr = () => new Date().toISOString().slice(0,10);
+  /* ── STATE ── */
+  var tasks = load();
+  var activeFilter = 'all';
+  var currentView = 'list';
+  var editingImages = []; // base64 array
+  var showDone = false;
 
-const startOfWeek = (offset = 0) => {
-  const d = new Date();
-  d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
-  d.setHours(0,0,0,0);
-  return d;
-};
-const endOfWeek = (offset = 0) => {
-  const d = startOfWeek(offset);
-  d.setDate(d.getDate() + 6);
-  d.setHours(23,59,59,999);
-  return d;
-};
-
-// Priority & Status helpers
-const priorityHTML = (p) => {
-  if (p === 'high') return `<span class="priority-badge high"><i class="fas fa-arrow-up"></i> Cao</span>`;
-  if (p === 'medium') return `<span class="priority-badge medium"><i class="fas fa-minus"></i> Trung</span>`;
-  return `<span class="priority-badge low"><i class="fas fa-arrow-down"></i> Thấp</span>`;
-};
-
-const dlClass = (deadline, status) => {
-  if (status === 'done') return 'ok';
-  if (!deadline) return '';
-  const diff = Math.ceil((new Date(deadline) - new Date(todayStr())) / 86400000);
-  return diff < 0 ? 'over' : diff === 0 ? 'warn' : 'ok';
-};
-
-const dlLabel = (deadline, status) => {
-  if (status === 'done') return 'Đã xong';
-  if (!deadline) return '';
-  const diff = Math.ceil((new Date(deadline) - new Date(todayStr())) / 86400000);
-  if (diff < 0) return `Quá ${Math.abs(diff)} ngày`;
-  if (diff === 0) return 'Hết hạn hôm nay';
-  return `Còn ${diff} ngày`;
-};
-
-const catLabel = (c) => ({study:'📚 Học tập', code:'💻 Code', personal:'🙂 Cá nhân', other:'📌 Khác'}[c] || c);
-
-// Render functions
-const taskHTML = (tk) => {
-  const pct = tk.progress || 0;
-  return `
-    <div class="task-item" onclick="tkOpenDetail('${tk.id}')">
-      <div class="task-check ${tk.status==='done'?'done':tk.status==='inprog'?'inprog':''}" onclick="event.stopPropagation();tkToggleStatus('${tk.id}')">
-        ${tk.status==='done' ? '<i class="fas fa-check"></i>' : tk.status==='inprog' ? '<i class="fas fa-ellipsis-h"></i>' : ''}
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="font-semibold ${tk.status==='done'?'line-through text-muted':''}">${tk.name}</div>
-        <div class="flex flex-wrap gap-2 mt-2">
-          ${priorityHTML(tk.priority)}
-          <span class="text-xs px-3 py-1 bg-[var(--t-border)] rounded-full">${catLabel(tk.cat)}</span>
-          ${tk.deadline ? `<span class="deadline-pill ${dlClass(tk.deadline, tk.status)}">${dlLabel(tk.deadline, tk.status)}</span>` : ''}
-        </div>
-        ${pct > 0 && tk.status !== 'done' ? `
-          <div class="mt-3">
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-            <div class="text-xs text-right text-muted mt-1">${pct}%</div>
-          </div>` : ''}
-      </div>
-    </div>`;
-};
-
-window.tkRender = () => {
-  const t = todayStr();
-  const visible = tasks.filter(tk => {
-    if (activeFilter === 'all') return true;
-    if (activeFilter === 'today') return tk.deadline === t;
-    if (activeFilter === 'week') {
-      const sw = startOfWeek(0), ew = endOfWeek(0);
-      return tk.deadline && new Date(tk.deadline) >= sw && new Date(tk.deadline) <= ew;
-    }
-    if (activeFilter === 'month') {
-      const m = parseInt(document.getElementById('tkMonthSelect').value);
-      const y = parseInt(document.getElementById('tkYearSelect').value);
-      const now = new Date();
-      const targetMonth = now.getMonth() + m;
-      const targetYear = y;
-      const start = new Date(targetYear, targetMonth, 1);
-      const end = new Date(targetYear, targetMonth + 1, 0);
-      return tk.deadline && new Date(tk.deadline) >= start && new Date(tk.deadline) <= end;
-    }
-    if (activeFilter === 'starred') return tk.starred === true;
-    return true;
-  });
-
-  // Stats
-  const todayTasks = tasks.filter(tk => tk.deadline === t);
-  const doneWeek = tasks.filter(tk => tk.status === 'done' && tk.completedAt && new Date(tk.completedAt) >= startOfWeek(0) && new Date(tk.completedAt) <= endOfWeek(0)).length;
-  const carry = tasks.filter(tk => tk.status !== 'done' && tk.deadline && new Date(tk.deadline) < new Date(t)).length;
-  const total = tasks.length;
-  const doneTotal = tasks.filter(tk => tk.status === 'done').length;
-
-  document.getElementById('statToday').textContent = todayTasks.length;
-  document.getElementById('statDone').textContent = doneWeek;
-  document.getElementById('statCarry').textContent = carry;
-  document.getElementById('statPct').textContent = total ? Math.round(doneTotal/total*100) + '%' : '0%';
-
-  // Today section
-  const todayDone = todayTasks.filter(tk => tk.status === 'done').length;
-  const todayPct = todayTasks.length ? Math.round(todayDone / todayTasks.length * 100) : 0;
-  document.getElementById('tkTodayProgress').innerHTML = `${todayDone}/${todayTasks.length} xong`;
-  document.getElementById('tkTodayBar').style.width = todayPct + '%';
-
-  // Render lists
-  document.getElementById('tkTodayList').innerHTML = tasks.filter(tk => tk.deadline === t && tk.status !== 'done').map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Không có công việc hôm nay</div>';
-
-  document.getElementById('tkUpcomingList').innerHTML = visible.filter(tk => tk.status !== 'done' && (!tk.deadline || tk.deadline > t)).map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Không có việc sắp tới</div>';
-
-  document.getElementById('tkDoneList').innerHTML = visible.filter(tk => tk.status === 'done').map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Chưa có việc hoàn thành</div>';
-
-  if (currentView === 'kanban') renderKanban(visible);
-  tkRenderReport();
-};
-
-const renderKanban = (visible) => {
-  const cols = {todo: [], inprog: [], done: []};
-  visible.forEach(tk => cols[tk.status || 'todo'].push(tk));
-
-  let html = '';
-  ['todo','inprog','done'].forEach(status => {
-    const label = status==='todo'?'Cần làm':status==='inprog'?'Đang làm':'Hoàn thành';
-    const color = status==='todo'?'var(--t-accent)':status==='inprog'?'#F59E0B':'#10B981';
-    html += `
-      <div class="kanban-col">
-        <div class="font-bold mb-4 flex justify-between" style="color:${color}">
-          ${label} <span class="bg-[var(--t-border)] px-3 py-0.5 rounded-full text-xs">${cols[status].length}</span>
-        </div>
-        ${cols[status].map(tk => `
-          <div class="bg-[var(--t-card)] border border-[var(--t-border)] rounded-2xl p-4 mb-3 cursor-grab" draggable="true" ondragstart="tkDragStart(event,'${tk.id}')">
-            <div class="font-medium">${tk.name}</div>
-            <div class="text-xs text-muted mt-2">${catLabel(tk.cat)}</div>
-          </div>
-        `).join('')}
-      </div>`;
-  });
-  document.getElementById('tkKanbanBoard').innerHTML = html;
-};
-
-window.tkSetView = (view) => {
-  currentView = view;
-  document.getElementById('tkListView').style.display = view === 'list' ? 'block' : 'none';
-  document.getElementById('tkKanbanView').style.display = view === 'kanban' ? 'block' : 'none';
-  document.getElementById('btnListView').classList.toggle('active', view==='list');
-  document.getElementById('btnKanbanView').classList.toggle('active', view==='kanban');
-  tkRender();
-};
-
-window.tkToggleStatus = (id) => {
-  const tk = tasks.find(t => t.id === id);
-  if (!tk) return;
-  const cycle = {todo: 'inprog', inprog: 'done', done: 'todo'};
-  tk.status = cycle[tk.status] || 'todo';
-  if (tk.status === 'done') {
-    tk.progress = 100;
-    tk.completedAt = new Date().toISOString();
+  /* ── HELPERS ── */
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function today(){ return new Date().toISOString().slice(0,10); }
+  function startOfWeek(offset){
+    var d=new Date(); d.setDate(d.getDate()-d.getDay()+1+(offset||0)*7); d.setHours(0,0,0,0); return d;
   }
-  saveTasks();
-  tkRender();
-};
+  function endOfWeek(offset){ var d=startOfWeek(offset); d.setDate(d.getDate()+6); d.setHours(23,59,59,999); return d; }
 
-window.tkOpenModal = () => {
-  document.getElementById('tkForm').reset();
-  document.getElementById('tkEditId').value = '';
-  document.getElementById('tkModalTitle').textContent = 'Thêm công việc mới';
-  document.getElementById('tkDeadline').value = todayStr();
-  document.getElementById('tkOverlay').classList.add('show');
-};
+  function dlClass(dateStr, status){
+    if(status==='done') return 'done';
+    if(!dateStr) return '';
+    var now=new Date(); now.setHours(0,0,0,0);
+    var dl=new Date(dateStr);
+    var diff=Math.round((dl-now)/86400000);
+    if(diff<0) return 'over';
+    if(diff===0) return 'warn';
+    return 'ok';
+  }
+  function dlLabel(dateStr, status){
+    if(status==='done') return 'Xong';
+    if(!dateStr) return '';
+    var now=new Date(); now.setHours(0,0,0,0);
+    var dl=new Date(dateStr);
+    var diff=Math.round((dl-now)/86400000);
+    if(diff<0) return 'Quá '+Math.abs(diff)+'ngày';
+    if(diff===0) return 'Hết hạn hôm nay';
+    if(diff===1) return 'Còn 1 ngày';
+    return 'Còn '+diff+' ngày';
+  }
+  function catClass(c){ return 'cat-'+(c||'other'); }
+  function catLabel(c){ return {study:'📚 Học tập',code:'💻 Code',team:'👥 Nhóm',school:'🏫 Trường',personal:'🙂 Cá nhân',other:'📌 Khác'}[c]||c; }
+  function priClass(p){ return 'pri-'+(p||'low'); }
+  function priLabel(p){ return {high:'🔴 Cao',med:'🟡 Trung',low:'🟢 Thấp'}[p]||p; }
+  function statusClass(s){ return 'status-'+(s||'todo'); }
+  function statusLabel(s){ return {todo:'Cần làm',inprog:'Đang làm',done:'Hoàn thành'}[s]||s; }
 
-window.tkCloseModal = () => {
-  document.getElementById('tkOverlay').classList.remove('show');
-};
+  function progFillClass(pct){ if(pct>=100) return 'done'; if(pct>=60) return ''; if(pct>0) return 'warn'; return 'danger'; }
 
-window.tkSaveTask = (e) => {
-  e.preventDefault();
-  const id = document.getElementById('tkEditId').value;
-  const task = {
-    id: id || uid(),
-    name: document.getElementById('tkName').value.trim(),
-    cat: document.getElementById('tkCat').value,
-    status: document.getElementById('tkStatus').value,
-    deadline: document.getElementById('tkDeadline').value,
-    progress: parseInt(document.getElementById('tkProgress').value) || 0,
-    priority: document.getElementById('taskPriority').value,
-    createdAt: id ? tasks.find(t=>t.id===id)?.createdAt || new Date().toISOString() : new Date().toISOString(),
-    completedAt: null
+  function weekDay(d){ return ['CN','T2','T3','T4','T5','T6','T7'][new Date(d).getDay()]; }
+
+  /* ── DATE LABEL ── */
+  (function(){
+    var now=new Date();
+    document.getElementById('tkDateLabel').textContent=
+      now.toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    var opts={day:'2-digit',month:'2-digit'};
+    document.getElementById('tkTodayDateLabel').textContent=now.toLocaleDateString('vi-VN',opts);
+  })();
+
+  /* ── FILTER CHIPS ── */
+  document.querySelectorAll('#tkFilterBar .tk-chip').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('#tkFilterBar .tk-chip').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      activeFilter=btn.dataset.filter;
+      tkRender();
+    });
+  });
+
+  /* ── FILTER LOGIC ── */
+  window.tkRender = function(){
+    var t=today();
+    var dateFrom=document.getElementById('tkDateFrom').value;
+    var dateTo=document.getElementById('tkDateTo').value;
+
+    function matchesFilter(task){
+      var f=activeFilter;
+      if(f==='all') return true;
+      if(f==='today') return task.deadline===t;
+      if(f==='week'){
+        var sw=startOfWeek(0),ew=endOfWeek(0);
+        if(!task.deadline) return false;
+        var d=new Date(task.deadline); return d>=sw&&d<=ew;
+      }
+      if(f==='overdue'){
+        if(task.status==='done') return false;
+        if(!task.deadline) return false;
+        var now=new Date(); now.setHours(0,0,0,0);
+        return new Date(task.deadline)<now;
+      }
+      if(f.startsWith('cat-')) return ('cat-'+task.cat)===f;
+      if(f.startsWith('pri-')) return ('pri-'+task.pri)===f;
+      return true;
+    }
+    function matchesDate(task){
+      if(!dateFrom&&!dateTo) return true;
+      if(!task.deadline) return !dateFrom&&!dateTo;
+      if(dateFrom&&task.deadline<dateFrom) return false;
+      if(dateTo&&task.deadline>dateTo) return false;
+      return true;
+    }
+
+    var visible=tasks.filter(function(tk){ return matchesFilter(tk)&&matchesDate(tk); });
+
+    // stats
+    var todayTasks=tasks.filter(function(tk){ return tk.deadline===t; });
+    var doneTodayCount=todayTasks.filter(function(tk){ return tk.status==='done'; }).length;
+    var weekStart=startOfWeek(0), weekEnd=endOfWeek(0);
+    var doneWeek=tasks.filter(function(tk){
+      if(tk.status!=='done') return false;
+      var cd=new Date(tk.completedAt||tk.createdAt);
+      return cd>=weekStart&&cd<=weekEnd;
+    }).length;
+
+    var now2=new Date(); now2.setHours(0,0,0,0);
+    var carry=tasks.filter(function(tk){
+      if(tk.status==='done') return false;
+      if(!tk.deadline) return false;
+      var dl=new Date(tk.deadline);
+      return dl<now2;
+    }).length;
+
+    var total=tasks.length, done=tasks.filter(function(tk){ return tk.status==='done'; }).length;
+    var pct=total>0?Math.round(done/total*100):0;
+
+    document.getElementById('statToday').textContent=todayTasks.length;
+    document.getElementById('statDone').textContent=doneWeek;
+    document.getElementById('statCarry').textContent=carry;
+    document.getElementById('statPct').textContent=pct+'%';
+
+    if(currentView==='list') renderList(visible, carry);
+    else renderKanban(visible);
+    tkRenderReport();
   };
 
-  if (task.progress >= 100) task.status = 'done';
-  if (task.status === 'done') task.completedAt = new Date().toISOString();
+  /* ── RENDER LIST ── */
+  function renderList(visible, carry){
+    var t=today();
+    var todayItems=visible.filter(function(tk){ return tk.deadline===t&&tk.status!=='done'; });
+    var upcomingItems=visible.filter(function(tk){
+      if(tk.status==='done') return false;
+      if(!tk.deadline) return true;
+      return tk.deadline>t;
+    });
+    var doneItems=visible.filter(function(tk){ return tk.status==='done'; });
 
-  if (id) {
-    const idx = tasks.findIndex(t => t.id === id);
-    if (idx !== -1) tasks[idx] = task;
-  } else {
-    tasks.unshift(task);
+    // carry note
+    if(carry>0){
+      document.getElementById('tkCarryNote').style.display='flex';
+      document.getElementById('tkCarryText').textContent=carry+' việc chưa xong từ hôm qua được chuyển sang';
+    } else {
+      document.getElementById('tkCarryNote').style.display='none';
+    }
+
+    // today progress
+    var todayAll=tasks.filter(function(tk){ return tk.deadline===t; });
+    var todayDone=todayAll.filter(function(tk){ return tk.status==='done'; }).length;
+    var todayPct=todayAll.length>0?Math.round(todayDone/todayAll.length*100):0;
+    document.getElementById('tkTodayProgress').textContent=todayDone+'/'+todayAll.length+' xong';
+    document.getElementById('tkTodayBar').style.width=todayPct+'%';
+    document.getElementById('tkTodayBar').className='tk-pbar-fill '+progFillClass(todayPct);
+    document.getElementById('tkTodayPct').textContent=todayPct+'% hoàn thành';
+
+    renderTaskList('tkTodayList', todayItems.length?todayItems:tasks.filter(function(tk){ return tk.deadline===t; }).filter(function(tk){ return tk.status!=='done'; }));
+    if(!todayItems.length&&!tasks.filter(function(tk){ return tk.deadline===t; }).length){
+      document.getElementById('tkTodayList').innerHTML='<div class="tk-empty"><div class="tk-empty-icon">📋</div><p>Không có việc nào hôm nay</p></div>';
+    }
+    renderTaskList('tkUpcomingList', upcomingItems.length?upcomingItems:[]);
+    if(!upcomingItems.length){
+      document.getElementById('tkUpcomingList').innerHTML='<div class="tk-empty"><div class="tk-empty-icon">🎯</div><p>Không có việc sắp tới</p></div>';
+    }
+    renderTaskList('tkDoneList', doneItems);
+    if(!doneItems.length){
+      document.getElementById('tkDoneList').innerHTML='<div class="tk-empty"><p>Chưa có việc hoàn thành</p></div>';
+    }
   }
 
-  saveTasks();
-  tkCloseModal();
-  tkRender();
-};
+  function renderTaskList(containerId, items){
+    var el=document.getElementById(containerId);
+    if(!items.length){ el.innerHTML=''; return; }
+    el.innerHTML=items.map(function(tk){ return taskHTML(tk); }).join('');
+  }
 
-window.tkAddTodayQuick = () => {
-  document.getElementById('tkDeadline').value = todayStr();
-  tkOpenModal();
-};
+  function taskHTML(tk){
+    var pct=parseInt(tk.progress||0);
+    var dlCls=dlClass(tk.deadline,tk.status);
+    var dlLbl=dlLabel(tk.deadline,tk.status);
+    var imgHTML='';
+    if(tk.images&&tk.images.length){
+      imgHTML='<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">';
+      tk.images.slice(0,3).forEach(function(src){
+        imgHTML+='<img src="'+src+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--t-border);">';
+      });
+      if(tk.images.length>3) imgHTML+='<div style="width:44px;height:44px;border-radius:8px;background:var(--t-border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--t-muted);">+'+( tk.images.length-3)+'</div>';
+      imgHTML+='</div>';
+    }
+    return '<div class="task-item" onclick="tkOpenDetail(\''+tk.id+'\')">' +
+      '<div class="tk-check '+(tk.status==='done'?'done':tk.status==='inprog'?'inprog':'')+'" onclick="tkToggleStatus(event,\''+tk.id+'\')">'+
+        (tk.status==='done'?'<i class="fa-solid fa-check"></i>':tk.status==='inprog'?'<i class="fa-solid fa-ellipsis"></i>':'')+
+      '</div>'+
+      '<div class="task-info">'+
+        '<div class="task-name'+(tk.status==='done'?' done':'')+'">'+ escHtml(tk.name)+'</div>'+
+        '<div class="task-meta">'+
+          '<span class="tk-badge '+catClass(tk.cat)+'">'+catLabel(tk.cat)+'</span>'+
+          '<span class="tk-badge '+priClass(tk.pri)+'">'+priLabel(tk.pri)+'</span>'+
+          '<span class="tk-badge '+statusClass(tk.status)+'">'+statusLabel(tk.status)+'</span>'+
+          (dlLbl?'<span class="tk-dl '+dlCls+'">'+dlLbl+'</span>':'')+
+        '</div>'+
+        (pct>0&&tk.status!=='done'?
+          '<div class="tk-pbar-wrap">'+
+            '<div class="tk-pbar"><div class="tk-pbar-fill '+progFillClass(pct)+'" style="width:'+pct+'%"></div></div>'+
+            '<div class="tk-pbar-pct">'+pct+'%</div>'+
+          '</div>':'')+
+        imgHTML+
+      '</div>'+
+      '<div class="tk-actions" onclick="event.stopPropagation()">'+
+        '<button class="tk-btn-icon edit" onclick="tkOpenEdit(\''+tk.id+'\')"><i class="fa-solid fa-pen"></i></button>'+
+        '<button class="tk-btn-icon delete" onclick="tkDeleteTask(\''+tk.id+'\')"><i class="fa-solid fa-trash"></i></button>'+
+      '</div>'+
+    '</div>';
+  }
 
-// Priority selector
-document.querySelectorAll('.priority-option').forEach(opt => {
-  opt.addEventListener('click', function() {
-    document.querySelectorAll('.priority-option').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    document.getElementById('taskPriority').value = this.dataset.priority;
-  });
-});
+  /* ── RENDER KANBAN ── */
+  function renderKanban(visible){
+    var cols={todo:[],inprog:[],done:[]};
+    visible.forEach(function(tk){ (cols[tk.status]||cols.todo).push(tk); });
 
-// Range input
-document.getElementById('tkProgress').addEventListener('input', function() {
-  document.getElementById('tkProgLabel').textContent = this.value + '%';
-});
+    var board=document.getElementById('tkKanbanBoard');
+    board.innerHTML=[
+      {key:'todo',label:'📋 Cần làm',color:'var(--t-accent)',bg:'var(--t-bg)'},
+      {key:'inprog',label:'⚡ Đang làm',color:'#F59E0B',bg:'#FFF7ED'},
+      {key:'done',label:'✅ Hoàn thành',color:'#10B981',bg:'#F0FDF4'}
+    ].map(function(col){
+      var cards=cols[col.key].map(function(tk){
+        var pct=parseInt(tk.progress||0);
+        return '<div class="tk-kcard" draggable="true" ondragstart="tkDragStart(event,\''+tk.id+'\')" ondrop="tkDrop(event,\''+col.key+'\')" ondragover="event.preventDefault()" '+
+          'style="'+(col.key==='inprog'?'border-left:3px solid '+col.color+';':col.key==='done'?'border-left:3px solid '+col.color+';opacity:.75;':'')+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">'+
+            '<div class="tk-kcard-title'+(col.key==='done'?' text-decoration:line-through':'')+'" style="'+(col.key==='done'?'text-decoration:line-through;color:var(--t-muted);':'')+'">'+escHtml(tk.name)+'</div>'+
+            '<span style="color:'+({high:'#EF4444',med:'#F59E0B',low:'#10B981'}[tk.pri]||'#94A3B8')+';font-size:13px;">●</span>'+
+          '</div>'+
+          '<div class="tk-kcard-meta">'+catLabel(tk.cat)+(tk.deadline?' · '+dlLabel(tk.deadline,tk.status):'')+
+          '</div>'+
+          (pct>0&&col.key!=='done'?
+            '<div style="margin-top:5px;"><div class="tk-pbar"><div class="tk-pbar-fill" style="width:'+pct+'%;background:'+col.color+'"></div></div>'+
+            '<div class="tk-pbar-pct">'+pct+'%</div></div>':'')+
+        '</div>';
+      }).join('');
+      return '<div class="tk-kcol" ondrop="tkDrop(event,\''+col.key+'\')" ondragover="event.preventDefault()">'+
+        '<div class="tk-kcol-head" style="color:'+col.color+'">'+
+          col.label+
+          '<span style="background:var(--t-border);color:var(--t-muted);border-radius:999px;padding:1px 7px;font-size:10px;">'+cols[col.key].length+'</span>'+
+        '</div>'+
+        cards+
+        '<div class="tk-kcard" style="border:1.5px dashed var(--t-border);background:var(--t-bg);text-align:center;color:var(--t-muted);font-size:11px;cursor:pointer;" onclick="tkOpenModal()">+ Thêm</div>'+
+      '</div>';
+    }).join('');
+  }
 
-window.tkToggleDoneList = () => {
-  showDone = !showDone;
-  const el = document.getElementById('tkDoneList');
-  el.style.display = showDone ? 'block' : 'none';
-  document.getElementById('tkDoneToggle').textContent = showDone ? 'Ẩn' : 'Hiện';
-};
+  /* ── DRAG DROP ── */
+  var dragId=null;
+  window.tkDragStart=function(e,id){ dragId=id; e.dataTransfer.effectAllowed='move'; };
+  window.tkDrop=function(e,status){
+    e.preventDefault();
+    if(!dragId) return;
+    var tk=tasks.find(function(t){ return t.id===dragId; });
+    if(tk){ tk.status=status; if(status==='done'){ tk.progress=100; tk.completedAt=new Date().toISOString(); } save(tasks); tkRender(); }
+    dragId=null;
+  };
 
-window.tkRenderReport = () => {
-  // Báo cáo tuần đơn giản
-  const offset = parseInt(document.getElementById('tkWeekSelect').value) || 0;
-  const sw = startOfWeek(offset);
-  const doneThisWeek = tasks.filter(tk => tk.status === 'done' && tk.completedAt && new Date(tk.completedAt) >= sw && new Date(tk.completedAt) <= endOfWeek(offset)).length;
+  /* ── TOGGLE STATUS ── */
+  window.tkToggleStatus=function(e,id){
+    e.stopPropagation();
+    var tk=tasks.find(function(t){ return t.id===id; });
+    if(!tk) return;
 
-  document.getElementById('tkReportBody').innerHTML = `
-    <div class="text-center py-8">
-      <div class="text-5xl font-bold text-accent">${doneThisWeek}</div>
-      <div class="text-muted mt-2">công việc đã hoàn thành trong tuần</div>
-    </div>
-  `;
-};
+    var cycle={todo:'inprog',inprog:'done',done:'todo'};
+    tk.status=cycle[tk.status]||'todo';
+    if(tk.status==='done'){ tk.progress=100; tk.completedAt=new Date().toISOString(); }
+    else if(tk.status==='todo'){ tk.completedAt=null; }
+    save(tasks); tkRender();
+  };
 
-// Drag & Drop cơ bản (có thể mở rộng sau)
-window.tkDragStart = (e, id) => { e.dataTransfer.setData('text', id); };
-
-document.getElementById('tkFilterBar').addEventListener('click', (e) => {
-  if (e.target.classList.contains('filter-chip')) {
-    document.querySelectorAll('#tkFilterBar .filter-chip').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    activeFilter = e.target.dataset.filter;
+  /* ── VIEW TOGGLE ── */
+  window.tkSetView=function(v){
+    currentView=v;
+    document.getElementById('tkListView').style.display=v==='list'?'block':'none';
+    document.getElementById('tkKanbanView').style.display=v==='kanban'?'block':'none';
+    document.getElementById('btnListView').classList.toggle('active',v==='list');
+    document.getElementById('btnKanbanView').classList.toggle('active',v==='kanban');
     tkRender();
+  };
+
+  window.tkToggleDoneList=function(){
+    showDone=!showDone;
+    document.getElementById('tkDoneList').style.display=showDone?'block':'none';
+    document.getElementById('tkDoneToggle').textContent=showDone?'Ẩn':'Hiện';
+  };
+
+  /* ── MODAL OPEN/CLOSE ── */
+  window.tkOpenModal=function(){
+    document.getElementById('tkEditId').value='';
+    document.getElementById('tkForm').reset();
+    document.getElementById('tkModalTitle').textContent='Thêm công việc';
+    document.getElementById('tkProgLabel').textContent='0%';
+    document.getElementById('tkProgBar').style.width='0%';
+    document.getElementById('tkImgPreview').innerHTML='';
+    editingImages=[];
+    // set today as default deadline
+    document.getElementById('tkDeadline').value=today();
+    document.getElementById('tkOverlay').classList.add('show');
+  };
+
+  window.tkOpenEdit=function(id){
+    var tk=tasks.find(function(t){ return t.id===id; });
+    if(!tk) return;
+    document.getElementById('tkEditId').value=tk.id;
+    document.getElementById('tkName').value=tk.name||'';
+    document.getElementById('tkDesc').value=tk.desc||'';
+    document.getElementById('tkCat').value=tk.cat||'other';
+    document.getElementById('tkPri').value=tk.pri||'med';
+    document.getElementById('tkStatus').value=tk.status||'todo';
+    document.getElementById('tkDeadline').value=tk.deadline||'';
+    document.getElementById('tkProgress').value=tk.progress||0;
+    document.getElementById('tkProgLabel').textContent=(tk.progress||0)+'%';
+    document.getElementById('tkProgBar').style.width=(tk.progress||0)+'%';
+    editingImages=(tk.images||[]).slice();
+    renderEditImgPreview();
+    document.getElementById('tkModalTitle').textContent='Sửa công việc';
+    document.getElementById('tkOverlay').classList.add('show');
+  };
+
+  window.tkCloseModal=function(){
+    document.getElementById('tkOverlay').classList.remove('show');
+    editingImages=[];
+  };
+
+  window.tkOverlayClick=function(e){
+    if(e.target===document.getElementById('tkOverlay')) tkCloseModal();
+  };
+
+  /* ── SAVE TASK ── */
+  window.tkSaveTask=function(e){
+    e.preventDefault();
+
+    var id=document.getElementById('tkEditId').value;
+    var pct=parseInt(document.getElementById('tkProgress').value)||0;
+    var status=document.getElementById('tkStatus').value;
+    if(pct===100) status='done';
+    var obj={
+      id: id||uid(),
+      name: document.getElementById('tkName').value.trim(),
+      desc: document.getElementById('tkDesc').value.trim(),
+      cat:  document.getElementById('tkCat').value,
+      pri:  document.getElementById('tkPri').value,
+      status: status,
+      deadline: document.getElementById('tkDeadline').value,
+      progress: pct,
+      images: editingImages.slice(),
+      createdAt: id ? (tasks.find(function(t){ return t.id===id; })||{}).createdAt||new Date().toISOString() : new Date().toISOString(),
+      completedAt: status==='done'?new Date().toISOString():null
+    };
+
+    if(id){
+      var idx=tasks.findIndex(function(t){ return t.id===id; });
+      if(idx>-1) tasks[idx]=obj;
+    } else {
+      tasks.unshift(obj);
+    }
+    save(tasks); tkCloseModal(); tkRender();
+    // toast
+    tkToast(id?'✅ Đã cập nhật!':'✅ Đã thêm công việc!');
+  };
+
+  /* ── DELETE ── */
+  window.tkDeleteTask=function(id){
+    if(!confirm('Xóa công việc này?')) return;
+    tasks=tasks.filter(function(t){ return t.id!==id; });
+    save(tasks);
+    tkRender();
+    tkToast('🗑 Đã xóa');
+  };
+
+  /* ── IMAGES ── */
+  window.tkHandleImages=function(e){
+    var files=Array.from(e.target.files);
+    files.forEach(function(f){
+      if(editingImages.length>=5) return;
+      var r=new FileReader();
+      r.onload=function(ev){ editingImages.push(ev.target.result); renderEditImgPreview(); };
+      r.readAsDataURL(f);
+    });
+  };
+
+  function renderEditImgPreview(){
+    var wrap=document.getElementById('tkImgPreview');
+    wrap.innerHTML=editingImages.map(function(src,i){
+      return '<div class="tk-img-thumb-wrap">'+
+        '<img class="tk-img-thumb" src="'+src+'">'+
+        '<button class="tk-img-del" onclick="tkRemoveImg('+i+')">✕</button>'+
+      '</div>';
+    }).join('');
   }
-});
 
-// Init
-document.getElementById('tkDateLabel').textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-document.getElementById('tkTodayDateLabel').textContent = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+  window.tkRemoveImg=function(i){
+    editingImages.splice(i,1);
+    renderEditImgPreview();
+  };
 
-tkRender();
+  /* ── DETAIL MODAL ── */
+  window.tkOpenDetail=function(id){
+    var tk=tasks.find(function(t){ return t.id===id; });
+    if(!tk) return;
+    var pct=parseInt(tk.progress||0);
+    var dlCls=dlClass(tk.deadline,tk.status);
+    var dlLbl=dlLabel(tk.deadline,tk.status);
+    var imgHTML='';
+
+    if(tk.images&&tk.images.length){
+      imgHTML='<div style="margin-top:10px;"><div style="font-size:11px;font-weight:800;color:var(--t-muted);margin-bottom:6px;text-transform:uppercase">Ảnh đính kèm</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
+      tk.images.forEach(function(src){
+        imgHTML+='<img src="'+src+'" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:1px solid var(--t-border);cursor:zoom-in;" onclick="tkZoomImg(this.src)">';
+      });
+      imgHTML+='</div></div>';
+    }
+    document.getElementById('tkDetailTitle').textContent=escHtml(tk.name);
+    document.getElementById('tkDetailBody').innerHTML=
+      '<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;">'+
+        '<span class="tk-badge '+catClass(tk.cat)+'">'+catLabel(tk.cat)+'</span>'+
+        '<span class="tk-badge '+priClass(tk.pri)+'">'+priLabel(tk.pri)+'</span>'+
+        '<span class="tk-badge '+statusClass(tk.status)+'">'+statusLabel(tk.status)+'</span>'+
+        (dlLbl?'<span class="tk-dl '+dlCls+'">'+dlLbl+'</span>':'')+
+      '</div>'+
+      (tk.desc?'<div style="font-size:12px;color:var(--t-text);line-height:1.6;margin-bottom:10px;padding:10px;background:var(--t-bg);border-radius:10px;">'+escHtml(tk.desc)+'</div>':'')+
+      (tk.deadline?'<div style="font-size:11px;font-weight:700;color:var(--t-muted);margin-bottom:6px;"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>Deadline: <strong>'+tk.deadline+'</strong></div>':'')+
+      '<div style="margin:10px 0;">'+
+        '<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--t-muted);margin-bottom:4px;"><span>Tiến trình</span><span>'+pct+'%</span></div>'+
+        '<div class="tk-pbar"><div class="tk-pbar-fill '+progFillClass(pct)+'" style="width:'+pct+'%"></div></div>'+
+      '</div>'+
+      imgHTML+
+      '<div style="display:flex;gap:8px;margin-top:14px;">'+
+        '<button class="tk-btn-primary" style="flex:1;background:var(--t-accent);" onclick="tkCloseDetail();tkOpenEdit(\''+tk.id+'\')">'+
+          '<i class="fa-solid fa-pen" style="margin-right:6px"></i>Chỉnh sửa'+
+        '</button>'+
+        '<button class="tk-btn-primary" style="flex:0 0 auto;background:#EF4444;width:44px;" onclick="tkCloseDetail();tkDeleteTask(\''+tk.id+'\')">'+
+          '<i class="fa-solid fa-trash"></i>'+
+        '</button>'+
+      '</div>';
+    document.getElementById('tkDetailOverlay').classList.add('show');
+  };
+
+  window.tkCloseDetail=function(){
+    document.getElementById('tkDetailOverlay').classList.remove('show');
+  };
+  window.tkDetailOverlayClick=function(e){
+    if(e.target===document.getElementById('tkDetailOverlay')) tkCloseDetail();
+  };
+
+  window.tkZoomImg=function(src){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+    ov.innerHTML='<img src="'+src+'" style="max-width:95vw;max-height:95vh;border-radius:12px;">';
+    ov.onclick=function(){ document.body.removeChild(ov); };
+    document.body.appendChild(ov);
+  };
+
+  /* ── REPORT ── */
+  window.tkRenderReport=function(){
+    var offset=parseInt(document.getElementById('tkWeekSelect').value)||0;
+    var sw=startOfWeek(offset), ew=endOfWeek(offset);
+
+    var weekTasks=tasks.filter(function(tk){
+      if(!tk.deadline) return false;
+      var d=new Date(tk.deadline); return d>=sw&&d<=ew;
+    });
+
+    var doneTasks=tasks.filter(function(tk){
+      if(tk.status!=='done') return false;
+      var cd=new Date(tk.completedAt||tk.createdAt);
+      return cd>=sw&&cd<=ew;
+    });
+
+    var overdueTasks=weekTasks.filter(function(tk){
+      if(tk.status==='done') return false;
+      return new Date(tk.deadline)<new Date();
+    });
+
+    // Summary stats
+    var statsEl=document.getElementById('tkReportStats');
+    statsEl.innerHTML=[
+      {num:weekTasks.length,lbl:'Việc tuần này',color:'var(--t-accent)'},
+      {num:doneTasks.length,lbl:'Đã hoàn thành',color:'#10B981'},
+      {num:overdueTasks.length,lbl:'Quá hạn',color:'#EF4444'}
+    ].map(function(s){
+      return '<div style="background:var(--t-card);border:1px solid var(--t-border);border-radius:12px;padding:10px;text-align:center;">'+
+        '<div style="font-size:22px;font-weight:900;color:'+s.color+'">'+s.num+'</div>'+
+        '<div style="font-size:10px;color:var(--t-muted);font-weight:700;margin-top:2px;">'+s.lbl+'</div>'+
+      '</div>';
+    }).join('');
+
+    // Bar chart — 7 days
+    var chartEl=document.getElementById('tkWeekChart');
+    var days=[];
+
+    for(var i=0;i<7;i++){
+      var d=new Date(sw); d.setDate(d.getDate()+i);
+      var ds=d.toISOString().slice(0,10);
+
+      var count=doneTasks.filter(function(tk){
+        var cd=new Date(tk.completedAt||tk.createdAt);
+        return cd.toISOString().slice(0,10)===ds;
+      }).length;
+
+      days.push({label:['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],count:count,date:ds,isToday:ds===today()});
+    }
+    var maxCount=Math.max(1,...days.map(function(d){ return d.count; }));
+
+    chartEl.innerHTML=days.map(function(day){
+      var h=Math.round((day.count/maxCount)*100);
+      var isT=day.isToday;
+      return '<div class="tk-day-col">'+
+        '<div class="tk-day-num">'+(day.count||'·')+'</div>'+
+        '<div class="tk-day-bar-wrap">'+
+          '<div class="tk-day-bar" style="height:'+(h||4)+'%;background:'+(isT?'var(--t-accent)':'color-mix(in srgb, var(--t-accent) 45%, var(--t-border))')+';'+(isT?'box-shadow:0 4px 12px rgba(90,155,212,.4);':'')+'"></div>'+
+        '</div>'+
+        '<div class="tk-day-lbl" style="'+(isT?'color:var(--t-accent);':'')+'">'+day.label+'</div>'+
+      '</div>';
+    }).join('');
+
+    // Category breakdown
+    var cats=['study','code','team','school','personal','other'];
+    var catCounts={};
+    cats.forEach(function(c){ catCounts[c]={total:0,done:0}; });
+
+    weekTasks.forEach(function(tk){
+      var c=tk.cat||'other';
+      if(!catCounts[c]) catCounts[c]={total:0,done:0};
+      catCounts[c].total++;
+      if(tk.status==='done') catCounts[c].done++;
+    });
+
+    var catHTML='<div style="font-size:11px;font-weight:800;color:var(--t-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Task theo danh mục</div>';
+    cats.forEach(function(c){
+      if(!catCounts[c].total) return;
+      var pct2=catCounts[c].total>0?Math.round(catCounts[c].done/catCounts[c].total*100):0;
+      catHTML+='<div style="margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:3px;">'+
+          '<span>'+catLabel(c)+'</span>'+
+          '<span style="color:'+(pct2>=80?'#10B981':pct2>=50?'#F59E0B':'#EF4444')+'">'+catCounts[c].done+'/'+catCounts[c].total+'</span>'+
+        '</div>'+
+        '<div class="tk-pbar"><div class="tk-pbar-fill '+progFillClass(pct2)+'" style="width:'+pct2+'%"></div></div>'+
+      '</div>';
+    });
+
+    document.getElementById('tkCatBreakdown').innerHTML=catHTML;
+  };
+
+  /* ── TOAST ── */
+  function tkToast(msg){
+    var t=document.createElement('div');
+    t.textContent=msg;
+    t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2C4A7C;color:white;padding:8px 18px;border-radius:999px;font-size:12px;font-weight:700;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity='1'; },10);
+    setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ document.body.removeChild(t); },300); },2000);
+  }
+
+  /* ── ESCAPE HTML ── */
+  function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* ── PROGRESS BAR LIVE UPDATE ── */
+  document.getElementById('tkProgress').addEventListener('input',function(){
+    document.getElementById('tkProgBar').style.width=this.value+'%';
+  });
+
+  /* ── INIT ── */
+  tkRender();
+
+})();
 </script>

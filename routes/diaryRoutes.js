@@ -7,8 +7,8 @@ const path = require('path');
 
 // Multer storage for avatar uploads
 const storage = multer.diskStorage({
-	destination: function (req, file, cb) {
-		cb(null, path.join(__dirname, '..', 'public', 'uploads'));
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, '..', 'public', 'uploads', 'diary'));
 	},
 	filename: function (req, file, cb) {
 		const ext = path.extname(file.originalname);
@@ -24,7 +24,6 @@ const { ensureAuthenticated } = require('../middleware/auth');
 router.use(ensureAuthenticated);
 
 router.get('/home', diaryController.getHome);
-router.post('/create', diaryController.createEntry); // API lưu bài viết
 router.get('/timeline', diaryController.getTimeline);
 router.get('/edit/:id', diaryController.getEditEntry);
 router.post('/update/:id', diaryController.updateEntry);
@@ -49,7 +48,7 @@ router.post('/profile/upload-avatar', upload.single('avatar'), authController.up
 router.get('/create', diaryController.getCreateDiary);
 
 // POST: Lưu nhật ký mới (upload nhiều ảnh + highlight)
-router.post('/create', diaryController.createDiary);
+router.post('/create', upload.array('images', 5), diaryController.createDiary);
 
 // GET: Timeline có hỗ trợ hiển thị highlight (không đè lên route cũ)
 router.get('/timeline-highlight', diaryController.getTimelineWithHighlight);
@@ -62,5 +61,5 @@ router.get('/tasks', function(req, res) {
     user: req.user || null
   });
 });
-
+router.post('/star/:id', diaryController.toggleStar);
 module.exports = router;

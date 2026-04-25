@@ -1,108 +1,5 @@
 <% title='Timeline - Bear Diary' ; %>
 
-  <style>
-    .timeline-container {
-      position: relative;
-    }
-
-    .timeline-line {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 100%;
-      background-color: var(--card-border);
-      z-index: 0;
-    }
-
-    .timeline-card {
-      width: 45%;
-      background: white;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--card-border);
-      z-index: 10;
-    }
-
-    .emoji-dot {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 36px;
-      height: 36px;
-      background: white;
-      border: 2px solid var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      z-index: 20;
-    }
-
-    .filter-pill {
-      background: white;
-      border: 1px solid #E2E8F0;
-      padding: 6px 16px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #64748B;
-      transition: all 0.2s;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .filter-pill.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .filter-pill:hover {
-      background: var(--accent-light);
-      border-color: var(--accent);
-    }
-
-    .filter-select {
-      padding: 10px 16px;
-      border-radius: 999px;
-      border: 1px solid #E0ECF9;
-      background: white;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--primary-dark);
-      min-width: 140px;
-      cursor: pointer;
-    }
-
-    [data-theme="dark"] .timeline-card {
-      background: #1E2937;
-      border-color: #334155;
-    }
-
-    [data-theme="dark"] .filter-pill,
-    [data-theme="dark"] .filter-select {
-      background: #1E2937;
-      border-color: #334155;
-      color: #E2E8F0;
-    }
-
-    [data-theme="dark"] .timeline-line {
-      background-color: #334155;
-    }
-
-    [data-theme="dark"] .emoji-dot {
-      background: #1E2937;
-      border-color: #475569;
-    }
-
-    /* Empty state icon background in dark mode */
-    .empty-icon { background: #EFF6FF; }
-    [data-theme="dark"] .empty-icon { background: #1E2937; color: var(--accent); }
-  </style>
-
   <div class="mb-8 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">📖
@@ -114,7 +11,7 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <select id="monthFilter" class="filter-select" onchange="applyFilter()">
+      <select id="monthFilter" class="filter-select">
         <option value="" <%=!currentMonth ? 'selected' : '' %>>Tất cả tháng</option>
         <option value="1" <%=currentMonth==='1' ? 'selected' : '' %>>Tháng 1</option>
         <option value="2" <%=currentMonth==='2' ? 'selected' : '' %>>Tháng 2</option>
@@ -130,7 +27,7 @@
         <option value="12" <%=currentMonth==='12' ? 'selected' : '' %>>Tháng 12</option>
       </select>
 
-      <select id="yearFilter" class="filter-select" onchange="applyFilter()">
+      <select id="yearFilter" class="filter-select">
         <option value="2024" <%=currentYear==='2024' ? 'selected' : '' %>>2024</option>
         <option value="2025" <%=currentYear==='2025' ? 'selected' : '' %>>2025</option>
         <option value="2026" <%=currentYear==='2026' ? 'selected' : '' %>>2026</option>
@@ -141,18 +38,20 @@
 
   <div class="flex flex-wrap gap-2 mb-12" id="filterPills">
     <button class="filter-pill active" data-mood="all">Tất cả (<%= entries.length %>)</button>
-    <button class="filter-pill" data-mood="happy">😊 Vui vẻ</button>
-    <button class="filter-pill" data-mood="calm">😌 Bình tĩnh</button>
-    <button class="filter-pill" data-mood="excited">🥳 Hào hứng</button>
-    <button class="filter-pill" data-mood="grateful">🙏 biết ơn</button>
-    <button class="filter-pill" data-mood="sad">😢 Buồn bã</button>
+    <button class="filter-pill" data-mood="vui">😊 Vui vẻ</button>
+    <button class="filter-pill" data-mood="bình">😌 Bình tĩnh</button>
+    <button class="filter-pill" data-mood="hào">🥳 Hào hứng</button>
+    <button class="filter-pill" data-mood="biết">🙏 Biết ơn</button>
+    <button class="filter-pill" data-mood="buồn">😢 Buồn bã</button>
+    <button class="filter-pill" data-mood="lo">😨 Lo lắng</button>
+    <button class="filter-pill" data-mood="mệt">😴 Mệt mỏi</button>
+    <button class="filter-pill" data-mood="tức">😡 Tức giận</button>
   </div>
 
   <div class="relative">
     <% const isAllMonths=!currentMonth || currentMonth==='' ; %>
 
       <% if (entries.length===0) { %>
-        <!-- EMPTY STATE -->
         <div class="text-center py-20 card-shadow rounded-3xl border-dashed">
           <div
             class="mx-auto w-24 h-24 empty-icon rounded-3xl flex items-center justify-center text-6xl mb-6 shadow-inner">
@@ -173,36 +72,42 @@
             🔥 Viết nhật ký ngay
           </a>
         </div>
-          <% } else { %>
-            <div class="flex items-center gap-4 mb-12">
-              <span class="bg-[#E0ECF9] accent-text px-6 py-2 rounded-full font-black text-sm">
-                <%= isAllMonths ? 'TẤT CẢ NHẬT KÝ' : `Tháng ${currentMonth}, ${currentYear}` %>
-              </span>
-              <div class="h-[1px] flex-1 bg-slate-100"></div>
-              <span class="text-xs font-bold text-slate-300 uppercase" id="entryCount">
-                <%= entries.length %> bài viết
-              </span>
-            </div>
+        <% } else { %>
+          <div class="flex items-center gap-4 mb-12">
+            <span class="bg-[#E0ECF9] accent-text px-6 py-2 rounded-full font-black text-sm">
+              <%= isAllMonths ? 'TẤT CẢ NHẬT KÝ' : `Tháng ${currentMonth}, ${currentYear}` %>
+            </span>
+            <div class="h-[1px] flex-1 bg-slate-100"></div>
+            <span class="text-xs font-bold text-slate-300 uppercase" id="entryCount">
+              <%= entries.length %> bài viết
+            </span>
+          </div>
 
-            <div class="timeline-container space-y-20 pb-20" id="timelineContainer">
-              <div class="timeline-line"></div>
+          <div class="timeline-container space-y-20 pb-20" id="timelineContainer">
+            <div class="timeline-line"></div>
 
-              <% entries.forEach((entry, index)=> {
-                let moodIcon = entry.moodIcon || '😊';
-                let moodName = entry.mood || 'Vui vẻ';
-                let moodColor = entry.moodColor || 'blue';
-                let side = entry.side || (index % 2 === 0 ? 'left' : 'right');
-                let displayDate = entry.date;
-                %>
-                <div class="flex <%= side === 'left' ? 'justify-start' : 'justify-end' %> relative timeline-item"
-                  data-mood="<%= moodName.toLowerCase() %>" data-date="<%= displayDate %>" data-id="<%= entry._id %>">
-                  <div class="emoji-dot border-<%= moodColor %>-200">
-                    <%= moodIcon %>
-                  </div>
-                  <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
-                    <% if (entry.image) { %>
-                      <img src="<%= entry.image %>" class="h-48 w-full object-cover" />
+            <% entries.forEach((entry, index)=> {
+              let moodIcon = entry.moodIcon || '😊';
+              let moodName = entry.mood || 'Vui vẻ';
+              let moodColor = entry.moodColor || 'blue';
+              let side = entry.side || (index % 2 === 0 ? 'left' : 'right');
+              let displayDate = entry.date;
+              %>
+              <div class="flex <%= side === 'left' ? 'justify-start' : 'justify-end' %> relative timeline-item"
+                data-mood="<%= moodName.toLowerCase() %>" data-date="<%= displayDate %>" data-id="<%= entry._id %>">
+                <div class="emoji-dot border-<%= moodColor %>-200">
+                  <%= moodIcon %>
+                </div>
+
+                <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
+                  <% let displayImg=entry.image; if (!displayImg && entry.images && entry.images.length> 0) {
+                    displayImg = entry.images[0]; // Lấy ảnh đầu tiên nếu là mảng
+                    }
+                    %>
+                    <% if (displayImg) { %>
+                      <img src="<%= displayImg %>" class="h-48 w-full object-cover" />
                       <% } %>
+
                         <div class="p-6">
                           <div class="flex justify-between items-center mb-4">
                             <span
@@ -211,12 +116,10 @@
                                 <%= moodName %>
                             </span>
                             <div class="flex gap-3 text-slate-400">
-                              <i onclick="editEntry(this)"
-                                class="fa-solid fa-pen hover-accent cursor-pointer"></i>
+                              <i class="fa-solid fa-pen hover-accent cursor-pointer btn-edit"></i>
                               <i
-                                class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer"></i>
-                              <i onclick="deleteEntry(this)"
-                                class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer"></i>
+                                class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer btn-star"></i>
+                              <i class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer btn-delete"></i>
                             </div>
                           </div>
                           <p class="text-[10px] font-black text-slate-400 uppercase mb-2">📅 <%= displayDate %>
@@ -225,28 +128,54 @@
                             <%= entry.content %>
                           </p>
                         </div>
-                  </div>
                 </div>
-                <% }); %>
-            </div>
-            <% } %>
+              </div>
+              <% }); %>
+          </div>
+          <% } %>
   </div>
 
   <script>
-    function editEntry(el) {
-      const id = el.closest('.timeline-item').dataset.id;
-      if (id) window.location.href = `/diaries/edit/${id}`;
-    }
-
-    function deleteEntry(el) {
-      if (!confirm("🗑️ Bạn có chắc muốn xóa bài viết này?")) return;
-      const id = el.closest('.timeline-item').dataset.id;
-      if (id) {
-        fetch(`/diaries/delete/${id}`, { method: 'POST' })
-          .then(res => res.ok ? location.reload() : alert('❌ Xóa thất bại!'))
-          .catch(() => alert('❌ Lỗi kết nối!'));
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('btn-edit')) {
+        const id = e.target.closest('.timeline-item').dataset.id;
+        if (id) window.location.href = `/diaries/edit/${id}`;
       }
-    }
+
+      if (e.target.classList.contains('btn-delete')) {
+        if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
+        const id = e.target.closest('.timeline-item').dataset.id;
+        if (id) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/diaries/delete/${id}`;
+          document.body.appendChild(form);
+          form.submit();
+        }
+      }
+
+      if (e.target.classList.contains('btn-star')) {
+        const btn = e.target;
+        const id = btn.closest('.timeline-item').dataset.id;
+        if (id) {
+          fetch(`/diaries/star/${id}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+              if (data.ok) {
+                if (data.isStarred) {
+                  btn.classList.remove('fa-regular');
+                  btn.classList.add('fa-solid');
+                  btn.style.color = '#FBBF24';
+                } else {
+                  btn.classList.remove('fa-solid');
+                  btn.classList.add('fa-regular');
+                  btn.style.color = '';
+                }
+              }
+            });
+        }
+      }
+    });
 
     function applyFilter() {
       const month = document.getElementById('monthFilter').value;
@@ -286,8 +215,10 @@
           updateVisibleCount(visible);
         });
       });
-
       // initialize count
       updateVisibleCount(timelineItems.length);
     })();
+
+    document.getElementById('monthFilter').addEventListener('change', applyFilter);
+    document.getElementById('yearFilter').addEventListener('change', applyFilter);
   </script>

@@ -1,473 +1,520 @@
-<% title = 'Chỉnh sửa hồ sơ - Bear Diary'; %>
+<% title='Chỉnh sửa hồ sơ - Bear Diary' ; %>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-<style>
-  :root {
-    --primary-color: #2563eb;
-    --bg-card: #ffffff;
-    --border-color: #f1f5f9;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-  }
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --bg-card: #ffffff;
+      --border-color: #f1f5f9;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
 
-  [data-theme="dark"] {
-    --bg-card: #1e293b;
-    --border-color: #334155;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-  }
+    [data-theme="dark"] {
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
-  .edit-profile-card {
-    max-width: 650px;
-    margin: 3rem auto;
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    background: var(--bg-card);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color);
-  }
+    .edit-profile-card {
+      max-width: 650px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      background: var(--bg-card);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-color);
+    }
 
-  .profile-header {
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
-  }
+    .profile-header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
 
-  .profile-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-main);
-  }
+    .profile-header h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
 
-  /* Avatar Section Layout */
-  .profile-grid {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 2.5rem;
-    align-items: start;
-  }
+    /* Avatar Section Layout */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
 
-  .avatar-section {
-    text-align: center;
-  }
+    .avatar-section {
+      text-align: center;
+    }
 
-  .avatar-wrapper {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 1rem;
-  }
+    .avatar-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1rem;
+    }
 
-  .avatar-preview {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    background: #f8fafc;
-  }
+    .avatar-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      background: #f8fafc;
+    }
 
-  .avatar-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
 
-  .avatar-fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 42px;
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-    color: white;
-  }
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: white;
+    }
 
-  /* Custom File Upload Button */
-  .btn-upload-custom {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--bg-card);
-    color: var(--text-main);
-    transition: all 0.2s;
-  }
+    /* Custom File Upload Button */
+    .btn-upload-custom {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
 
-  .btn-upload-custom:hover {
-    background: var(--border-color);
-  }
+    .btn-upload-custom:hover {
+      background: var(--border-color);
+    }
 
-  #avatarFile { display: none; }
+    #avatarFile {
+      display: none;
+    }
 
-  /* Form Styling */
-  .form-group { margin-bottom: 1.5rem; }
+    /* Form Styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
 
-  .form-label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-  }
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
 
-  .styled-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    color: var(--text-main);
-    font-size: 1rem;
-    transition: all 0.3s ease;
-  }
+    .styled-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
 
-  .styled-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-  }
+    .styled-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
 
-  /* Actions */
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-  }
+    /* Actions */
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
 
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
 
-  .btn-save { background: var(--primary-color); color: white; }
-  .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-save {
+      background: var(--primary-color);
+      color: white;
+    }
 
-  .btn-cancel { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
-  .btn-cancel:hover { background: var(--border-color); }
+    .btn-save:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
 
-  /* Cropper Modal */
-  .crop-modal {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-    z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);
-  }
-  .crop-modal.active { display: flex; }
-  .crop-container {
-    background: var(--bg-card); width: 90%; max-width: 500px; padding: 2rem; border-radius: 1.5rem;
-  }
-  .crop-image-container { height: 300px; margin: 1.5rem 0; background: #000; border-radius: 0.5rem; overflow: hidden; }
+    .btn-cancel {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
 
-  @media (max-width: 640px) {
-    .profile-grid { grid-template-columns: 1fr; }
-    .avatar-section { margin-bottom: 1rem; }
-  }
-</style>
+    .btn-cancel:hover {
+      background: var(--border-color);
+    }
 
-<div class="edit-profile-card">
-  <div class="profile-header">
-    <h2>Hồ sơ của tôi</h2>
-  </div>
+    /* Cropper Modal */
+    .crop-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
 
-  <form id="editProfileForm">
-    <div class="profile-grid">
-      <div class="avatar-section">
-        <div class="avatar-wrapper">
-          <div class="avatar-preview" id="currentAvatar">
-            <% if (user.avatar && user.avatar !== 'U' && !user.avatar.match(/^[A-Z]$/)) { %>
-              <img id="avatarImg" src="<%= user.avatar %>" alt="avatar">
-            <% } else { %>
-              <div id="avatarFallback" class="avatar-fallback"><%= (user.name || 'U').charAt(0).toUpperCase() %></div>
-            <% } %>
+    .crop-modal.active {
+      display: flex;
+    }
+
+    .crop-container {
+      background: var(--bg-card);
+      width: 90%;
+      max-width: 500px;
+      padding: 2rem;
+      border-radius: 1.5rem;
+    }
+
+    .crop-image-container {
+      height: 300px;
+      margin: 1.5rem 0;
+      background: #000;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    @media (max-width: 640px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .avatar-section {
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+
+  <div class="edit-profile-card">
+    <div class="profile-header">
+      <h2>Hồ sơ của tôi</h2>
+    </div>
+
+    <form id="editProfileForm">
+      <div class="profile-grid">
+        <div class="avatar-section">
+          <div class="avatar-wrapper">
+            <div class="avatar-preview" id="currentAvatar">
+              <% if (user.avatar && user.avatar !=='U' && !user.avatar.match(/^[A-Z]$/)) { %>
+                <img id="avatarImg" src="<%= user.avatar %>" alt="avatar">
+                <% } else { %>
+                  <div id="avatarFallback" class="avatar-fallback">
+                    <%= (user.name || 'U' ).charAt(0).toUpperCase() %>
+                  </div>
+                  <% } %>
+            </div>
+          </div>
+
+          <label for="avatarFile" class="btn-upload-custom">
+            <i class="fa-regular fa-image"></i> Thay đổi
+          </label>
+          <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/jpg" />
+          <div id="fileError" style="color: #ef4444; font-size: 11px; margin-top: 8px;"></div>
+        </div>
+
+        <div class="form-content">
+          <div class="form-group">
+            <label class="form-label">Tên</label>
+            <input name="name" id="userName" type="text" value="<%= user.name %>" required class="styled-input"
+              placeholder="Enter your name" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input name="email" id="userEmail" type="email" value="<%= user.email %>" required class="styled-input"
+              placeholder="your@email.com" />
           </div>
         </div>
-        
-        <label for="avatarFile" class="btn-upload-custom">
-          <i class="fa-regular fa-image"></i> Thay đổi
-        </label>
-        <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/jpg" />
-        <div id="fileError" style="color: #ef4444; font-size: 11px; margin-top: 8px;"></div>
       </div>
 
-      <div class="form-content">
-        <div class="form-group">
-          <label class="form-label">Tên</label>
-          <input name="name" id="userName" type="text" value="<%= user.name %>" required class="styled-input" placeholder="Enter your name" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input name="email" id="userEmail" type="email" value="<%= user.email %>" required class="styled-input" placeholder="your@email.com" />
-        </div>
+      <div class="form-actions">
+        <a href="/diaries/profile" class="btn btn-cancel">Hủy</a>
+        <button type="button" id="saveBtn" class="btn btn-save">Lưu thay đổi</button>
       </div>
-    </div>
+    </form>
+  </div>
 
-    <div class="form-actions">
-      <a href="/diaries/profile" class="btn btn-cancel">Hủy</a>
-      <button type="button" id="saveBtn" class="btn btn-save">Lưu thay đổi</button>
-    </div>
-  </form>
-</div>
-
-<div id="cropModal" class="crop-modal">
-  <div class="crop-container">
-    <h3 style="text-align:center; font-weight: bold; color: var(--text-main)">Cắt ảnh</h3>
-    <div class="crop-image-container">
-      <img id="cropImage" src="" alt="Image to crop">
-    </div>
-    <div style="display:flex; gap:10px; justify-content: center">
-      <button id="cropCancelBtn" class="btn btn-cancel">Hủy</button>
-      <button id="cropSaveBtn" class="btn btn-save">Cắt & Lưu</button>
+  <div id="cropModal" class="crop-modal">
+    <div class="crop-container">
+      <h3 style="text-align:center; font-weight: bold; color: var(--text-main)">Cắt ảnh</h3>
+      <div class="crop-image-container">
+        <img id="cropImage" src="" alt="Image to crop">
+      </div>
+      <div style="display:flex; gap:10px; justify-content: center">
+        <button id="cropCancelBtn" class="btn btn-cancel">Hủy</button>
+        <button id="cropSaveBtn" class="btn btn-save">Cắt & Lưu</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="loading" class="loading" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.7); color:white; padding: 1rem 2rem; border-radius: 8px; z-index:9999;">
-  <i class="fas fa-spinner fa-spin"></i> Processing...
-</div>
+  <div id="loading" class="loading"
+    style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background: rgba(0,0,0,0.7); color:white; padding: 1rem 2rem; border-radius: 8px; z-index:9999;">
+    <i class="fas fa-spinner fa-spin"></i> Processing...
+  </div>
 
-<div id="toast" class="toast-message" style="display:none; position:fixed; bottom:20px; right:20px; padding: 12px 24px; border-radius: 8px; color:white; z-index:9999;"></div>
+  <div id="toast" class="toast-message"
+    style="display:none; position:fixed; bottom:20px; right:20px; padding: 12px 24px; border-radius: 8px; color:white; z-index:9999;">
+  </div>
 
-<script>
-  let cropper = null;
-  let pendingFile = null;
-  let isUploading = false;
+  <script>
+    let cropper = null;
+    let pendingFile = null;
+    let isUploading = false;
 
-  // Hiển thị toast message
-  function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = `toast-message ${type}`;
-    toast.style.display = 'block';
-    setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
-  }
-
-  // Cập nhật avatar preview
-  function updateAvatarPreview(imageUrl) {
-    const avatarPreview = document.getElementById('currentAvatar');
-    const existingImg = document.getElementById('avatarImg');
-    
-    if (existingImg) {
-      existingImg.src = imageUrl;
-      existingImg.style.display = 'block';
-      const fallback = document.getElementById('avatarFallback');
-      if (fallback) fallback.style.display = 'none';
-    } else {
-      avatarPreview.innerHTML = `<img id="avatarImg" src="${imageUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover">`;
+    // Hiển thị toast message
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast-message ${type}`;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
     }
-  }
 
-  // Resize ảnh trước khi crop
-  function resizeImage(file, maxSize, callback) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = new Image();
-      img.onload = function() {
-        let width = img.width;
-        let height = img.height;
-        
-        if (width > maxSize || height > maxSize) {
-          const ratio = Math.min(maxSize / width, maxSize / height);
-          width = width * ratio;
-          height = height * ratio;
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          canvas.toBlob(blob => callback(blob), file.type, 0.9);
-        } else {
-          callback(file);
-        }
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
+    // Cập nhật avatar preview
+    function updateAvatarPreview(imageUrl) {
+      const avatarPreview = document.getElementById('currentAvatar');
+      const existingImg = document.getElementById('avatarImg');
 
-  // Xử lý chọn file
-  document.getElementById('avatarFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const fileError = document.getElementById('fileError');
-    fileError.innerHTML = '';
-    
-    if (!file) return;
-    
-    if (file.size > 5 * 1024 * 1024) {
-      fileError.innerHTML = '❌ File quá lớn! Chọn ảnh nhỏ hơn 5MB';
-      this.value = '';
-      return;
+      if (existingImg) {
+        existingImg.src = imageUrl;
+        existingImg.style.display = 'block';
+        const fallback = document.getElementById('avatarFallback');
+        if (fallback) fallback.style.display = 'none';
+      } else {
+        avatarPreview.innerHTML = `<img id="avatarImg" src="${imageUrl}" alt="avatar" style="width:100%;height:100%;object-fit:cover">`;
+      }
     }
-    
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      fileError.innerHTML = '❌ Chỉ chấp nhận JPG, PNG, GIF';
-      this.value = '';
-      return;
-    }
-    
-    const loading = document.getElementById('loading');
-    loading.style.display = 'block';
-    
-    resizeImage(file, 1200, (resizedBlob) => {
-      pendingFile = resizedBlob;
+
+    // Resize ảnh trước khi crop
+    function resizeImage(file, maxSize, callback) {
       const reader = new FileReader();
-      reader.onload = function(e) {
-        loading.style.display = 'none';
-        
-        const cropImage = document.getElementById('cropImage');
-        cropImage.src = e.target.result;
-        document.getElementById('cropModal').classList.add('active');
-        
-        const initCropper = () => {
-          if (cropper) cropper.destroy();
-          cropper = new Cropper(cropImage, {
-            aspectRatio: 1,
-            viewMode: 2,
-            dragMode: 'move',
-            autoCropArea: 1,
-            zoomable: true,
-            minCropBoxWidth: 100,
-            minCropBoxHeight: 100
-          });
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxSize || height > maxSize) {
+            const ratio = Math.min(maxSize / width, maxSize / height);
+            width = width * ratio;
+            height = height * ratio;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(blob => callback(blob), file.type, 0.9);
+          } else {
+            callback(file);
+          }
         };
-        
-        if (cropImage.complete) initCropper();
-        else cropImage.onload = initCropper;
+        img.src = e.target.result;
       };
-      reader.readAsDataURL(resizedBlob);
-    });
-  });
-
-  // Đóng modal
-  window.closeCropModal = function() {
-    document.getElementById('cropModal').classList.remove('active');
-    if (cropper) {
-      cropper.destroy();
-      cropper = null;
+      reader.readAsDataURL(file);
     }
-    document.getElementById('avatarFile').value = '';
-    pendingFile = null;
-  };
 
-  // Cắt và upload
-  window.cropAndUpload = async function() {
-    if (!cropper || isUploading) return;
-    
-    isUploading = true;
-    const loading = document.getElementById('loading');
-    loading.style.display = 'block';
-    
-    try {
-      const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
-      if (!canvas) throw new Error('Không thể cắt ảnh');
-      
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-      if (!blob) throw new Error('Không thể xử lý ảnh');
-      
+    // Xử lý chọn file
+    document.getElementById('avatarFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      const fileError = document.getElementById('fileError');
+      fileError.innerHTML = '';
+
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        fileError.innerHTML = '❌ File quá lớn! Chọn ảnh nhỏ hơn 5MB';
+        this.value = '';
+        return;
+      }
+
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        fileError.innerHTML = '❌ Chỉ chấp nhận JPG, PNG, GIF';
+        this.value = '';
+        return;
+      }
+
+      const loading = document.getElementById('loading');
+      loading.style.display = 'block';
+
+      resizeImage(file, 1200, (resizedBlob) => {
+        pendingFile = resizedBlob;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          loading.style.display = 'none';
+
+          const cropImage = document.getElementById('cropImage');
+          cropImage.src = e.target.result;
+          document.getElementById('cropModal').classList.add('active');
+
+          const initCropper = () => {
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(cropImage, {
+              aspectRatio: 1,
+              viewMode: 2,
+              dragMode: 'move',
+              autoCropArea: 1,
+              zoomable: true,
+              minCropBoxWidth: 100,
+              minCropBoxHeight: 100
+            });
+          };
+
+          if (cropImage.complete) initCropper();
+          else cropImage.onload = initCropper;
+        };
+        reader.readAsDataURL(resizedBlob);
+      });
+    });
+
+    // Đóng modal
+    window.closeCropModal = function () {
+      document.getElementById('cropModal').classList.remove('active');
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      document.getElementById('avatarFile').value = '';
+      pendingFile = null;
+    };
+
+    // Cắt và upload
+    // Cắt và upload (Trở lại cách cũ 100%)
+    window.cropAndUpload = async function () {
+      if (!cropper || isUploading) return;
+      isUploading = true;
+      const loading = document.getElementById('loading');
+      loading.style.display = 'block';
+
+      try {
+        const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+        if (!canvas) throw new Error('Không thể cắt ảnh');
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+        if (!blob) throw new Error('Không thể xử lý ảnh');
+
+        const formData = new FormData();
+        // BẮT BUỘC DÙNG TÊN: 'avatarFile' để Multer nhận diện đúng
+        formData.append('avatarFile', blob, 'avatar.jpg');
+        formData.append('name', document.getElementById('userName').value);
+        formData.append('email', document.getElementById('userEmail').value);
+
+        const response = await fetch('/diaries/profile/update', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+          headers: { 'Accept': 'application/json' } // TUYỆT ĐỐI KHÔNG GHI Content-Type
+        });
+
+        const result = await response.json();
+
+        if (result.ok) {
+          const avatarUrl = result.avatar + '?t=' + Date.now();
+          updateAvatarPreview(avatarUrl);
+          localStorage.setItem('avatarUpdated', Date.now());
+          showToast('✅ Cập nhật avatar thành công!', 'success');
+          closeCropModal();
+
+          setTimeout(() => {
+            window.location.href = '/diaries/profile';
+          }, 1000);
+        } else {
+          throw new Error(result.error || 'Cập nhật thất bại');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('❌ ' + error.message, 'error');
+      } finally {
+        loading.style.display = 'none';
+        isUploading = false;
+      }
+    };
+
+    // Lưu thông tin (không đổi avatar)
+    document.getElementById('saveBtn').addEventListener('click', async function () {
+      if (isUploading) return;
+
+      const loading = document.getElementById('loading');
+      loading.style.display = 'block';
+
       const formData = new FormData();
-      formData.append('avatarFile', blob, 'avatar.jpg');
       formData.append('name', document.getElementById('userName').value);
       formData.append('email', document.getElementById('userEmail').value);
-      
-      const response = await fetch('/diaries/profile/update', {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin',
-        headers: { 'Accept': 'application/json' }
-      });
-      
-      const result = await response.json();
-      
-      if (result.ok) {
-        // Cập nhật avatar ngay lập tức
-        const avatarUrl = result.avatar + '?t=' + Date.now(); // Cache bust
-        updateAvatarPreview(avatarUrl);
-        
-        // Cập nhật session trong localStorage để đồng bộ trang profile
-        localStorage.setItem('avatarUpdated', Date.now());
-        
-        showToast('✅ Cập nhật avatar thành công!', 'success');
-        closeCropModal();
-        
-        // Reload trang profile sau 1 giây
-        setTimeout(() => {
-          window.location.href = '/diaries/profile';
-        }, 1000);
-      } else {
-        throw new Error(result.error || 'Cập nhật thất bại');
-      }
-    } catch (error) {
-      console.error(error);
-      showToast('❌ ' + error.message, 'error');
-    } finally {
-      loading.style.display = 'none';
-      isUploading = false;
-    }
-  };
 
-  // Lưu thông tin (không đổi avatar)
-  document.getElementById('saveBtn').addEventListener('click', async function() {
-    if (isUploading) return;
-    
-    const loading = document.getElementById('loading');
-    loading.style.display = 'block';
-    
-    const formData = new FormData();
-    formData.append('name', document.getElementById('userName').value);
-    formData.append('email', document.getElementById('userEmail').value);
-    
-    try {
-      const response = await fetch('/diaries/profile/update', {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin',
-        headers: { 'Accept': 'application/json' }
-      });
-      
-      const result = await response.json();
-      
-      if (result.ok) {
-        showToast('✅ Cập nhật thông tin thành công!', 'success');
-        setTimeout(() => {
-          window.location.href = '/diaries/profile';
-        }, 800);
-      } else {
-        throw new Error(result.error || 'Cập nhật thất bại');
-      }
-    } catch (error) {
-      console.error(error);
-      showToast('❌ ' + error.message, 'error');
-    } finally {
-      loading.style.display = 'none';
-    }
-  });
+      try {
+        const response = await fetch('/diaries/profile/update', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+          headers: { 'Accept': 'application/json' }
+        });
 
-  // Gắn event cho các nút trong modal (tránh inline handlers)
-  document.addEventListener('DOMContentLoaded', function () {
-    const cancel = document.getElementById('cropCancelBtn');
-    if (cancel) cancel.addEventListener('click', window.closeCropModal);
-    const save = document.getElementById('cropSaveBtn');
-    if (save) save.addEventListener('click', window.cropAndUpload);
-  });
-</script>
+        const result = await response.json();
+
+        if (result.ok) {
+          showToast('✅ Cập nhật thông tin thành công!', 'success');
+          setTimeout(() => {
+            window.location.href = '/diaries/profile';
+          }, 800);
+        } else {
+          throw new Error(result.error || 'Cập nhật thất bại');
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('❌ ' + error.message, 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
+    });
+
+    // Gắn event cho các nút trong modal (tránh inline handlers)
+    document.addEventListener('DOMContentLoaded', function () {
+      const cancel = document.getElementById('cropCancelBtn');
+      if (cancel) cancel.addEventListener('click', window.closeCropModal);
+      const save = document.getElementById('cropSaveBtn');
+      if (save) save.addEventListener('click', window.cropAndUpload);
+    });
+  </script>

@@ -1,139 +1,4 @@
 <% title = 'Cá nhân - Bear Diary'; %>
-<style>
-    .profile-card-main {
-      background: white;
-      border-radius: 2.5rem;
-      overflow: hidden;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
-    }
-
-    .banner-box {
-      height: 160px;
-      background: var(--banner);
-      position: relative;
-    }
-
-    .avatar-container {
-      width: 100px;
-      height: 100px;
-      background: #DBEAFE;
-      border: 6px solid var(--accent);
-      border-radius: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--accent);
-      margin-top: -50px;
-      margin-left: 40px;
-      position: relative;
-      z-index: 10;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-    }
-    
-    .avatar-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .avatar-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-size: 40px;
-      font-weight: bold;
-    }
-
-    .stat-item {
-      border-radius: 1.5rem;
-      padding: 24px 10px;
-      text-align: center;
-      transition: transform 0.2s;
-      background: white;
-      border: 1px solid var(--card-border);
-    }
-
-    .stat-item:hover {
-      transform: translateY(-4px);
-    }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 24px;
-      border-radius: 1.5rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .setting-row:hover {
-      background: #F8FAFF;
-    }
-
-    .icon-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    /* Dark mode */
-    [data-theme="dark"] .profile-card-main { background: #1E2937; border-color: #334155; }
-    [data-theme="dark"] .stat-item { background: #1E2937; border-color: #334155; }
-    [data-theme="dark"] .setting-row:hover { background: #334155; }
-    [data-theme="dark"] .text-slate-400, [data-theme="dark"] .setting-row p { color: #94A3B8 !important; }
-    [data-theme="dark"] .text-slate-700 { color: #E2E8F0 !important; }
-    [data-theme="dark"] .icon-wrap.bg-blue-50 { background: #1E2A3E; color: #60A5FA; }
-    [data-theme="dark"] .icon-wrap.bg-purple-50 { background: #2D1B3A; color: #A78BFA; }
-    [data-theme="dark"] .icon-wrap.bg-yellow-50 { background: #3D3A1A; color: #FACC15; }
-    [data-theme="dark"] .icon-wrap.bg-violet-50 { background: #2D1B3A; color: #C084FC; }
-    .icon-wrap.bg-emerald-50 { background: #ECFDF5; color: #10B981; }
-    [data-theme="dark"] .icon-wrap.bg-emerald-50 { background: #064E3B; color: #34D399; }
-    [data-theme="dark"] .avatar-container { background: #1E2A3E; border-color: #334155; color: #60A5FA; }
-    [data-theme="dark"] #themePicker .bg-white { background-color: #1E2937; }
-    [data-theme="dark"] #themePicker h3 { color: #F1F5F9; }
-    [data-theme="dark"] .banner-box { background: linear-gradient(135deg, #1E2937 0%, #0F172A 100%); }
-    [data-theme="dark"] .bg-rose-50 { background: #3D1A1A !important; }
-    [data-theme="dark"] .bg-emerald-50 { background: #1A3D2A !important; }
-    [data-theme="dark"] .bg-yellow-50 { background: #3D3A1A !important; }
-    [data-theme="dark"] .bg-\[\#E0ECF9\] { background: #1E2A3E !important; }
-    [data-theme="dark"] .text-rose-500 { color: #F87171 !important; }
-    [data-theme="dark"] .text-emerald-500 { color: #34D399 !important; }
-    [data-theme="dark"] .text-yellow-600 { color: #FACC15 !important; }
-
-    /* Notification animations */
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-    .custom-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: slideInRight 0.3s ease;
-    }
-</style>
 
 <div class="flex items-center gap-4 mb-8">
     <div class="w-12 h-12 flex items-center justify-center text-white text-xl shadow-lg rounded-2xl" style="background: var(--accent)">
@@ -263,6 +128,36 @@
     </div>
 </div>
 
+<div id="changePasswordModal" class="hidden fixed inset-0 bg-black/50 items-center justify-center z-[100] p-4 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl border border-blue-50 relative modal-animate">
+        <div class="text-center mb-6">
+            <div class="text-4xl mb-3">🔑</div>
+            <h3 class="text-2xl font-black text-[#1E3A8A] dark:text-white">Đổi mật khẩu</h3>
+            <p class="text-slate-400 text-sm font-bold">Nhập thông tin để cập nhật mật khẩu 🐻</p>
+        </div>
+
+        <form action="/auth/change-password" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Mật khẩu hiện tại</label>
+                <input type="password" name="currentPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Mật khẩu mới</label>
+                <input type="password" name="newPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Xác nhận mật khẩu</label>
+                <input type="password" name="confirmNewPassword" placeholder="••••••••" class="w-full bg-[#F8FBFF] dark:bg-slate-700 border border-[#EBF4FF] dark:border-slate-600 rounded-2xl p-4 outline-none focus:border-blue-500 dark:text-white" required>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" id="closePwdModal" class="flex-1 py-4 text-slate-400 font-bold hover:text-slate-600 transition-colors">Hủy bỏ</button>
+                <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg transition-all">Lưu 🐻</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
       <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
@@ -298,11 +193,10 @@
         editBtn.addEventListener('click', () => window.location.href = '/diaries/profile/edit');
       }
 
-      // 3. XỬ LÝ NÚT GẠT 2FA (CÓ DEBUG)
+      // 3. XỬ LÝ NÚT GẠT 2FA
       const twoFactorToggle = document.getElementById('2fa-toggle');
       const statusText = document.getElementById('2fa-status-text');
 
-      // Hàm hiển thị thông báo
       window.showNotification = function(message, type = 'info') {
           const oldNotif = document.querySelector('.custom-notification');
           if (oldNotif) oldNotif.remove();
@@ -311,17 +205,14 @@
           notification.className = 'custom-notification';
           if (type === 'success') {
               notification.style.backgroundColor = '#10B981';
-              notification.style.color = 'white';
           } else if (type === 'error') {
               notification.style.backgroundColor = '#EF4444';
-              notification.style.color = 'white';
           } else {
               notification.style.backgroundColor = '#3B82F6';
-              notification.style.color = 'white';
           }
+          notification.style.color = 'white';
           notification.textContent = message;
           document.body.appendChild(notification);
-          
           setTimeout(() => {
               notification.style.animation = 'slideOutRight 0.3s ease';
               setTimeout(() => notification.remove(), 300);
@@ -332,12 +223,10 @@
           let isUpdating = false;
           twoFactorToggle.addEventListener('change', async function() {
             if (isUpdating) return;
-            // Nếu bật 2FA
             if (this.checked) {
               window.location.href = '/auth/setup-2fa';
               return;
             }
-            // Nếu tắt 2FA
             const confirmDisable = confirm('Bạn có chắc chắn muốn tắt bảo mật 2 lớp không?');
             if (!confirmDisable) {
               this.checked = true;
@@ -359,19 +248,36 @@
               }
             } catch (error) {
               this.checked = true;
-              window.showNotification('Lỗi kết nối đến server!', 'error');
+              window.showNotification('Lỗi kết nối!', 'error');
             } finally {
               isUpdating = false;
             }
           });
-        }
-
-      // 4. Bảo mật
-      const pwdBtn = document.getElementById('changePasswordBtn');
-      if (pwdBtn) {
-        pwdBtn.addEventListener('click', () => alert('🔒 Sử dụng luồng Quên mật khẩu nội bộ để bảo mật nhất!'));
       }
 
+      // 4. XỬ LÝ MODAL ĐỔI MẬT KHẨU
+      const pwdBtn = document.getElementById('changePasswordBtn');
+      const pwdModal = document.getElementById('changePasswordModal');
+      const closePwdBtn = document.getElementById('closePwdModal');
+
+      if (pwdBtn && pwdModal) {
+        pwdBtn.addEventListener('click', () => {
+          pwdModal.style.display = 'flex'; // Hiện modal
+        });
+      }
+
+      if (closePwdBtn) {
+        closePwdBtn.addEventListener('click', () => {
+          pwdModal.style.display = 'none'; // Đóng modal
+        });
+      }
+
+      // Đóng khi click ra ngoài vùng trắng
+      window.addEventListener('click', (e) => {
+        if (e.target === pwdModal) {
+          pwdModal.style.display = 'none';
+        }
+      });
       // 5. Theme picker
       const themePickerBtn = document.getElementById('themePickerBtn');
       const themePickerModal = document.getElementById('themePicker');
@@ -387,14 +293,8 @@
           ev.stopPropagation();
           const t = el.getAttribute('data-theme');
           if (t) {
-            const accent = (window.THEME_ACCENTS && window.THEME_ACCENTS[t]) || null;
             localStorage.setItem('moodiary-theme', t);
-            if (accent) localStorage.setItem('moodiary-accent', accent);
-            if (localStorage.getItem('moodiary-is-dark') === '1') {
-              if (accent) document.documentElement.style.setProperty('--accent', accent);
-            } else if (window.setTheme) {
-              window.setTheme(t);
-            }
+            if (window.setTheme) window.setTheme(t);
           }
           themePickerModal.classList.add('hidden');
         });

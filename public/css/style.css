@@ -239,13 +239,19 @@ input:checked+.slider:before { transform: translateX(20px); }
 
 /* Report Dark Mode */
 [data-theme="dark"] .glass-card { background-color: #1E2937; border-color: #334155; }
-[data-theme="dark"] .cal-day { background-color: #1E2937; border-color: #334155; color: #E2E8F0; }
 
-/* Đã đổi thành background-color để KHÔNG LÀM RESET KÍCH THƯỚC ẢNH */
-[data-theme="dark"] .cal-day.has-journal { background-color: rgba(90, 155, 212, 0.15); }
-[data-theme="dark"] .cal-day.has-journal.has-image { background-color: transparent !important; }
+/* 1. Ô lịch bình thường: Chỉnh viền sáng hơn (#475569) để không bị chìm vào nền */
+[data-theme="dark"] .cal-day { background-color: #1E2937; border-color: #475569; color: #F1F5F9; }
 
-[data-theme="dark"] .stat-card { background-color: #1E2937; border-color: #334155; }
+/* 2. Ngày CÓ NHẬT KÝ: Trả lại viền màu của Theme (var(--accent)) */
+[data-theme="dark"] .cal-day.has-journal { background-color: rgba(90, 155, 212, 0.2); border-color: var(--accent); }
+
+/* 3. Ngày HÔM NAY: Trả lại viền màu của Theme */
+[data-theme="dark"] .cal-day.today { border-color: var(--accent); }
+
+[data-theme="dark"] .cal-day.has-image { background-color: transparent !important; }
+[data-theme="dark"] .stat-card { background-color: #1E2937; border-color: #334155; color: #FFFFFF; }
+[data-theme="dark"] .stat-card h5 { color: #FFFFFF !important; font-weight: 900; }
 [data-theme="dark"] .important-star { background-color: #1E2937; }
 [data-theme="dark"] .cal-day.has-journal.has-image .important-star { background-color: rgba(0,0,0,0.6); }
 

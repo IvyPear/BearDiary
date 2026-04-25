@@ -3,7 +3,7 @@
 
 <head>
   <script>
-    (function(){
+    (function () {
       try {
         var isDark = localStorage.getItem('moodiary-is-dark') === '1';
         var saved = localStorage.getItem('moodiary-theme') || 'blue';
@@ -21,12 +21,14 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title><%= typeof title != 'undefined' ? title : 'Bear Diary' %></title>
+  <title>
+    <%= typeof title !='undefined' ? title : 'Bear Diary' %>
+  </title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -51,23 +53,32 @@
     </div>
 
     <nav class="flex-1 space-y-2">
-      <a href="/" class="nav-item <%= title === 'Trang chủ - Bear Diary' ? 'active' : '' %>">
+      <a href="/diaries/home"
+        class="nav-item <%= (typeof title !== 'undefined' && title.includes('Trang chủ')) ? 'active' : '' %>">
         <i class="fa-solid fa-house"></i>
         <span>Trang chủ</span>
       </a>
-      <a href="/diaries/timeline" class="nav-item <%= title === 'Dòng thời gian - Bear Diary' || title === 'Nhật ký - Bear Diary' ? 'active' : '' %>">
+
+      <a href="/diaries/timeline"
+        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Dòng thời gian') || title.includes('Nhật ký'))) ? 'active' : '' %>">
         <i class="fa-solid fa-book-open"></i>
         <span>Timeline</span>
       </a>
-      <a href="/diaries/report" class="nav-item <%= title === 'Mood Report - Bear Diary' || title === 'Báo cáo - Bear Diary' ? 'active' : '' %>">
+
+      <a href="/diaries/report"
+        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Báo cáo') || title.includes('Mood Report'))) ? 'active' : '' %>">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Báo cáo</span>
       </a>
-      <a href="/diaries/tasks" class="nav-item <%= title === 'Công việc - Bear Diary' ? 'active' : '' %>">
+
+      <a href="/diaries/tasks"
+        class="nav-item <%= (typeof title !== 'undefined' && title.includes('Công việc')) ? 'active' : '' %>">
         <i class="fa-solid fa-list-check"></i>
         <span>Công việc</span>
       </a>
-      <a href="/diaries/profile" class="nav-item <%= title === 'Cá nhân - Bear Diary' ? 'active' : '' %>">
+
+      <a href="/diaries/profile"
+        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Cá nhân') || title.includes('Hồ sơ'))) ? 'active' : '' %>">
         <i class="fa-solid fa-user"></i>
         <span>Cá nhân</span>
       </a>
@@ -186,7 +197,7 @@
           }
         });
       }
-      
+
       // Highlight current page in sidebar based on URL
       const currentPath = window.location.pathname;
       const navLinks = document.querySelectorAll('.nav-item');

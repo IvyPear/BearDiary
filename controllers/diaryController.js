@@ -44,11 +44,13 @@ exports.createEntry = async (req, res) => {
             return res.redirect('/auth/login');
         }
 
-        const { content, mood } = req.body;
+        // CHỈ THÊM isStarred VÀO ĐÂY ĐỂ LƯU ĐƯỢC SAO TỪ TRANG CHỦ
+        const { content, mood, isStarred } = req.body; 
         const newDiary = new Diary({
             userId: req.session.user._id,
             content: content,
-            mood: mood || '😊 Happy'
+            mood: mood || '😊 Happy',
+            isStarred: isStarred === 'true' // ĐÃ THÊM DÒNG NÀY
         });
         
         await newDiary.save();
@@ -398,7 +400,6 @@ exports.updateProfile = async (req, res) => {
         req.flash('error_msg', 'Có lỗi xảy ra!');
         res.redirect('/diaries/profile');
     }
-// ↑ THIS WAS THE MISSING }; — now correctly closed above
 };
 
 // ====================== THÊM MỚI CHO TASK ======================
@@ -487,6 +488,7 @@ exports.getTimelineWithHighlight = async (req, res) => {
         res.send('Lỗi tải Timeline');
     }
 };
+
 exports.createDiary = async (req, res) => {
     try {
         if (!req.session || !req.session.user || !req.session.user._id) {
@@ -522,12 +524,13 @@ exports.createDiary = async (req, res) => {
         });
 
         await newDiary.save();
-        res.redirect('/diaries/home');
+            res.redirect('/diaries/home');
     } catch (error) {
         console.error('Lỗi tạo nhật ký:', error);
         res.redirect('/diaries/home');
     }
 };
+
 exports.toggleStar = async (req, res) => {
     try {
         const userId = req.session.user._id;

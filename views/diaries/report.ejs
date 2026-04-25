@@ -124,6 +124,7 @@
       const icons = rawLabels.map(l => l.split(' ')[0] || '');
       const colors = ['#FDE68A', '#FBCFE8', '#A7F3D0', '#BFDBFE', '#E9D5FF', '#FCA5A5', '#D8B4FE'];
       const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-dark').trim() || '#2C4A7C';
+      
       new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -176,8 +177,8 @@
               }
             },
             datalabels: {
-              color: primaryColor,
-              font: { weight: 'bold', size: 13 },
+              color: '#1E293B',
+              font: { weight: '900', size: 13 },
               formatter: (value, context) => {
                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                 return Math.round((value / total) * 100) + '%';
@@ -185,9 +186,11 @@
               anchor: 'center',
               align: 'center',
               offset: 0,
-              backgroundColor: 'rgba(255,255,255,0.85)',
+              backgroundColor: '#FFFFFF',
+              borderWidth: 2,
+              borderColor: '#E2E8F0',
               borderRadius: 20,
-              padding: { left: 6, right: 6, top: 3, bottom: 3 }
+              padding: { left: 8, right: 8, top: 4, bottom: 4 }
             }
           }
         },

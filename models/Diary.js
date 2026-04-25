@@ -41,7 +41,6 @@ const diarySchema = new mongoose.Schema({
         default: '😊 Happy' 
     },
     images: [{ type: String }],           // ← Thay vì image (singular)
-    highlights: [HighlightSchema],        // ← Mảng highlight quan trọng
     isStarred: { 
         type: Boolean, 
         default: false 

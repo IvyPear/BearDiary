@@ -238,12 +238,16 @@ input:checked+.slider:before { transform: translateX(20px); }
 .stat-card { background: white; border-radius: 1.5rem; padding: 20px; text-align: center; border: 1px solid var(--card-border); }
 
 /* Report Dark Mode */
-[data-theme="dark"] .glass-card { background: #1E2937; border-color: #334155; }
-[data-theme="dark"] .cal-day { background: #1E2937; border-color: #334155; color: #E2E8F0; }
-[data-theme="dark"] .cal-day.has-journal { background: rgba(90, 155, 212, 0.15); }
-[data-theme="dark"] .stat-card { background: #1E2937; border-color: #334155; }
-[data-theme="dark"] .important-star { background: #1E2937; }
-[data-theme="dark"] .cal-day.has-journal.has-image .important-star { background: #1E2937; }
+[data-theme="dark"] .glass-card { background-color: #1E2937; border-color: #334155; }
+[data-theme="dark"] .cal-day { background-color: #1E2937; border-color: #334155; color: #E2E8F0; }
+
+/* Đã đổi thành background-color để KHÔNG LÀM RESET KÍCH THƯỚC ẢNH */
+[data-theme="dark"] .cal-day.has-journal { background-color: rgba(90, 155, 212, 0.15); }
+[data-theme="dark"] .cal-day.has-journal.has-image { background-color: transparent !important; }
+
+[data-theme="dark"] .stat-card { background-color: #1E2937; border-color: #334155; }
+[data-theme="dark"] .important-star { background-color: #1E2937; }
+[data-theme="dark"] .cal-day.has-journal.has-image .important-star { background-color: rgba(0,0,0,0.6); }
 
 /* ==========================================================================
    5. TIMELINE PAGE

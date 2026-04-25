@@ -208,7 +208,12 @@ input:checked+.slider:before { transform: translateX(20px); }
 [data-theme="dark"] .icon-wrap.bg-violet-50 { background: #2D1B3A; color: #C084FC; }
 .icon-wrap.bg-emerald-50 { background: #ECFDF5; color: #10B981; }
 [data-theme="dark"] .icon-wrap.bg-emerald-50 { background: #064E3B; color: #34D399; }
-[data-theme="dark"] .avatar-container { background: #1E2A3E; border-color: #334155; color: var(--accent); }
+[data-theme="dark"] .avatar-container { 
+        background: #1E2A3E; 
+        border-color: var(--accent); /* Trả lại màu viền của Theme */
+        color: var(--accent); 
+        box-shadow: 0 0 15px color-mix(in srgb, var(--accent) 30%, transparent); /* Hiệu ứng phát sáng vòng ngoài */
+    }
 [data-theme="dark"] #themePicker .bg-white { background-color: #1E2937; }
 [data-theme="dark"] #themePicker h3 { color: #F1F5F9; }
 [data-theme="dark"] .banner-box { background: linear-gradient(135deg, #1E2937 0%, #0F172A 100%); }

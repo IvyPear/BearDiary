@@ -19,19 +19,36 @@ connectDB();
 
 // 2. CẤU HÌNH BẢO MẬT HELMET (Sửa lỗi vỡ giao diện)
 // Cấu hình này cho phép tải CSS/JS từ các nguồn phổ biến như Tailwind và FontAwesome
-app.use(
-  helmet({
+app.use(helmet({
     contentSecurityPolicy: {
-      directives: {
-        "default-src": ["'self'"],
-        "script-src": ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-        "img-src": ["'self'", "data:", "https://*"],
-      },
-    },
-  })
-);
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.tailwindcss.com",
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com",
+                "https://fonts.googleapis.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.tailwindcss.com",
+                "https://cdnjs.cloudflare.com",
+                "https://fonts.googleapis.com",
+                "https://fonts.gstatic.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdnjs.cloudflare.com"
+            ],
+            imgSrc: ["'self'", "data:", "https:", "blob:"],
+            connectSrc: ["'self'"],
+        }
+    }
+}));
 
 // 3. GIỚI HẠN TỐC ĐỘ TRUY CẬP (Rate Limit)
 const limiter = rateLimit({

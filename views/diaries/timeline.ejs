@@ -114,7 +114,7 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <select id="monthFilter" class="filter-select" onchange="applyFilter()">
+      <select id="monthFilter" class="filter-select">
         <option value="" <%=!currentMonth ? 'selected' : '' %>>Tất cả tháng</option>
         <option value="1" <%=currentMonth==='1' ? 'selected' : '' %>>Tháng 1</option>
         <option value="2" <%=currentMonth==='2' ? 'selected' : '' %>>Tháng 2</option>
@@ -130,7 +130,7 @@
         <option value="12" <%=currentMonth==='12' ? 'selected' : '' %>>Tháng 12</option>
       </select>
 
-      <select id="yearFilter" class="filter-select" onchange="applyFilter()">
+      <select id="yearFilter" class="filter-select">
         <option value="2024" <%=currentYear==='2024' ? 'selected' : '' %>>2024</option>
         <option value="2025" <%=currentYear==='2025' ? 'selected' : '' %>>2025</option>
         <option value="2026" <%=currentYear==='2026' ? 'selected' : '' %>>2026</option>
@@ -141,11 +141,14 @@
 
   <div class="flex flex-wrap gap-2 mb-12" id="filterPills">
     <button class="filter-pill active" data-mood="all">Tất cả (<%= entries.length %>)</button>
-    <button class="filter-pill" data-mood="happy">😊 Vui vẻ</button>
-    <button class="filter-pill" data-mood="calm">😌 Bình tĩnh</button>
-    <button class="filter-pill" data-mood="excited">🥳 Hào hứng</button>
-    <button class="filter-pill" data-mood="grateful">🙏 biết ơn</button>
-    <button class="filter-pill" data-mood="sad">😢 Buồn bã</button>
+<button class="filter-pill" data-mood="vui">😊 Vui vẻ</button>
+<button class="filter-pill" data-mood="bình">😌 Bình tĩnh</button>
+<button class="filter-pill" data-mood="hào">🥳 Hào hứng</button>
+<button class="filter-pill" data-mood="biết">🙏 Biết ơn</button>
+<button class="filter-pill" data-mood="buồn">😢 Buồn bã</button>
+<button class="filter-pill" data-mood="lo">😨 Lo lắng</button>
+<button class="filter-pill" data-mood="mệt">😴 Mệt mỏi</button>
+<button class="filter-pill" data-mood="tức">😡 Tức giận</button>
   </div>
 
   <div class="relative">
@@ -200,9 +203,9 @@
                     <%= moodIcon %>
                   </div>
                   <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
-                    <% if (entry.image) { %>
-                      <img src="<%= entry.image %>" class="h-48 w-full object-cover" />
-                      <% } %>
+                    <% if (entry.images && entry.images.length > 0) { %>
+  <img src="/uploads/diary/<%= entry.images[0].split('/').pop() %>" class="h-48 w-full object-cover" />
+<% } %>
                         <div class="p-6">
                           <div class="flex justify-between items-center mb-4">
                             <span
@@ -211,12 +214,9 @@
                                 <%= moodName %>
                             </span>
                             <div class="flex gap-3 text-slate-400">
-                              <i onclick="editEntry(this)"
-                                class="fa-solid fa-pen hover-accent cursor-pointer"></i>
-                              <i
-                                class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer"></i>
-                              <i onclick="deleteEntry(this)"
-                                class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer"></i>
+                              <i class="fa-solid fa-pen hover-accent cursor-pointer btn-edit"></i>
+                              <i class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer btn-star"></i>
+                              <i class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer btn-delete"></i>
                             </div>
                           </div>
                           <p class="text-[10px] font-black text-slate-400 uppercase mb-2">📅 <%= displayDate %>
@@ -231,22 +231,46 @@
             </div>
             <% } %>
   </div>
-
   <script>
-    function editEntry(el) {
-      const id = el.closest('.timeline-item').dataset.id;
-      if (id) window.location.href = `/diaries/edit/${id}`;
-    }
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('btn-edit')) {
+    const id = e.target.closest('.timeline-item').dataset.id;
+    if (id) window.location.href = `/diaries/edit/${id}`;
+  }
 
-    function deleteEntry(el) {
-      if (!confirm("🗑️ Bạn có chắc muốn xóa bài viết này?")) return;
-      const id = el.closest('.timeline-item').dataset.id;
-      if (id) {
-        fetch(`/diaries/delete/${id}`, { method: 'POST' })
-          .then(res => res.ok ? location.reload() : alert('❌ Xóa thất bại!'))
-          .catch(() => alert('❌ Lỗi kết nối!'));
-      }
+  if (e.target.classList.contains('btn-delete')) {
+    if (!confirm("Bạn có chắc muốn xóa bài viết này?")) return;
+    const id = e.target.closest('.timeline-item').dataset.id;
+    if (id) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/diaries/delete/${id}`;
+      document.body.appendChild(form);
+      form.submit();
     }
+  }
+  if (e.target.classList.contains('btn-star')) {
+  const btn = e.target;
+  const id = btn.closest('.timeline-item').dataset.id;
+  if (id) {
+    fetch(`/diaries/star/${id}`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          if (data.isStarred) {
+            btn.classList.remove('fa-regular');
+            btn.classList.add('fa-solid');
+            btn.style.color = '#FBBF24';
+          } else {
+            btn.classList.remove('fa-solid');
+            btn.classList.add('fa-regular');
+            btn.style.color = '';
+          }
+        }
+      });
+  }
+}
+});
 
     function applyFilter() {
       const month = document.getElementById('monthFilter').value;
@@ -290,4 +314,7 @@
       // initialize count
       updateVisibleCount(timelineItems.length);
     })();
+    
+document.getElementById('monthFilter').addEventListener('change', applyFilter);
+document.getElementById('yearFilter').addEventListener('change', applyFilter);
   </script>

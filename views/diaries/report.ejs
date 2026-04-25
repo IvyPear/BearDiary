@@ -43,16 +43,17 @@
   }
   
   .cal-day.has-journal {
-    border: 2px solid var(--accent, #5A9BD4);
-    background: rgba(90, 155, 212, 0.05);
-  }
+    border: 2px solid var(--accent);
+    background: rgb(90, 155, 212);
+}
   
   .cal-day.has-journal.has-image {
     background-size: cover;
     background-position: center;
     color: white;
     position: relative;
-  }
+    border: 2px solid var(--accent);
+}
   
   .cal-day.has-journal.has-image::before {
     content: '';
@@ -186,11 +187,11 @@
           else if (!day.hasJournal) classes += ' no-journal';
           else {
             classes += ' has-journal';
-            if (day.image) classes += ' has-image';
+            if (day.images && day.images.length > 0) classes += ' has-image';
           }
           if (day.isToday) classes += ' today';
         %>
-        <div class="<%= classes %>" <%- day.image ? `style="background-image: url('${day.image}')"` : '' %>>
+        <div class="<%= classes %>" <%- (day.images && day.images.length > 0) ? `style="background-image: url('${day.images[0]}')"` : '' %>>
           <% if (day.isStarred) { %>
             <div class="important-star"><i class="fa-solid fa-star"></i></div>
           <% } %>
@@ -317,4 +318,5 @@
         plugins: [ChartDataLabels]
       });
   }
+
 </script>

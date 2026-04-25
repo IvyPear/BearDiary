@@ -35,9 +35,9 @@ const diarySchema = new mongoose.Schema({
         type: String, 
         // Đã cập nhật enum để bao gồm cả các trạng thái tiếng Việt từ frontend gửi lên
         enum: [
-            '😊 Happy', '🥳 Excited', '😌 Calm', '🙏 Grateful', '😢 Sad', '😨 Anxious', '😴 Tired', '😡 Angry',
-            '😊 Vui vẻ', '🥳 Hào hứng', '😌 Bình yên', '🙏 Biết ơn', '😢 Buồn', '😢 Buồn bã', '😨 Lo lắng', '😴 Mệt mỏi', '😡 Tức giận', '😐 Normal'
-        ],
+    '😊 Happy', '🥳 Excited', '😌 Calm', '🙏 Grateful', '😢 Sad', '😨 Anxious', '😴 Tired', '😡 Angry',
+    '😊 Vui vẻ', '🥳 Hào hứng', '😌 Bình yên', '🙏 Biết ơn', '😢 Buồn', '😢 Buồn bã', '😨 Lo lắng', '😴 Mệt mỏi', '😡 Tức giận', '😡 Giận dữ'
+],
         default: '😊 Happy' 
     },
     images: [{ type: String }],           // ← Thay vì image (singular)

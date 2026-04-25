@@ -1,3 +1,13 @@
+<style>
+  .star-btn-home {
+    font-size: 22px;
+    color: #CBD5E1;
+    cursor: pointer;
+  }
+  .star-btn-home.active {
+    color: #FBBF24;
+  }
+</style>
 <div class="banner-gradient rounded-[2rem] md:rounded-[2.5rem] p-4 md:p-8 text-white flex justify-between items-center relative overflow-hidden mb-6 md:mb-8 shadow-xl">
   <div class="relative z-10">
     <p class="text-white/90 text-xs md:text-sm font-semibold mb-1" id="currentDate"></p>
@@ -45,14 +55,18 @@
   </div>
 
   <div class="lg:col-span-9 bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-8 card-shadow min-h-[400px] md:min-h-[450px] flex flex-col">
-    <form action="/diaries/create" method="POST" class="flex flex-col h-full flex-1">
+    <form action="/diaries/create" method="POST" enctype="multipart/form-data" class="flex flex-col h-full flex-1">
       <div class="flex justify-between items-center mb-4 md:mb-6">
         <div class="flex items-center gap-2 accent-text font-bold text-xs md:text-sm">
           ✨ Nhật ký hôm nay
         </div>
         <div class="flex gap-3 md:gap-4 items-center">
-          <i class="fa-regular fa-star text-slate-300 hover:text-amber-400 cursor-pointer"></i>
-          <i class="fa-regular fa-image text-slate-300 hover-accent cursor-pointer"></i>
+          <input type="hidden" name="isStarred" id="isStarredInput" value="false">
+<span id="starBtn" class="star-btn-home">☆</span> 
+          <label for="imageUpload" class="cursor-pointer">
+  <i class="fa-regular fa-image text-slate-300 hover-accent cursor-pointer"></i>
+</label>
+<input type="file" id="imageUpload" name="images" multiple accept="image/*" class="hidden">
         </div>
       </div>
 
@@ -61,8 +75,8 @@
         <textarea name="content" required
           class="w-full h-full outline-none border-t border-slate-100 pt-4 md:pt-6 primary-text placeholder:text-slate-300 resize-none text-sm md:text-base"
           placeholder="Bắt đầu viết những suy nghĩ của bạn..."></textarea>
+          <div id="imagePreview" class="flex flex-wrap gap-2 mt-2"></div>
       </div>
-
       <div class="flex justify-end mt-3 md:mt-4">
         <button type="submit"
           class="accent-bg btn-accent text-white px-4 md:px-8 py-2 md:py-3 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 shadow-md transition-all">
@@ -93,7 +107,7 @@
           else if (mLower.includes('hào') || mLower.includes('excited')) moodColor = 'purple';
 
           let entryDate = entry.date ? new Date(entry.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-          let image = entry.image || 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400';
+          let image = entry.image || (entry.images && entry.images.length > 0 ? entry.images[0] : 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400');
       %>
         <div class="bg-<%= moodColor %>-50 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow">
           <img src="<%= image %>" class="h-28 md:h-32 w-full object-cover" />
@@ -131,4 +145,36 @@
       document.getElementById('selectedMood').value = `${emoji} ${label}`.trim();
     });
   });
+  // Preview ảnh khi chọn
+document.getElementById('imageUpload').addEventListener('change', function() {
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  Array.from(this.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.className = 'h-16 w-16 object-cover rounded-xl border border-slate-200';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function toggleStar() {
+  const btn = document.getElementById('starBtn');
+  const input = document.getElementById('isStarredInput');
+  if (input.value === 'false') {
+    input.value = 'true';
+    btn.style.color = '#FBBF24'; // amber
+    btn.innerHTML = '★'; // solid star
+    btn.style.fontSize = '22px';
+  } else {
+    input.value = 'false';
+    btn.style.color = '#CBD5E1'; // slate-300
+    btn.innerHTML = '☆'; // outline star
+    btn.style.fontSize = '22px';
+  }
+}
+document.getElementById('starBtn').addEventListener('click', toggleStar);
 </script>

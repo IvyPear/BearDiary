@@ -70,11 +70,11 @@
           else if (!day.hasJournal) classes += ' no-journal';
           else {
             classes += ' has-journal';
-            if (day.image) classes += ' has-image';
+            if (day.images && day.images.length > 0) classes += ' has-image';
           }
           if (day.isToday) classes += ' today';
         %>
-        <div class="<%= classes %>" <%- day.image ? `style="background-image: url('${day.image}')"` : '' %>>
+        <div class="<%= classes %>" <%- (day.images && day.images.length > 0) ? `style="background-image: url('${day.images[0]}')"` : '' %>>
           <% if (day.isStarred) { %>
             <div class="important-star"><i class="fa-solid fa-star"></i></div>
           <% } %>
@@ -115,9 +115,7 @@
 </div>
 
 <script>
-  // Xử lý EJS trong nháy đơn để JS hiểu là string (không bị đỏ code ở VS Code)
   const entriesCount = Number('<%= entriesCount || 0 %>');
-  // Chỉ vẽ Chart nếu tháng đó có bài viết
   if (entriesCount > 0) {
       const ctx = document.getElementById('moodChart').getContext('2d');
       const rawLabels = JSON.parse('<%- chartLabels || "[]" %>');

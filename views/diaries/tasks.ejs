@@ -1,526 +1,685 @@
 <% title='Công việc - Bear Diary'; %>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- ==================== CSS ==================== -->
 <style>
-:root{
-  --t-bg:#F8FAFF;
-  --t-card:#ffffff;
-  --t-border:#E2E8F0;
-  --t-text:#334155;
-  --t-muted:#94A3B8;
-
-  --t-accent:#5A9BD4;
-  --t-accent2:#7EB8E8;
-  --t-accent-rgb:90,155,212;
-
-  --t-success:#10B981;
-  --t-warn:#F59E0B;
-  --t-danger:#EF4444;
-
-  /* background semantic */
-  --t-success-bg:#ECFDF5;
-  --t-warn-bg:#FFFBEB;
-  --t-danger-bg:#FEF2F2;
-
-  --t-shadow:0 4px 12px rgba(0,0,0,.04);
-  --t-shadow-lg:0 8px 24px rgba(0,0,0,.06);
+:root {
+  --t-bg: #F8FAFF;
+  --t-card: #ffffff;
+  --t-border: #E2E8F0;
+  --t-text: #334155;
+  --t-muted: #94A3B8;
+  --t-accent: #5A9BD4;
+  --t-accent2: #7EB8E8;
+  --t-accent-rgb: 90,155,212;
+  --t-success: #10B981;
+  --t-warn: #F59E0B;
+  --t-danger: #EF4444;
 }
 
-/* DARK MODE */
-[data-theme="dark"]{
-  --t-bg:#0F172A;
-  --t-card:#1E293B;
-  --t-border:#334155;
-  --t-text:#E2E8F0;
-  --t-muted:#94A3B8;
-
-  /* giữ accent nhưng chỉnh RGB để hover dùng */
-  --t-accent-rgb:90,155,212;
-
-  /* background semantic cho dark */
-  --t-success-bg:#064E3B;
-  --t-warn-bg:#431407;
-  --t-danger-bg:#450A0A;
-
-  --t-shadow:0 4px 20px rgba(0,0,0,.3);
-  --t-shadow-lg:0 12px 40px rgba(0,0,0,.5);
+[data-theme="dark"] {
+  --t-bg: #0F172A;
+  --t-card: #1E293B;
+  --t-border: #334155;
+  --t-text: #F8FAFC;
+  --t-muted: #94A3B8;
+  --t-accent: #60A5FA;
+  --t-accent2: #93C5FD;
+  --t-accent-rgb: 96,165,250;
+  --t-success: #34D399;
+  --t-warn: #FBBF24;
+  --t-danger: #F87171;
 }
 
-/* COLOR THEMES (phải set luôn RGB, đừng ngu quên) */
-[data-theme="pink"]{
-  --t-accent:#F472B6;
-  --t-accent2:#FBCFE8;
-  --t-accent-rgb:244,114,182;
+/* Color themes */
+[data-theme="pink"] { --t-accent:#F472B6; --t-accent2:#FBCFE8; }
+[data-theme="green"] { --t-accent:#34D399; --t-accent2:#A7F3D0; }
+[data-theme="purple"] { --t-accent:#A78BFA; --t-accent2:#DDD6FE; }
+[data-theme="yellow"] { --t-accent:#FBBF24; --t-accent2:#FDE68A; }
+
+.task-page { background:var(--t-bg); min-height:100vh; color:var(--t-text); }
+.task-container { max-width:1280px; margin:0 auto; padding:1rem; }
+
+.banner-gradient {
+  background: linear-gradient(135deg, var(--t-accent), var(--t-accent2));
+  border-radius: 2rem;
+  padding: 1.75rem 1.5rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
 }
-[data-theme="green"]{
-  --t-accent:#34D399;
-  --t-accent2:#A7F3D0;
-  --t-accent-rgb:52,211,153;
+.banner-stat {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 1rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+  min-width: 78px;
 }
-[data-theme="purple"]{
-  --t-accent:#A78BFA;
-  --t-accent2:#DDD6FE;
-  --t-accent-rgb:167,139,250;
+.banner-stat p:first-child { font-size: 0.75rem; opacity: 0.9; }
+.banner-stat p:last-child { font-size: 1.4rem; font-weight: 800; }
+
+.card {
+  background: var(--t-card);
+  border-radius: 1.75rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  border: 1px solid var(--t-border);
+  overflow: hidden;
 }
-[data-theme="yellow"]{
-  --t-accent:#FBBF24;
-  --t-accent2:#FDE68A;
-  --t-accent-rgb:251,191,36;
+.card-header {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--t-border);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.card-body { padding: 1.25rem; }
+
+.filter-bar { display:flex; flex-wrap:wrap; gap:8px; }
+.filter-chip {
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid var(--t-border);
+  background: var(--t-card);
+  color: var(--t-muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.filter-chip.active {
+  background: var(--t-accent) !important;
+  color: #fff !important;
+  border-color: var(--t-accent) !important;
 }
 
-.task-page{background:var(--t-bg);min-height:100vh;color:var(--t-text)}
-.task-container{max-width:1400px;margin:0 auto;padding:0 1rem}
-@media(min-width:768px){.task-container{padding:0 1.5rem}}
-@media(min-width:1024px){.task-container{padding:0 2rem}}
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--t-border);
+  cursor: pointer;
+  transition: background .2s;
+}
+.task-item:hover { background: rgba(var(--t-accent-rgb), 0.05); }
+.task-item:last-child { border-bottom: none; }
 
-/* ----- BANNER ----- */
-.banner-gradient{background:linear-gradient(135deg,var(--t-accent),var(--t-accent2));border-radius:2rem;padding:1.5rem;color:#fff;position:relative;overflow:hidden;margin-bottom:1.5rem;box-shadow:0 10px 40px rgba(0,0,0,.1)}
-@media(min-width:768px){.banner-gradient{border-radius:2.5rem;padding:2rem;margin-bottom:2rem}}
-.banner-gradient::before{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,.15)0%,transparent 70%);border-radius:50%}
-.banner-stat{background:rgba(255,255,255,.2);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.25);border-radius:1rem;padding:.5rem .75rem;text-align:center;min-width:70px;transition:all .2s}
-.banner-stat:hover{background:rgba(255,255,255,.28);transform:translateY(-2px)}
-@media(min-width:768px){.banner-stat{border-radius:1.25rem;padding:.625rem 1.25rem;min-width:90px}}
-.banner-stat p:first-child{font-size:9px;font-weight:700;text-transform:uppercase;opacity:.85}
-.banner-stat p:last-child{font-size:1.25rem;font-weight:800;margin-top:2px}
-@media(min-width:768px){.banner-stat p:first-child{font-size:10px}.banner-stat p:last-child{font-size:1.5rem}}
-.bear-float{animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.task-check {
+  width: 26px; height: 26px;
+  border: 2.5px solid var(--t-border);
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--t-card);
+  margin-top: 2px;
+}
+.task-check.done { background: var(--t-accent); border-color: var(--t-accent); color: white; }
+.task-check.inprog { background: var(--t-warn); border-color: var(--t-warn); color: white; }
 
-/* ----- CARD ----- */
-.card-shadow{background:var(--t-card);border-radius:1.5rem;box-shadow:var(--t-shadow);border:1px solid var(--t-border);transition:all .2s}
-@media(min-width:768px){.card-shadow{border-radius:2rem}}
-.card-shadow:hover{box-shadow:var(--t-shadow-lg)}
-.card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--t-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
-@media(min-width:768px){.card-header{padding:1.125rem 1.5rem}}
-.card-body{padding:1rem 1.25rem}
-@media(min-width:768px){.card-body{padding:1.25rem 1.5rem}}
+.priority-badge {
+  font-size: 0.73rem;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+.priority-badge.high { background:#FEE2E2; color:#DC2626; }
+.priority-badge.medium { background:#FEF3C7; color:#D97706; }
+.priority-badge.low { background:#D1FAE5; color:#059669; }
 
-/* ----- FILTER CHIP ----- */
-.filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.filter-chip{padding:.4rem .9rem;border-radius:9999px;font-size:.7rem;font-weight:600;cursor:pointer;border:1px solid var(--t-border);background:var(--t-card);color:var(--t-muted);transition:all .2s;white-space:nowrap}
-.filter-chip:hover{border-color:var(--t-accent);color:var(--t-accent);background:rgba(90,155,212,.05);transform:translateY(-1px)}
-.filter-chip.active{background:var(--t-accent);color:#fff;border-color:var(--t-accent)}
+[data-theme="dark"] .priority-badge.high { background:rgba(220,38,38,0.2); color:#FCA5A5; }
+[data-theme="dark"] .priority-badge.medium { background:rgba(217,119,6,0.2); color:#FCD34D; }
+[data-theme="dark"] .priority-badge.low { background:rgba(5,150,105,0.2); color:#6EE7B7; }
 
-/* ----- DATE FILTER ----- */
-.date-filter{display:flex;gap:.5rem;align-items:center}
-.date-filter select{padding:.4rem .75rem;border:1px solid var(--t-border);border-radius:.75rem;font-size:.7rem;font-weight:600;color:var(--t-text);background:var(--t-card);cursor:pointer}
+.deadline-pill {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.deadline-pill.ok { background:#ECFDF5; color:#059669; }
+.deadline-pill.warn { background:#FFFBEB; color:#D97706; }
+.deadline-pill.over { background:#FEF2F2; color:#DC2626; }
 
-/* ----- TASK ITEM ----- */
-.task-item{display:flex;align-items:flex-start;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid var(--t-border);transition:background .2s;cursor:pointer}
-.task-item:last-child{border-bottom:none}
-.task-item:hover{background:rgba(90,155,212,.04)}
-@media(min-width:768px){.task-item{padding:1rem 1.5rem;gap:1rem}}
-.task-check{width:22px;height:22px;border-radius:8px;border:2px solid var(--t-border);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s;cursor:pointer;background:var(--t-card)}
-@media(min-width:768px){.task-check{width:24px;height:24px}}
-.task-check.done{background:var(--t-accent);border-color:var(--t-accent);color:#fff}
-.task-check.inprog{background:var(--t-warn);border-color:var(--t-warn);color:#fff}
-.task-info{flex:1;min-width:0}
-.task-name{font-size:.875rem;font-weight:700;color:var(--t-text);line-height:1.4;word-break:break-word}
-@media(min-width:768px){.task-name{font-size:.9375rem}}
-.task-name.done{text-decoration:line-through;color:var(--t-muted)}
-.task-meta{display:flex;flex-wrap:wrap;gap:.375rem;margin-top:.375rem;align-items:center}
-.action-btns{display:flex;gap:.5rem;flex-shrink:0}
-.action-btn{width:32px;height:32px;border-radius:.625rem;border:1px solid var(--t-border);background:var(--t-card);color:var(--t-muted);display:flex;align-items:center;justify-content:center;font-size:.75rem;cursor:pointer;transition:all .2s}
-@media(min-width:768px){.action-btn{width:34px;height:34px}}
-.action-btn.edit:hover{border-color:var(--t-accent);color:var(--t-accent);background:rgba(90,155,212,.1);transform:scale(1.05)}
-.action-btn.delete:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2;transform:scale(1.05)}
+[data-theme="dark"] .deadline-pill.ok { background:rgba(5,150,105,0.15); color:#6EE7B7; }
+[data-theme="dark"] .deadline-pill.warn { background:rgba(217,119,6,0.15); color:#FCD34D; }
+[data-theme="dark"] .deadline-pill.over { background:rgba(220,38,38,0.15); color:#FCA5A5; }
 
-/* ----- PRIORITY BADGE ----- */
-.priority-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
-.priority-badge.high{background:#FEE2E2;color:#DC2626}
-.priority-badge.medium{background:#FEF3C7;color:#D97706}
-.priority-badge.low{background:#D1FAE5;color:#059669}
-[data-theme="dark"] .priority-badge.high{background:#450A0A;color:#FCA5A5}
-[data-theme="dark"] .priority-badge.medium{background:#431407;color:#FCD34D}
-[data-theme="dark"] .priority-badge.low{background:#064E3B;color:#6EE7B7}
+.progress-bar {
+  height: 6px;
+  background: var(--t-border);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--t-accent);
+  border-radius: 9999px;
+  transition: width .4s;
+}
 
-/* ----- BADGES ----- */
-.task-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.2rem .6rem;border-radius:9999px;font-size:.6rem;font-weight:600;white-space:nowrap}
-.task-badge.cat-study{background:#EFF6FF;color:#3B82F6}
-.task-badge.cat-code{background:#F5F3FF;color:#8B5CF6}
-.task-badge.cat-team{background:#FDF2F8;color:#EC4899}
-.task-badge.cat-school{background:#FFFBEB;color:#F59E0B}
-.task-badge.cat-personal{background:#ECFDF5;color:#10B981}
-.task-badge.cat-other{background:#F1F5F9;color:#64748B}
-.task-badge.status-todo{background:#F0F9FF;color:#0284C7}
-.task-badge.status-inprog{background:#FFFBEB;color:#D97706}
-.task-badge.status-done{background:#ECFDF5;color:#059669}
-.task-badge.status-overdue{background:#FEF2F2;color:#DC2626}
-[data-theme="dark"] .task-badge.cat-study{background:#1E3A5F;color:#93C5FD}
-[data-theme="dark"] .task-badge.cat-code{background:#2D1B69;color:#C4B5FD}
-[data-theme="dark"] .task-badge.cat-team{background:#500724;color:#F9A8D4}
-[data-theme="dark"] .task-badge.cat-school{background:#431407;color:#FCD34D}
-[data-theme="dark"] .task-badge.cat-personal{background:#064E3B;color:#6EE7B7}
-[data-theme="dark"] .task-badge.status-todo{background:#1E293B;color:#93C5FD}
-[data-theme="dark"] .task-badge.status-inprog{background:#431407;color:#FCD34D}
-[data-theme="dark"] .task-badge.status-done{background:#064E3B;color:#6EE7B7}
-[data-theme="dark"] .task-badge.status-overdue{background:#450A0A;color:#FCA5A5}
-.deadline-pill{font-size:.6rem;font-weight:600;padding:.2rem .6rem;border-radius:.5rem;white-space:nowrap}
-.deadline-pill.ok{background:#ECFDF5;color:#059669}
-.deadline-pill.warn{background:#FFFBEB;color:#D97706}
-.deadline-pill.over{background:#FEF2F2;color:#DC2626}
-[data-theme="dark"] .deadline-pill.ok{background:#064E3B;color:#6EE7B7}
-[data-theme="dark"] .deadline-pill.warn{background:#431407;color:#FCD34D}
-[data-theme="dark"] .deadline-pill.over{background:#450A0A;color:#FCA5A5}
+.view-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--t-border);
+  background: var(--t-card);
+  color: var(--t-muted);
+  cursor: pointer;
+  transition: all .2s;
+}
+.view-btn.active {
+  background: var(--t-accent) !important;
+  color: #fff !important;
+  border-color: var(--t-accent) !important;
+}
 
-/* ----- PROGRESS ----- */
-.progress-bar{height:4px;background:#E2E8F0;border-radius:9999px;overflow:hidden}
-[data-theme="dark"] .progress-bar{background:#334155}
-.progress-fill{height:100%;border-radius:9999px;background:var(--t-accent);transition:width .4s}
-.progress-fill.warn{background:#F59E0B}
-.progress-fill.done{background:#10B981}
-.progress-fill.danger{background:#EF4444}
-.progress-percent{font-size:.6rem;color:var(--t-muted);font-weight:600;margin-top:.2rem}
-.carry-note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:.75rem;padding:.5rem 1rem;font-size:.7rem;font-weight:600;color:#D97706;margin:0 1rem .75rem;display:flex;align-items:center;gap:.5rem}
-[data-theme="dark"] .carry-note{background:#431407;border-color:#854D0E;color:#FCD34D}
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.kanban-col {
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 1.5rem;
+  padding: 1rem;
+}
 
-/* ----- EMPTY STATE ----- */
-.empty-state{text-align:center;padding:2rem 1rem;color:var(--t-muted)}
-.empty-state-icon{font-size:2.5rem;margin-bottom:.5rem;opacity:.5}
-.empty-state p{font-size:.8rem;font-weight:500}
+.fab-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--t-accent), var(--t-accent2));
+  color: white;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+  z-index: 100;
+  transition: transform .2s;
+}
+.fab-btn:hover { transform: scale(1.08); }
 
-/* ----- MODAL ----- */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
-.modal-overlay.show{opacity:1;pointer-events:all}
-.modal-content{background:var(--t-card);border-radius:1.5rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:1.5rem;transform:scale(.95);transition:transform .3s;box-shadow:var(--t-shadow-lg)}
-@media(min-width:768px){.modal-content{border-radius:2rem;padding:2rem}}
-.modal-overlay.show .modal-content{transform:scale(1)}
-.modal-title{font-size:1.2rem;font-weight:700;color:var(--t-text);margin-bottom:1.2rem;display:flex;align-items:center;gap:.75rem}
-
-/* ----- FORM ----- */
-.form-label{font-size:.65rem;font-weight:700;color:var(--t-muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:.3rem;display:block}
-.form-input,.form-select,.form-textarea{width:100%;padding:.7rem;border:1px solid var(--t-border);border-radius:.75rem;font-size:.85rem;font-weight:500;color:var(--t-text);background:var(--t-bg);outline:none;transition:all .2s}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--t-accent);box-shadow:0 0 0 3px rgba(90,155,212,.1)}
-.form-textarea{resize:vertical;min-height:70px}
-.form-row{margin-bottom:.8rem}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
-.btn-submit{background:linear-gradient(135deg,var(--t-accent),var(--t-accent2));color:#fff;border:none;padding:.8rem;border-radius:.8rem;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
-.btn-submit:hover{filter:brightness(1.05);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.range-input{width:100%;accent-color:var(--t-accent);cursor:pointer}
-.img-preview{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
-.img-thumb{width:55px;height:55px;border-radius:.7rem;object-fit:cover;border:1px solid var(--t-border)}
-.img-thumb-wrap{position:relative}
-.img-delete{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#EF4444;color:#fff;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;transition:transform .2s}
-.img-delete:hover{transform:scale(1.1)}
-
-/* ----- PRIORITY SELECT IN FORM ----- */
-.priority-select{display:flex;gap:10px;margin-top:5px}
-.priority-option{flex:1;padding:8px;text-align:center;border-radius:10px;cursor:pointer;border:1.5px solid var(--t-border);background:var(--t-card);transition:all .2s;font-size:.8rem;font-weight:600}
-.priority-option.low{color:#10B981}
-.priority-option.medium{color:#F59E0B}
-.priority-option.high{color:#EF4444}
-.priority-option.selected{background:var(--t-accent);color:#fff;border-color:var(--t-accent)}
-
-/* ----- REPORT ----- */
-.report-week{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;text-align:center;margin-top:1rem}
-.report-day-col{display:flex;flex-direction:column;align-items:center;gap:.5rem}
-.report-bar-wrap{height:70px;display:flex;align-items:flex-end;width:100%;justify-content:center}
-.report-bar{width:55%;border-radius:6px 6px 0 0;min-height:4px;transition:height .5s}
-.report-day-label{font-size:.6rem;font-weight:700;color:var(--t-muted);text-transform:uppercase}
-.report-day-num{font-size:.65rem;font-weight:700;color:var(--t-text)}
-
-/* ----- KANBAN ----- */
-.kanban-board{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-@media(max-width:700px){.kanban-board{grid-template-columns:1fr;gap:1.25rem}}
-.kanban-col{background:var(--t-bg);border:1px solid var(--t-border);border-radius:1.25rem;padding:1rem}
-.kanban-col-header{font-size:.7rem;font-weight:700;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;color:var(--t-text)}
-.kanban-card{background:var(--t-card);border:1px solid var(--t-border);border-radius:.8rem;padding:.7rem;margin-bottom:.7rem;cursor:grab;transition:all .2s}
-.kanban-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px)}
-.kanban-card-title{font-size:.7rem;font-weight:700;color:var(--t-text);margin-bottom:.3rem}
-.kanban-card-meta{font-size:.6rem;color:var(--t-muted);font-weight:600}
-
-/* ----- FAB ----- */
-.fab-btn{position:fixed;bottom:1.5rem;right:1.5rem;width:52px;height:52px;border-radius:26px;background:linear-gradient(135deg,var(--t-accent),var(--t-accent2));color:#fff;border:none;font-size:1.3rem;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.15);cursor:pointer;z-index:40;transition:all .2s}
-.fab-btn:hover{transform:scale(1.08);box-shadow:0 10px 28px rgba(0,0,0,.2)}
-@media(min-width:768px){.fab-btn{bottom:2rem;right:2rem;width:56px;height:56px;font-size:1.5rem}}
-.text-accent{color:var(--t-accent)}
-.text-muted{color:var(--t-muted)}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-content {
+  background: var(--t-card);
+  border-radius: 1.75rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  margin: 1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
 </style>
 
-<!-- ==================== HTML ==================== -->
 <div class="task-page">
 <div class="task-container">
 
-<!-- SECTION 1: BANNER -->
-<div class="banner-gradient">
-<div class="flex justify-between items-center">
-<div class="relative z-10">
-<p class="text-white/85 text-xs md:text-sm font-semibold mb-1" id="tkDateLabel">Đang tải...</p>
-<h2 class="text-xl md:text-3xl font-extrabold mb-1 md:mb-2"><i class="fas fa-list-check mr-2"></i>Công việc của tôi</h2>
-<p class="text-white/75 text-xs md:text-base">Quản lý công việc hàng ngày của bạn 📋</p>
-<div class="flex gap-2 md:gap-4 mt-4 md:mt-6">
-<div class="banner-stat"><p>Hôm nay</p><p id="statToday">0</p></div>
-<div class="banner-stat"><p>Xong tuần</p><p id="statDone">0</p></div>
-<div class="banner-stat"><p>Chuyển tiếp</p><p id="statCarry">0</p></div>
-<div class="banner-stat"><p>Tỉ lệ xong</p><p id="statPct">0%</p></div>
-</div></div>
-<div class="w-16 h-16 md:w-32 md:h-32 bg-white/25 rounded-full flex items-center justify-center text-3xl md:text-6xl bear-float backdrop-blur-sm border border-white/30 shadow-lg">🐻</div>
-</div></div>
+  <!-- BANNER -->
+  <div class="banner-gradient">
+    <div class="flex justify-between items-center">
+      <div>
+        <p class="text-white/80 text-sm" id="tkDateLabel"></p>
+        <h2 class="text-2xl md:text-3xl font-extrabold mt-1">Công việc của tôi 🐻</h2>
+        <p class="text-white/75 text-sm mt-1">Quản lý công việc dễ dàng mỗi ngày</p>
+      </div>
+      <button onclick="tkAddTodayQuick()" class="bg-white/25 hover:bg-white/35 backdrop-blur px-5 py-2.5 rounded-2xl text-sm font-semibold transition flex items-center gap-2">
+        <i class="fas fa-plus"></i> Thêm hôm nay
+      </button>
+    </div>
 
-<!-- SECTION 2: FILTER BAR -->
-<div class="card-shadow mb-5"><div class="card-body">
-<div class="flex flex-wrap gap-3 items-center justify-between">
-<div class="filter-bar" id="tkFilterBar">
-<button class="filter-chip active" data-filter="all"><i class="fas fa-list-ul mr-1"></i>Tất cả</button>
-<button class="filter-chip" data-filter="today"><i class="fas fa-calendar-day mr-1"></i>Hôm nay</button>
-<button class="filter-chip" data-filter="week"><i class="fas fa-calendar-week mr-1"></i>Tuần này</button>
-<button class="filter-chip" data-filter="month"><i class="fas fa-calendar-alt mr-1"></i>Tháng này</button>
-<button class="filter-chip" data-filter="starred"><i class="fas fa-star mr-1"></i>Highlight</button>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+      <div class="banner-stat"><p>Hôm nay</p><p id="statToday" class="text-3xl">0</p></div>
+      <div class="banner-stat"><p>Hoàn thành tuần</p><p id="statDone" class="text-3xl">0</p></div>
+      <div class="banner-stat"><p>Chuyển tiếp</p><p id="statCarry" class="text-3xl">0</p></div>
+      <div class="banner-stat"><p>Tỉ lệ</p><p id="statPct" class="text-3xl">0%</p></div>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="card mb-6">
+    <div class="card-body">
+      <div class="flex flex-wrap gap-3 justify-between items-center">
+        <div class="filter-bar" id="tkFilterBar">
+          <button class="filter-chip active" data-filter="all">Tất cả</button>
+          <button class="filter-chip" data-filter="today">Hôm nay</button>
+          <button class="filter-chip" data-filter="week">Tuần này</button>
+          <button class="filter-chip" data-filter="month">Tháng này</button>
+          <button class="filter-chip" data-filter="starred">Quan trọng</button>
+        </div>
+        <div class="flex gap-2">
+          <select id="tkMonthSelect" onchange="tkRender()" class="filter-chip">
+            <option value="0">Tháng này</option>
+            <option value="-1">Tháng trước</option>
+          </select>
+          <select id="tkYearSelect" onchange="tkRender()" class="filter-chip">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW SWITCH -->
+  <div class="flex gap-3 mb-5">
+    <button id="btnListView" onclick="tkSetView('list')" class="view-btn active">📋 Danh sách</button>
+    <button id="btnKanbanView" onclick="tkSetView('kanban')" class="view-btn">📊 Kanban</button>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="tkListView">
+    <!-- Hôm nay -->
+    <div class="card mb-6">
+      <div class="card-header">
+        <i class="fas fa-sun text-accent"></i>
+        <span>Hôm nay • <span id="tkTodayDateLabel"></span></span>
+        <span class="ml-auto text-sm text-muted" id="tkTodayProgress"></span>
+      </div>
+      <div class="card-body pt-2">
+        <div class="progress-bar mb-4"><div class="progress-fill" id="tkTodayBar" style="width:0%"></div></div>
+        <div id="tkTodayList"></div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Sắp tới -->
+      <div class="card">
+        <div class="card-header"><i class="fas fa-clock text-accent"></i> Sắp tới</div>
+        <div class="card-body" id="tkUpcomingList"></div>
+      </div>
+
+      <!-- Đã hoàn thành -->
+      <div class="card">
+        <div class="card-header">
+          <span><i class="fas fa-check-circle text-success"></i> Đã hoàn thành</span>
+          <button onclick="tkToggleDoneList()" id="tkDoneToggle" class="ml-auto text-accent text-sm font-medium">Hiện</button>
+        </div>
+        <div class="card-body" id="tkDoneList" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KANBAN VIEW -->
+  <div id="tkKanbanView" style="display:none">
+    <div class="kanban-board" id="tkKanbanBoard"></div>
+  </div>
+
+  <!-- BÁO CÁO TUẦN -->
+  <div class="card mt-8">
+    <div class="card-header">
+      <i class="fas fa-chart-bar text-accent"></i>
+      <span>Báo cáo tuần</span>
+      <select id="tkWeekSelect" onchange="tkRenderReport()" class="filter-chip ml-auto">
+        <option value="0">Tuần này</option>
+        <option value="-1">Tuần trước</option>
+      </select>
+    </div>
+    <div class="card-body" id="tkReportBody"></div>
+  </div>
+
 </div>
-<div class="date-filter">
-<select id="tkMonthSelect" onchange="tkRender()">
-<option value="0">Tháng này</option>
-<option value="-1">Tháng trước</option>
-<option value="-2">2 tháng trước</option>
-</select>
-<select id="tkYearSelect" onchange="tkRender()">
-<option value="2025">2025</option>
-<option value="2026" selected>2026</option>
-<option value="2027">2027</option>
-</select>
-</div>
-</div></div></div>
-
-<!-- SECTION 3: VIEW TOGGLE + EDIT -->
-<div class="flex gap-2 mb-4 justify-between items-center">
-<div class="flex gap-2">
-<button class="filter-chip active" id="btnListView" onclick="tkSetView('list')"><i class="fas fa-list mr-1"></i>Danh sách</button>
-<button class="filter-chip" id="btnKanbanView" onclick="tkSetView('kanban')"><i class="fas fa-table-columns mr-1"></i>Bảng</button>
-</div>
-<button class="filter-chip" id="editModeBtn" onclick="tkToggleEditMode()" style="background:var(--t-card);color:var(--t-accent);border-color:var(--t-accent)">
-<i class="fas fa-pen mr-1"></i>Sửa/Xóa
-</button>
 </div>
 
-<!-- SECTION 4: LIST VIEW -->
-<div id="tkListView">
-<div class="card-shadow mb-5"><div class="card-header"><span class="flex items-center gap-2 font-bold text-base md:text-lg"><i class="fas fa-calendar-day text-accent"></i>Hôm nay · <span id="tkTodayDateLabel"></span></span><span class="text-xs md:text-sm font-semibold text-muted" id="tkTodayProgress"></span></div>
-<div id="tkCarryNote" class="carry-note" style="display:none"><i class="fas fa-arrow-rotate-left"></i><span id="tkCarryText"></span></div>
-<div class="px-4 md:px-6 pt-3"><div class="progress-bar"><div class="progress-fill" id="tkTodayBar" style="width:0%"></div></div><div class="progress-percent" id="tkTodayPct"></div></div>
-<div id="tkTodayList"></div></div>
-
-<div class="card-shadow mb-5"><div class="card-header"><span class="flex items-center gap-2 font-bold text-base md:text-lg"><i class="fas fa-calendar-check text-accent"></i>Sắp tới</span></div><div id="tkUpcomingList"></div></div>
-
-<div class="card-shadow"><div class="card-header"><span class="flex items-center gap-2 font-bold text-base md:text-lg"><i class="fas fa-circle-check text-success"></i>Đã hoàn thành</span><button class="filter-chip" onclick="tkToggleDoneList()" id="tkDoneToggle" style="font-size:0.7rem"><i class="fas fa-eye mr-1"></i>Hiện</button></div><div id="tkDoneList" style="display:none"></div></div>
-</div>
-
-<!-- SECTION 5: KANBAN VIEW -->
-<div id="tkKanbanView" style="display:none"><div class="card-shadow"><div class="card-body"><div class="kanban-board" id="tkKanbanBoard"></div></div></div></div>
-
-<!-- SECTION 6: WEEKLY REPORT -->
-<div class="card-shadow mt-5"><div class="card-header"><span class="flex items-center gap-2 font-bold text-base md:text-lg"><i class="fas fa-chart-bar text-accent"></i>Báo cáo tuần</span><select class="filter-chip" id="tkWeekSelect" onchange="tkRenderReport()" style="background:var(--t-card);color:var(--t-text)"><option value="0"><i class="fas fa-calendar-week mr-1"></i>Tuần này</option><option value="-1"><i class="fas fa-calendar-week mr-1"></i>Tuần trước</option><option value="-2"><i class="fas fa-calendar-week mr-1"></i>2 tuần trước</option><option value="-3"><i class="fas fa-calendar-week mr-1"></i>3 tuần trước</option></select></div>
-<div class="card-body"><div class="grid grid-cols-3 gap-3 md:gap-4 mb-5" id="tkReportStats"></div><div class="report-week" id="tkWeekChart"></div><div class="mt-5" id="tkCatBreakdown"></div></div></div>
-
-</div></div>
-
-<!-- SECTION 7: FAB BUTTON -->
+<!-- FAB -->
 <button class="fab-btn" onclick="tkOpenModal()"><i class="fas fa-plus"></i></button>
 
-<!-- SECTION 8: ADD/EDIT MODAL -->
-<div class="modal-overlay" id="tkOverlay" onclick="tkOverlayClick(event)"><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-title"><i class="fas fa-pen-to-square text-accent"></i><span id="tkModalTitle">Thêm công việc</span><button class="ml-auto bg-transparent border-none text-xl cursor-pointer p-1 rounded-lg hover:bg-border transition" onclick="tkCloseModal()"><i class="fas fa-times"></i></button></div>
-<form id="tkForm" onsubmit="tkSaveTask(event)"><input type="hidden" id="tkEditId">
-<div class="form-row"><label class="form-label"><i class="fas fa-tag mr-1"></i>Tên công việc *</label><input class="form-input" type="text" id="tkName" required placeholder="Nhập tên công việc..." maxlength="120"></div>
-<div class="form-row"><label class="form-label"><i class="fas fa-align-left mr-1"></i>Mô tả</label><textarea class="form-textarea" id="tkDesc" placeholder="Ghi chú chi tiết..." rows="2"></textarea></div>
+<!-- MODAL -->
+<div class="modal-overlay" id="tkOverlay" onclick="if(event.target===this)tkCloseModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="card-header border-b-0">
+      <span id="tkModalTitle" class="text-xl">Thêm công việc</span>
+      <button onclick="tkCloseModal()" class="ml-auto text-3xl leading-none text-muted">×</button>
+    </div>
+    <form id="tkForm" onsubmit="tkSaveTask(event)" class="card-body space-y-6">
+      <input type="hidden" id="tkEditId">
 
-<!-- MỨC ĐỘ ƯU TIÊN -->
-<div class="form-row"><label class="form-label"><i class="fas fa-flag mr-1"></i>Mức độ ưu tiên</label>
-<div class="priority-select">
-<div class="priority-option low" data-priority="low"><i class="fas fa-arrow-down mr-1"></i>Thấp</div>
-<div class="priority-option medium" data-priority="medium"><i class="fas fa-minus mr-1"></i>Trung bình</div>
-<div class="priority-option high selected" data-priority="high"><i class="fas fa-arrow-up mr-1"></i>Cao</div>
+      <div>
+        <label class="block text-xs font-bold text-muted mb-1.5">TÊN CÔNG VIỆC *</label>
+        <input type="text" id="tkName" required class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl focus:outline-none focus:border-[var(--t-accent)]" placeholder="Nhập tên công việc...">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-muted mb-1.5">DANH MỤC</label>
+          <select id="tkCat" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
+            <option value="study">📚 Học tập</option>
+            <option value="code">💻 Code</option>
+            <option value="personal">🙂 Cá nhân</option>
+            <option value="other">📌 Khác</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-muted mb-1.5">DEADLINE</label>
+          <input type="date" id="tkDeadline" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-muted mb-1.5">TRẠNG THÁI</label>
+          <select id="tkStatus" class="w-full px-4 py-3 border border-[var(--t-border)] rounded-2xl">
+            <option value="todo">Cần làm</option>
+            <option value="inprog">Đang làm</option>
+            <option value="done">Hoàn thành</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-muted mb-1.5">ƯU TIÊN</label>
+          <div class="priority-select flex gap-2">
+            <div class="priority-option low flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer" data-priority="low">Thấp</div>
+            <div class="priority-option medium flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer" data-priority="medium">Trung bình</div>
+            <div class="priority-option high flex-1 py-2 text-center rounded-2xl border-2 cursor-pointer selected" data-priority="high">Cao</div>
+          </div>
+          <input type="hidden" id="taskPriority" value="high">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-muted mb-1.5">TIẾN TRÌNH: <span id="tkProgLabel" class="text-accent">0%</span></label>
+        <input type="range" id="tkProgress" min="0" max="100" step="5" value="0" class="w-full accent-[var(--t-accent)]">
+      </div>
+
+      <button type="submit" class="w-full py-4 bg-gradient-to-r from-[var(--t-accent)] to-[var(--t-accent2)] text-white font-bold rounded-2xl text-lg">💾 Lưu công việc</button>
+    </form>
+  </div>
 </div>
-<input type="hidden" id="taskPriority" value="high">
-</div>
 
-<div class="form-grid"><div class="form-row"><label class="form-label"><i class="fas fa-folder mr-1"></i>Danh mục</label><select class="form-select" id="tkCat"><option value="study">📚 Học tập</option><option value="code">💻 Code</option><option value="team">👥 Nhóm</option><option value="school">🏫 Trường</option><option value="personal">🙂 Cá nhân</option><option value="other">📌 Khác</option></select></div><div class="form-row"><label class="form-label"><i class="fas fa-calendar mr-1"></i>Deadline</label><input class="form-input" type="date" id="tkDeadline"></div></div>
-<div class="form-grid"><div class="form-row"><label class="form-label"><i class="fas fa-spinner mr-1"></i>Trạng thái</label><select class="form-select" id="tkStatus"><option value="todo">📋 Cần làm</option><option value="inprog">⚡ Đang làm</option><option value="done">✅ Hoàn thành</option></select></div><div class="form-row"><label class="form-label"><i class="fas fa-star mr-1"></i>Highlight</label><select class="form-select" id="tkStarred"><option value="false">⭐ Thường</option><option value="true">🌟 Quan trọng</option></select></div></div>
-<div class="form-row"><label class="form-label"><i class="fas fa-chart-simple mr-1"></i>Tiến trình: <span id="tkProgLabel">0%</span></label><input type="range" class="range-input" id="tkProgress" min="0" max="100" step="5" value="0" oninput="document.getElementById('tkProgLabel').textContent=this.value+'%';document.getElementById('tkProgBar').style.width=this.value+'%'"><div class="progress-bar mt-2"><div class="progress-fill" id="tkProgBar" style="width:0%"></div></div></div>
-
-<!-- UPLOAD ẢNH -->
-<div class="form-row"><label class="form-label"><i class="fas fa-image mr-1"></i>Ảnh đính kèm</label><input type="file" id="tkImgInput" accept="image/*" multiple style="display:none" onchange="tkHandleImages(event)"><button type="button" onclick="document.getElementById('tkImgInput').click()" class="w-full py-2 px-3 border-2 border-dashed border-border rounded-xl text-muted text-xs font-semibold cursor-pointer bg-bg"><i class="fas fa-camera mr-1"></i>Chọn ảnh (tối đa 5)</button><div class="img-preview" id="tkImgPreview"></div></div>
-<button type="submit" class="btn-submit"><i class="fas fa-save mr-1"></i>Lưu công việc</button>
-</form></div></div>
-
-<!-- SECTION 9: DETAIL MODAL -->
-<div class="modal-overlay" id="tkDetailOverlay" onclick="tkDetailOverlayClick(event)"><div class="modal-content" onclick="event.stopPropagation()"><div class="modal-title"><i class="fas fa-circle-info text-accent"></i><span id="tkDetailTitle">Chi tiết công việc</span><button class="ml-auto bg-transparent border-none text-xl cursor-pointer p-1 rounded-lg hover:bg-border transition" onclick="tkCloseDetail()"><i class="fas fa-times"></i></button></div><div id="tkDetailBody"></div></div></div>
-
-<!-- ==================== JAVASCRIPT ==================== -->
 <script>
-(function(){
-// ----- STORAGE -----
-const STORE_KEY='bd_tasks_v3';
-let tasks=(()=>{try{return JSON.parse(localStorage.getItem(STORE_KEY))||[]}catch(e){return[]}})();
-let activeFilter='all',currentView='list',editingImages=[],showDone=!1,editMode=!1;
-const save=arr=>localStorage.setItem(STORE_KEY,JSON.stringify(arr));
+// ==================== BEAR DIARY TASK MANAGER - CLEAN VERSION ====================
+const STORE_KEY = 'bd_tasks_v3';
+let tasks = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
+let activeFilter = 'all';
+let currentView = 'list';
+let showDone = false;
 
-// ----- HELPERS -----
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const today=()=>new Date().toISOString().slice(0,10);
-const startOfWeek=offset=>{let d=new Date();d.setDate(d.getDate()-d.getDay()+1+(offset||0)*7);d.setHours(0,0,0,0);return d};
-const endOfWeek=offset=>{let d=startOfWeek(offset);d.setDate(d.getDate()+6);d.setHours(23,59,59,999);return d};
-const startOfMonth=(year,month)=>{let d=new Date(year,month,1);d.setHours(0,0,0,0);return d};
-const endOfMonth=(year,month)=>{let d=new Date(year,month+1,0);d.setHours(23,59,59,999);return d};
+const saveTasks = () => localStorage.setItem(STORE_KEY, JSON.stringify(tasks));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const todayStr = () => new Date().toISOString().slice(0,10);
 
-const dlClass=(d,s)=>{if(s==='done')return'done';if(!d)return'';let n=new Date();n.setHours(0,0,0,0);let diff=Math.round((new Date(d)-n)/86400000);return diff<0?'over':diff===0?'warn':'ok'};
-const dlLabel=(d,s)=>{if(s==='done')return'Xong';if(!d)return'';let n=new Date();n.setHours(0,0,0,0);let diff=Math.round((new Date(d)-n)/86400000);return diff<0?'Quá '+Math.abs(diff)+'ngày':diff===0?'Hết hạn hôm nay':diff===1?'Còn 1 ngày':'Còn '+diff+' ngày'};
-const catLabel=c=>({study:'📚 Học tập',code:'💻 Code',team:'👥 Nhóm',school:'🏫 Trường',personal:'🙂 Cá nhân',other:'📌 Khác'}[c]||c);
-const priLabel=p=>({high:'🔴 Cao',med:'🟡 Trung',low:'🟢 Thấp'}[p]||p);
-const statusLabel=s=>({todo:'Cần làm',inprog:'Đang làm',done:'Hoàn thành'}[s]||s);
-const progFillClass=p=>p>=100?'done':p>=60?'':p>0?'warn':'danger';
-const escHtml=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const startOfWeek = (offset = 0) => {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay() + 1 + offset * 7);
+  d.setHours(0,0,0,0);
+  return d;
+};
+const endOfWeek = (offset = 0) => {
+  const d = startOfWeek(offset);
+  d.setDate(d.getDate() + 6);
+  d.setHours(23,59,59,999);
+  return d;
+};
 
-// ----- PRIORITY SELECTION IN FORM -----
-document.querySelectorAll('.priority-option').forEach(opt=>{
-opt.addEventListener('click',function(){
-document.querySelectorAll('.priority-option').forEach(o=>o.classList.remove('selected'));
-this.classList.add('selected');
-document.getElementById('taskPriority').value=this.dataset.priority;
+// Priority & Status helpers
+const priorityHTML = (p) => {
+  if (p === 'high') return `<span class="priority-badge high"><i class="fas fa-arrow-up"></i> Cao</span>`;
+  if (p === 'medium') return `<span class="priority-badge medium"><i class="fas fa-minus"></i> Trung</span>`;
+  return `<span class="priority-badge low"><i class="fas fa-arrow-down"></i> Thấp</span>`;
+};
+
+const dlClass = (deadline, status) => {
+  if (status === 'done') return 'ok';
+  if (!deadline) return '';
+  const diff = Math.ceil((new Date(deadline) - new Date(todayStr())) / 86400000);
+  return diff < 0 ? 'over' : diff === 0 ? 'warn' : 'ok';
+};
+
+const dlLabel = (deadline, status) => {
+  if (status === 'done') return 'Đã xong';
+  if (!deadline) return '';
+  const diff = Math.ceil((new Date(deadline) - new Date(todayStr())) / 86400000);
+  if (diff < 0) return `Quá ${Math.abs(diff)} ngày`;
+  if (diff === 0) return 'Hết hạn hôm nay';
+  return `Còn ${diff} ngày`;
+};
+
+const catLabel = (c) => ({study:'📚 Học tập', code:'💻 Code', personal:'🙂 Cá nhân', other:'📌 Khác'}[c] || c);
+
+// Render functions
+const taskHTML = (tk) => {
+  const pct = tk.progress || 0;
+  return `
+    <div class="task-item" onclick="tkOpenDetail('${tk.id}')">
+      <div class="task-check ${tk.status==='done'?'done':tk.status==='inprog'?'inprog':''}" onclick="event.stopPropagation();tkToggleStatus('${tk.id}')">
+        ${tk.status==='done' ? '<i class="fas fa-check"></i>' : tk.status==='inprog' ? '<i class="fas fa-ellipsis-h"></i>' : ''}
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold ${tk.status==='done'?'line-through text-muted':''}">${tk.name}</div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          ${priorityHTML(tk.priority)}
+          <span class="text-xs px-3 py-1 bg-[var(--t-border)] rounded-full">${catLabel(tk.cat)}</span>
+          ${tk.deadline ? `<span class="deadline-pill ${dlClass(tk.deadline, tk.status)}">${dlLabel(tk.deadline, tk.status)}</span>` : ''}
+        </div>
+        ${pct > 0 && tk.status !== 'done' ? `
+          <div class="mt-3">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="text-xs text-right text-muted mt-1">${pct}%</div>
+          </div>` : ''}
+      </div>
+    </div>`;
+};
+
+window.tkRender = () => {
+  const t = todayStr();
+  const visible = tasks.filter(tk => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'today') return tk.deadline === t;
+    if (activeFilter === 'week') {
+      const sw = startOfWeek(0), ew = endOfWeek(0);
+      return tk.deadline && new Date(tk.deadline) >= sw && new Date(tk.deadline) <= ew;
+    }
+    if (activeFilter === 'month') {
+      const m = parseInt(document.getElementById('tkMonthSelect').value);
+      const y = parseInt(document.getElementById('tkYearSelect').value);
+      const now = new Date();
+      const targetMonth = now.getMonth() + m;
+      const targetYear = y;
+      const start = new Date(targetYear, targetMonth, 1);
+      const end = new Date(targetYear, targetMonth + 1, 0);
+      return tk.deadline && new Date(tk.deadline) >= start && new Date(tk.deadline) <= end;
+    }
+    if (activeFilter === 'starred') return tk.starred === true;
+    return true;
+  });
+
+  // Stats
+  const todayTasks = tasks.filter(tk => tk.deadline === t);
+  const doneWeek = tasks.filter(tk => tk.status === 'done' && tk.completedAt && new Date(tk.completedAt) >= startOfWeek(0) && new Date(tk.completedAt) <= endOfWeek(0)).length;
+  const carry = tasks.filter(tk => tk.status !== 'done' && tk.deadline && new Date(tk.deadline) < new Date(t)).length;
+  const total = tasks.length;
+  const doneTotal = tasks.filter(tk => tk.status === 'done').length;
+
+  document.getElementById('statToday').textContent = todayTasks.length;
+  document.getElementById('statDone').textContent = doneWeek;
+  document.getElementById('statCarry').textContent = carry;
+  document.getElementById('statPct').textContent = total ? Math.round(doneTotal/total*100) + '%' : '0%';
+
+  // Today section
+  const todayDone = todayTasks.filter(tk => tk.status === 'done').length;
+  const todayPct = todayTasks.length ? Math.round(todayDone / todayTasks.length * 100) : 0;
+  document.getElementById('tkTodayProgress').innerHTML = `${todayDone}/${todayTasks.length} xong`;
+  document.getElementById('tkTodayBar').style.width = todayPct + '%';
+
+  // Render lists
+  document.getElementById('tkTodayList').innerHTML = tasks.filter(tk => tk.deadline === t && tk.status !== 'done').map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Không có công việc hôm nay</div>';
+
+  document.getElementById('tkUpcomingList').innerHTML = visible.filter(tk => tk.status !== 'done' && (!tk.deadline || tk.deadline > t)).map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Không có việc sắp tới</div>';
+
+  document.getElementById('tkDoneList').innerHTML = visible.filter(tk => tk.status === 'done').map(taskHTML).join('') || '<div class="empty-state py-12 text-center text-muted">Chưa có việc hoàn thành</div>';
+
+  if (currentView === 'kanban') renderKanban(visible);
+  tkRenderReport();
+};
+
+const renderKanban = (visible) => {
+  const cols = {todo: [], inprog: [], done: []};
+  visible.forEach(tk => cols[tk.status || 'todo'].push(tk));
+
+  let html = '';
+  ['todo','inprog','done'].forEach(status => {
+    const label = status==='todo'?'Cần làm':status==='inprog'?'Đang làm':'Hoàn thành';
+    const color = status==='todo'?'var(--t-accent)':status==='inprog'?'#F59E0B':'#10B981';
+    html += `
+      <div class="kanban-col">
+        <div class="font-bold mb-4 flex justify-between" style="color:${color}">
+          ${label} <span class="bg-[var(--t-border)] px-3 py-0.5 rounded-full text-xs">${cols[status].length}</span>
+        </div>
+        ${cols[status].map(tk => `
+          <div class="bg-[var(--t-card)] border border-[var(--t-border)] rounded-2xl p-4 mb-3 cursor-grab" draggable="true" ondragstart="tkDragStart(event,'${tk.id}')">
+            <div class="font-medium">${tk.name}</div>
+            <div class="text-xs text-muted mt-2">${catLabel(tk.cat)}</div>
+          </div>
+        `).join('')}
+      </div>`;
+  });
+  document.getElementById('tkKanbanBoard').innerHTML = html;
+};
+
+window.tkSetView = (view) => {
+  currentView = view;
+  document.getElementById('tkListView').style.display = view === 'list' ? 'block' : 'none';
+  document.getElementById('tkKanbanView').style.display = view === 'kanban' ? 'block' : 'none';
+  document.getElementById('btnListView').classList.toggle('active', view==='list');
+  document.getElementById('btnKanbanView').classList.toggle('active', view==='kanban');
+  tkRender();
+};
+
+window.tkToggleStatus = (id) => {
+  const tk = tasks.find(t => t.id === id);
+  if (!tk) return;
+  const cycle = {todo: 'inprog', inprog: 'done', done: 'todo'};
+  tk.status = cycle[tk.status] || 'todo';
+  if (tk.status === 'done') {
+    tk.progress = 100;
+    tk.completedAt = new Date().toISOString();
+  }
+  saveTasks();
+  tkRender();
+};
+
+window.tkOpenModal = () => {
+  document.getElementById('tkForm').reset();
+  document.getElementById('tkEditId').value = '';
+  document.getElementById('tkModalTitle').textContent = 'Thêm công việc mới';
+  document.getElementById('tkDeadline').value = todayStr();
+  document.getElementById('tkOverlay').classList.add('show');
+};
+
+window.tkCloseModal = () => {
+  document.getElementById('tkOverlay').classList.remove('show');
+};
+
+window.tkSaveTask = (e) => {
+  e.preventDefault();
+  const id = document.getElementById('tkEditId').value;
+  const task = {
+    id: id || uid(),
+    name: document.getElementById('tkName').value.trim(),
+    cat: document.getElementById('tkCat').value,
+    status: document.getElementById('tkStatus').value,
+    deadline: document.getElementById('tkDeadline').value,
+    progress: parseInt(document.getElementById('tkProgress').value) || 0,
+    priority: document.getElementById('taskPriority').value,
+    createdAt: id ? tasks.find(t=>t.id===id)?.createdAt || new Date().toISOString() : new Date().toISOString(),
+    completedAt: null
+  };
+
+  if (task.progress >= 100) task.status = 'done';
+  if (task.status === 'done') task.completedAt = new Date().toISOString();
+
+  if (id) {
+    const idx = tasks.findIndex(t => t.id === id);
+    if (idx !== -1) tasks[idx] = task;
+  } else {
+    tasks.unshift(task);
+  }
+
+  saveTasks();
+  tkCloseModal();
+  tkRender();
+};
+
+window.tkAddTodayQuick = () => {
+  document.getElementById('tkDeadline').value = todayStr();
+  tkOpenModal();
+};
+
+// Priority selector
+document.querySelectorAll('.priority-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.priority-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+    document.getElementById('taskPriority').value = this.dataset.priority;
+  });
 });
+
+// Range input
+document.getElementById('tkProgress').addEventListener('input', function() {
+  document.getElementById('tkProgLabel').textContent = this.value + '%';
 });
 
-// ----- EDIT MODE -----
-window.tkToggleEditMode=()=>{
-editMode=!editMode;
-const btn=document.getElementById('editModeBtn');
-if(editMode){
-btn.style.background='var(--t-accent)';
-btn.style.color='#fff';
-btn.innerHTML='<i class="fas fa-check mr-1"></i>Hoàn tất';
-}else{
-btn.style.background='var(--t-card)';
-btn.style.color='var(--t-accent)';
-btn.innerHTML='<i class="fas fa-pen mr-1"></i>Sửa/Xóa';
-}
+window.tkToggleDoneList = () => {
+  showDone = !showDone;
+  const el = document.getElementById('tkDoneList');
+  el.style.display = showDone ? 'block' : 'none';
+  document.getElementById('tkDoneToggle').textContent = showDone ? 'Ẩn' : 'Hiện';
+};
+
+window.tkRenderReport = () => {
+  // Báo cáo tuần đơn giản
+  const offset = parseInt(document.getElementById('tkWeekSelect').value) || 0;
+  const sw = startOfWeek(offset);
+  const doneThisWeek = tasks.filter(tk => tk.status === 'done' && tk.completedAt && new Date(tk.completedAt) >= sw && new Date(tk.completedAt) <= endOfWeek(offset)).length;
+
+  document.getElementById('tkReportBody').innerHTML = `
+    <div class="text-center py-8">
+      <div class="text-5xl font-bold text-accent">${doneThisWeek}</div>
+      <div class="text-muted mt-2">công việc đã hoàn thành trong tuần</div>
+    </div>
+  `;
+};
+
+// Drag & Drop cơ bản (có thể mở rộng sau)
+window.tkDragStart = (e, id) => { e.dataTransfer.setData('text', id); };
+
+document.getElementById('tkFilterBar').addEventListener('click', (e) => {
+  if (e.target.classList.contains('filter-chip')) {
+    document.querySelectorAll('#tkFilterBar .filter-chip').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    activeFilter = e.target.dataset.filter;
+    tkRender();
+  }
+});
+
+// Init
+document.getElementById('tkDateLabel').textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+document.getElementById('tkTodayDateLabel').textContent = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+
 tkRender();
-};
-
-// ----- INIT DATE -----
-(()=>{let n=new Date();document.getElementById('tkDateLabel').textContent=n.toLocaleDateString('vi-VN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});document.getElementById('tkTodayDateLabel').textContent=n.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit'})})();
-
-// ----- FILTER CHIPS -----
-document.querySelectorAll('#tkFilterBar .filter-chip').forEach(btn=>btn.addEventListener('click',function(){document.querySelectorAll('#tkFilterBar .filter-chip').forEach(b=>b.classList.remove('active'));this.classList.add('active');activeFilter=this.dataset.filter;tkRender()}));
-
-// ----- RENDER MAIN -----
-window.tkRender=()=>{
-let t=today();
-let monthOffset=parseInt(document.getElementById('tkMonthSelect').value)||0;
-let year=parseInt(document.getElementById('tkYearSelect').value)||2026;
-let now=new Date();
-let targetMonth=now.getMonth()+monthOffset;
-let targetYear=year;
-if(targetMonth<0){targetMonth=11;targetYear--;}
-if(targetMonth>11){targetMonth=0;targetYear++;}
-let swDate=startOfMonth(targetYear,targetMonth);
-let ewDate=endOfMonth(targetYear,targetMonth);
-
-const matchesFilter=task=>{
-let f=activeFilter;
-if(f==='all')return!0;
-if(f==='today')return task.deadline===t;
-if(f==='week'){let sw=startOfWeek(0),ew=endOfWeek(0);if(!task.deadline)return!1;let d=new Date(task.deadline);return d>=sw&&d<=ew}
-if(f==='month'){if(!task.deadline)return!1;let d=new Date(task.deadline);return d>=swDate&&d<=ewDate}
-if(f==='starred')return task.starred===!0;
-return!0;
-};
-
-let visible=tasks.filter(tk=>matchesFilter(tk));
-let todayTasks=tasks.filter(tk=>tk.deadline===t);
-let weekStart=startOfWeek(0),weekEnd=endOfWeek(0);
-let doneWeek=tasks.filter(tk=>{if(tk.status!=='done')return!1;let cd=new Date(tk.completedAt||tk.createdAt);return cd>=weekStart&&cd<=weekEnd}).length;
-let now2=new Date();now2.setHours(0,0,0,0);
-let carry=tasks.filter(tk=>{if(tk.status==='done')return!1;if(!tk.deadline)return!1;return new Date(tk.deadline)<now2}).length;
-let total=tasks.length,done=tasks.filter(tk=>tk.status==='done').length;
-document.getElementById('statToday').textContent=todayTasks.length;
-document.getElementById('statDone').textContent=doneWeek;
-document.getElementById('statCarry').textContent=carry;
-document.getElementById('statPct').textContent=total>0?Math.round(done/total*100)+'%':'0%';
-if(currentView==='list')renderList(visible,carry);else renderKanban(visible);
-tkRenderReport();
-};
-
-// ----- RENDER LIST -----
-const renderList=(visible,carry)=>{
-let t=today(),todayItems=visible.filter(tk=>tk.deadline===t&&tk.status!=='done');
-let upcomingItems=visible.filter(tk=>{if(tk.status==='done')return!1;if(!tk.deadline)return!0;return tk.deadline>t});
-let doneItems=visible.filter(tk=>tk.status==='done');
-if(carry>0){document.getElementById('tkCarryNote').style.display='flex';document.getElementById('tkCarryText').textContent=carry+' việc chưa xong từ hôm qua được chuyển sang'}else{document.getElementById('tkCarryNote').style.display='none'}
-let todayAll=tasks.filter(tk=>tk.deadline===t),todayDone=todayAll.filter(tk=>tk.status==='done').length,todayPct=todayAll.length>0?Math.round(todayDone/todayAll.length*100):0;
-document.getElementById('tkTodayProgress').textContent=todayDone+'/'+todayAll.length+' xong';
-document.getElementById('tkTodayBar').style.width=todayPct+'%';
-document.getElementById('tkTodayBar').className='progress-fill '+progFillClass(todayPct);
-document.getElementById('tkTodayPct').textContent=todayPct+'% hoàn thành';
-const renderTaskList=(id,items)=>{let el=document.getElementById(id);if(!items.length){el.innerHTML='';return}el.innerHTML=items.map(tk=>taskHTML(tk)).join('')};
-renderTaskList('tkTodayList',todayItems.length?todayItems:tasks.filter(tk=>tk.deadline===t).filter(tk=>tk.status!=='done'));
-if(!todayItems.length&&!tasks.filter(tk=>tk.deadline===t).length)document.getElementById('tkTodayList').innerHTML='<div class="empty-state"><div class="empty-state-icon">📋</div><p>Không có việc nào hôm nay</p></div>';
-renderTaskList('tkUpcomingList',upcomingItems);
-if(!upcomingItems.length)document.getElementById('tkUpcomingList').innerHTML='<div class="empty-state"><div class="empty-state-icon">🎯</div><p>Không có việc sắp tới</p></div>';
-renderTaskList('tkDoneList',doneItems);
-if(!doneItems.length)document.getElementById('tkDoneList').innerHTML='<div class="empty-state"><p>Chưa có việc hoàn thành</p></div>';
-};
-
-// ----- TASK HTML -----
-const taskHTML=tk=>{
-let pct=parseInt(tk.progress||0),dlCls=dlClass(tk.deadline,tk.status),dlLbl=dlLabel(tk.deadline,tk.status),imgHTML='',starHTML=tk.starred?'<i class="fas fa-star text-yellow-500 mr-1"></i>':'<i class="far fa-star text-muted mr-1"></i>';
-let priorityClass=tk.priority||'medium';
-let priorityBadge=priorityClass==='high'?'<span class="priority-badge high"><i class="fas fa-arrow-up mr-1"></i>Cao</span>':priorityClass==='medium'?'<span class="priority-badge medium"><i class="fas fa-minus mr-1"></i>Trung</span>':'<span class="priority-badge low"><i class="fas fa-arrow-down mr-1"></i>Thấp</span>';
-if(tk.images&&tk.images.length){imgHTML='<div class="flex gap-2 mt-2 flex-wrap">';tk.images.slice(0,3).forEach(src=>{imgHTML+='<img src="'+src+'" class="w-10 h-10 rounded-lg object-cover border border-border">'});if(tk.images.length>3)imgHTML+='<div class="w-10 h-10 rounded-lg bg-border flex items-center justify-center text-xs font-bold text-muted">+'+(tk.images.length-3)+'</div>';imgHTML+='</div>'}
-let actionBtns='';
-if(editMode){
-actionBtns='<div class="action-btns" onclick="event.stopPropagation()"><button class="action-btn edit" onclick="tkOpenEdit(\''+tk.id+'\')"><i class="fas fa-pen"></i></button><button class="action-btn delete" onclick="tkDeleteTask(\''+tk.id+'\')"><i class="fas fa-trash"></i></button></div>';
-}
-return'<div class="task-item" onclick="tkOpenDetail(\''+tk.id+'\')"><div class="task-check '+(tk.status==='done'?'done':tk.status==='inprog'?'inprog':'')+'" onclick="tkToggleStatus(event,\''+tk.id+'\')">'+(tk.status==='done'?'<i class="fas fa-check"></i>':tk.status==='inprog'?'<i class="fas fa-ellipsis-h"></i>':'')+'</div><div class="task-info"><div class="task-name'+(tk.status==='done'?' done':'')+'">'+starHTML+escHtml(tk.name)+'</div><div class="task-meta">'+priorityBadge+'<span class="task-badge cat-'+tk.cat+'">'+catLabel(tk.cat)+'</span><span class="task-badge status-'+tk.status+'">'+statusLabel(tk.status)+'</span>'+(dlLbl?'<span class="deadline-pill '+dlCls+'">'+dlLbl+'</span>':'')+'</div>'+(pct>0&&tk.status!=='done'?'<div class="progress-bar-wrap"><div class="progress-bar"><div class="progress-fill '+progFillClass(pct)+'" style="width:'+pct+'%"></div></div><div class="progress-percent">'+pct+'%</div></div>':'')+imgHTML+'</div>'+actionBtns+'</div>';
-};
-
-// ----- RENDER KANBAN -----
-const renderKanban=visible=>{
-let cols={todo:[],inprog:[],done:[]};
-visible.forEach(tk=>(cols[tk.status]||cols.todo).push(tk));
-document.getElementById('tkKanbanBoard').innerHTML=[{key:'todo',label:'📋 Cần làm',color:'var(--t-accent)'},{key:'inprog',label:'⚡ Đang làm',color:'#F59E0B'},{key:'done',label:'✅ Hoàn thành',color:'#10B981'}].map(col=>'<div class="kanban-col" ondrop="tkDrop(event,\''+col.key+'\')" ondragover="event.preventDefault()"><div class="kanban-col-header" style="color:'+col.color+'">'+col.label+'<span class="bg-border text-muted rounded-full px-2 py-0.5 text-xs">'+cols[col.key].length+'</span></div>'+cols[col.key].map(tk=>{let pct=parseInt(tk.progress||0);let priorityClass=tk.priority||'medium';let priorityIcon=priorityClass==='high'?'🔴':priorityClass==='medium'?'🟡':'🟢';return'<div class="kanban-card" draggable="true" ondragstart="tkDragStart(event,\''+tk.id+'\')" ondrop="tkDrop(event,\''+col.key+'\')" ondragover="event.preventDefault()"><div class="flex justify-between items-start mb-1"><div class="kanban-card-title'+(col.key==='done'?' line-through text-muted':'')+'">'+priorityIcon+' '+escHtml(tk.name)+'</div><span style="color:'+({high:'#EF4444',med:'#F59E0B',low:'#10B981'}[tk.pri]||'#94A3B8')+';">●</span></div><div class="kanban-card-meta">'+catLabel(tk.cat)+(tk.deadline?' · '+dlLabel(tk.deadline,tk.status):'')+'</div>'+(pct>0&&col.key!=='done'?'<div class="mt-2"><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:'+col.color+'"></div></div><div class="progress-percent">'+pct+'%</div></div>':'')+'</div>'}).join('')+'<div class="kanban-card border-dashed bg-bg text-center text-muted text-xs cursor-pointer" onclick="tkOpenModal()">+ Thêm</div></div>').join('');
-};
-
-// ----- DRAG & DROP -----
-let dragId=null;
-window.tkDragStart=(e,id)=>{dragId=id;e.dataTransfer.effectAllowed='move'};
-window.tkDrop=(e,status)=>{e.preventDefault();if(!dragId)return;let tk=tasks.find(t=>t.id===dragId);if(tk){tk.status=status;if(status==='done'){tk.progress=100;tk.completedAt=new Date().toISOString()}save(tasks);tkRender()}dragId=null};
-
-// ----- ACTIONS -----
-window.tkToggleStatus=(e,id)=>{e.stopPropagation();let tk=tasks.find(t=>t.id===id);if(!tk)return;let cycle={todo:'inprog',inprog:'done',done:'todo'};tk.status=cycle[tk.status]||'todo';if(tk.status==='done'){tk.progress=100;tk.completedAt=new Date().toISOString()}else if(tk.status==='todo')tk.completedAt=null;save(tasks);tkRender()};
-window.tkSetView=v=>{currentView=v;document.getElementById('tkListView').style.display=v==='list'?'block':'none';document.getElementById('tkKanbanView').style.display=v==='kanban'?'block':'none';document.getElementById('btnListView').classList.toggle('active',v==='list');document.getElementById('btnKanbanView').classList.toggle('active',v==='kanban');tkRender()};
-window.tkToggleDoneList=()=>{showDone=!showDone;document.getElementById('tkDoneList').style.display=showDone?'block':'none';document.getElementById('tkDoneToggle').textContent=showDone?'Ẩn':'Hiện'};
-
-// ----- MODAL -----
-window.tkOpenModal=()=>{document.getElementById('tkEditId').value='';document.getElementById('tkForm').reset();document.getElementById('tkModalTitle').textContent='Thêm công việc';document.getElementById('tkProgLabel').textContent='0%';document.getElementById('tkProgBar').style.width='0%';document.getElementById('tkImgPreview').innerHTML='';editingImages=[];document.getElementById('tkDeadline').value=today();document.getElementById('taskPriority').value='high';document.querySelectorAll('.priority-option').forEach(o=>o.classList.remove('selected'));document.querySelector('.priority-option.high').classList.add('selected');document.getElementById('tkOverlay').classList.add('show')};
-window.tkOpenEdit=id=>{let tk=tasks.find(t=>t.id===id);if(!tk)return;document.getElementById('tkEditId').value=tk.id;document.getElementById('tkName').value=tk.name||'';document.getElementById('tkDesc').value=tk.desc||'';document.getElementById('tkCat').value=tk.cat||'other';document.getElementById('tkDeadline').value=tk.deadline||'';document.getElementById('tkStatus').value=tk.status||'todo';document.getElementById('tkProgress').value=tk.progress||0;document.getElementById('tkProgLabel').textContent=(tk.progress||0)+'%';document.getElementById('tkProgBar').style.width=(tk.progress||0)+'%';document.getElementById('tkStarred').value=tk.starred?'true':'false';document.getElementById('taskPriority').value=tk.priority||'medium';document.querySelectorAll('.priority-option').forEach(o=>o.classList.remove('selected'));document.querySelector('.priority-option.'+(tk.priority||'medium')).classList.add('selected');editingImages=(tk.images||[]).slice();renderEditImgPreview();document.getElementById('tkModalTitle').textContent='Sửa công việc';document.getElementById('tkOverlay').classList.add('show')};
-window.tkCloseModal=()=>{document.getElementById('tkOverlay').classList.remove('show');editingImages=[]};
-window.tkOverlayClick=e=>{if(e.target===document.getElementById('tkOverlay'))tkCloseModal()};
-
-// ----- SAVE/DELETE -----
-window.tkSaveTask=e=>{e.preventDefault();let id=document.getElementById('tkEditId').value,pct=parseInt(document.getElementById('tkProgress').value)||0,status=document.getElementById('tkStatus').value;if(pct===100)status='done';let obj={id:id||uid(),name:document.getElementById('tkName').value.trim(),desc:document.getElementById('tkDesc').value.trim(),cat:document.getElementById('tkCat').value,pri:document.getElementById('taskPriority').value,status:status,deadline:document.getElementById('tkDeadline').value,progress:pct,images:editingImages.slice(),starred:document.getElementById('tkStarred').value==='true',priority:document.getElementById('taskPriority').value,createdAt:id?(tasks.find(t=>t.id===id)||{}).createdAt||new Date().toISOString():new Date().toISOString(),completedAt:status==='done'?new Date().toISOString():null};if(id){let idx=tasks.findIndex(t=>t.id===id);if(idx>-1)tasks[idx]=obj}else tasks.unshift(obj);save(tasks);tkCloseModal();tkRender();tkToast(id?'✅ Đã cập nhật!':'✅ Đã thêm công việc!')};
-window.tkDeleteTask=id=>{if(!confirm('Xóa công việc này?'))return;tasks=tasks.filter(t=>t.id!==id);save(tasks);tkRender();tkToast('🗑 Đã xóa')};
-
-// ----- IMAGES -----
-window.tkHandleImages=e=>{Array.from(e.target.files).forEach(f=>{if(editingImages.length>=5)return;let r=new FileReader();r.onload=ev=>{editingImages.push(ev.target.result);renderEditImgPreview()};r.readAsDataURL(f)})};
-const renderEditImgPreview=()=>{document.getElementById('tkImgPreview').innerHTML=editingImages.map((src,i)=>'<div class="img-thumb-wrap"><img class="img-thumb" src="'+src+'"><button class="img-delete" onclick="tkRemoveImg('+i+')">✕</button></div>').join('')};
-window.tkRemoveImg=i=>{editingImages.splice(i,1);renderEditImgPreview()};
-
-// ----- DETAIL MODAL -----
-window.tkOpenDetail=id=>{let tk=tasks.find(t=>t.id===id);if(!tk)return;let pct=parseInt(tk.progress||0),dlCls=dlClass(tk.deadline,tk.status),dlLbl=dlLabel(tk.deadline,tk.status),imgHTML='',priorityClass=tk.priority||'medium';let priorityBadge=priorityClass==='high'?'<span class="priority-badge high"><i class="fas fa-arrow-up mr-1"></i>Cao</span>':priorityClass==='medium'?'<span class="priority-badge medium"><i class="fas fa-minus mr-1"></i>Trung</span>':'<span class="priority-badge low"><i class="fas fa-arrow-down mr-1"></i>Thấp</span>';if(tk.images&&tk.images.length){imgHTML='<div class="mt-3"><div class="text-xs font-bold text-muted uppercase mb-2">Ảnh đính kèm</div><div class="flex gap-2 flex-wrap">';tk.images.forEach(src=>{imgHTML+='<img src="'+src+'" class="w-16 h-16 rounded-xl object-cover border border-border cursor-zoom-in" onclick="tkZoomImg(this.src)">'});imgHTML+='</div></div>'}document.getElementById('tkDetailTitle').textContent=escHtml(tk.name);document.getElementById('tkDetailBody').innerHTML='<div class="flex flex-wrap gap-2 mb-3">'+priorityBadge+'<span class="task-badge cat-'+tk.cat+'">'+catLabel(tk.cat)+'</span><span class="task-badge status-'+tk.status+'">'+statusLabel(tk.status)+'</span>'+(dlLbl?'<span class="deadline-pill '+dlCls+'">'+dlLbl+'</span>':'')+'</div>'+(tk.desc?'<div class="text-sm text-text leading-relaxed mb-3 p-3 bg-bg rounded-xl">'+escHtml(tk.desc)+'</div>':'')+(tk.deadline?'<div class="text-xs font-bold text-muted mb-2"><i class="fas fa-calendar mr-1"></i>Deadline: <strong>'+tk.deadline+'</strong></div>':'')+'<div class="my-3"><div class="flex justify-between text-xs font-bold text-muted mb-1"><span>Tiến trình</span><span>'+pct+'%</span></div><div class="progress-bar"><div class="progress-fill '+progFillClass(pct)+'" style="width:'+pct+'%"></div></div></div>'+imgHTML+'<div class="flex gap-3 mt-4"><button class="btn-submit flex-1" onclick="tkCloseDetail();tkOpenEdit(\''+tk.id+'\')"><i class="fas fa-pen mr-1"></i>Chỉnh sửa</button><button class="btn-submit flex-none w-12 bg-danger" onclick="tkCloseDetail();tkDeleteTask(\''+tk.id+'\')"><i class="fas fa-trash"></i></button></div>';document.getElementById('tkDetailOverlay').classList.add('show')};
-window.tkCloseDetail=()=>{document.getElementById('tkDetailOverlay').classList.remove('show')};
-window.tkDetailOverlayClick=e=>{if(e.target===document.getElementById('tkDetailOverlay'))tkCloseDetail()};
-window.tkZoomImg=src=>{let ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';ov.innerHTML='<img src="'+src+'" style="max-width:95vw;max-height:95vh;border-radius:12px;">';ov.onclick=()=>document.body.removeChild(ov);document.body.appendChild(ov)};
-
-// ----- REPORT -----
-window.tkRenderReport=()=>{let offset=parseInt(document.getElementById('tkWeekSelect').value)||0,sw=startOfWeek(offset),ew=endOfWeek(offset);let weekTasks=tasks.filter(tk=>{if(!tk.deadline)return!1;let d=new Date(tk.deadline);return d>=sw&&d<=ew});let doneTasks=tasks.filter(tk=>{if(tk.status!=='done')return!1;let cd=new Date(tk.completedAt||tk.createdAt);return cd>=sw&&cd<=ew});let overdueTasks=weekTasks.filter(tk=>{if(tk.status==='done')return!1;return new Date(tk.deadline)<new Date()});document.getElementById('tkReportStats').innerHTML=[{num:weekTasks.length,lbl:'Việc tuần này',color:'var(--t-accent)'},{num:doneTasks.length,lbl:'Đã hoàn thành',color:'#10B981'},{num:overdueTasks.length,lbl:'Quá hạn',color:'#EF4444'}].map(s=>'<div class="card-shadow p-3 text-center"><div class="text-2xl font-bold" style="color:'+s.color+'">'+s.num+'</div><div class="text-[10px] font-semibold text-muted mt-1">'+s.lbl+'</div></div>').join('');let days=[],maxCount=1;for(let i=0;i<7;i++){let d=new Date(sw);d.setDate(d.getDate()+i);let ds=d.toISOString().slice(0,10);let count=doneTasks.filter(tk=>new Date(tk.completedAt||tk.createdAt).toISOString().slice(0,10)===ds).length;days.push({label:['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],count:count,isToday:ds===today()});maxCount=Math.max(maxCount,count)}maxCount=Math.max(1,maxCount);document.getElementById('tkWeekChart').innerHTML=days.map(day=>{let h=Math.round((day.count/maxCount)*100);return'<div class="report-day-col"><div class="report-day-num">'+(day.count||'·')+'</div><div class="report-bar-wrap"><div class="report-bar" style="height:'+(h||4)+'%;background:'+(day.isToday?'var(--t-accent)':'color-mix(in srgb, var(--t-accent) 45%, var(--t-border))')+(day.isToday?';box-shadow:0 2px 8px rgba(90,155,212,.3)':'')+'"></div></div><div class="report-day-label" style="'+(day.isToday?'color:var(--t-accent);':'')+'">'+day.label+'</div></div>'}).join('');let cats=['study','code','team','school','personal','other'],catCounts={};cats.forEach(c=>catCounts[c]={total:0,done:0});weekTasks.forEach(tk=>{let c=tk.cat||'other';if(!catCounts[c])catCounts[c]={total:0,done:0};catCounts[c].total++;if(tk.status==='done')catCounts[c].done++});let catHTML='<div class="text-xs font-bold text-muted uppercase tracking-wide mb-2">Task theo danh mục</div>';cats.forEach(c=>{if(!catCounts[c].total)return;let pct2=catCounts[c].total>0?Math.round(catCounts[c].done/catCounts[c].total*100):0;catHTML+='<div class="mb-3"><div class="flex justify-between text-xs font-semibold mb-1"><span>'+catLabel(c)+'</span><span style="color:'+(pct2>=80?'#10B981':pct2>=50?'#F59E0B':'#EF4444')+'">'+catCounts[c].done+'/'+catCounts[c].total+'</span></div><div class="progress-bar"><div class="progress-fill '+progFillClass(pct2)+'" style="width:'+pct2+'%"></div></div></div>'});document.getElementById('tkCatBreakdown').innerHTML=catHTML};
-
-// ----- TOAST -----
-const tkToast=msg=>{let t=document.createElement('div');t.textContent=msg;t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#334155;color:white;padding:8px 18px;border-radius:999px;font-size:12px;font-weight:600;z-index:9999;pointer-events:none;opacity:0;transition:opacity .2s;white-space:nowrap;';document.body.appendChild(t);setTimeout(()=>t.style.opacity='1',10);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>document.body.removeChild(t),300)},2000)};
-
-// ----- PROGRESS LISTENER -----
-document.getElementById('tkProgress').addEventListener('input',function(){document.getElementById('tkProgBar').style.width=this.value+'%'});
-
-// ----- INIT -----
-tkRender();
-})();
 </script>

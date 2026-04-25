@@ -21,9 +21,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-  <title>
-    <%= typeof title !='undefined' ? title : 'Bear Diary' %>
-  </title>
+  <title><%= typeof title != 'undefined' ? title : 'Bear Diary' %></title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -35,45 +33,62 @@
       --primary-dark: #2C4A7C;
       --accent: #5A9BD4;
       --accent-light: #A3C4E8;
+      --accent-dark: #3B82F6;
       --muted: #64748B;
       --danger: #ef4444;
       --card-bg: white;
       --card-border: #E0ECF9;
+      --accent-rgb: 90, 155, 212;
     }
 
     [data-theme="blue"] {
       --accent: #5A9BD4;
+      --accent-light: #A3C4E8;
+      --accent-dark: #3B82F6;
       --bg-main: #F8FAFF;
       --primary-dark: #2C4A7C;
       --card-border: #E0ECF9;
+      --accent-rgb: 90, 155, 212;
     }
 
     [data-theme="pink"] {
-      --accent: #F8B4D9;
+      --accent: #F472B6;
+      --accent-light: #FBCFE8;
+      --accent-dark: #EC4899;
       --bg-main: #FFF5F8;
       --primary-dark: #831843;
       --card-border: #FCE7F3;
+      --accent-rgb: 244, 114, 182;
     }
 
     [data-theme="green"] {
-      --accent: #A8E6CF;
+      --accent: #34D399;
+      --accent-light: #A7F3D0;
+      --accent-dark: #10B981;
       --bg-main: #F0FDF4;
       --primary-dark: #064E3B;
       --card-border: #D1FAE5;
+      --accent-rgb: 52, 211, 153;
     }
 
     [data-theme="purple"] {
-      --accent: #D4B3FF;
+      --accent: #A78BFA;
+      --accent-light: #DDD6FE;
+      --accent-dark: #8B5CF6;
       --bg-main: #F5F3FF;
       --primary-dark: #4C1D95;
       --card-border: #EDE9FE;
+      --accent-rgb: 167, 139, 250;
     }
 
     [data-theme="yellow"] {
-      --accent: #F9D77E;
+      --accent: #FBBF24;
+      --accent-light: #FDE68A;
+      --accent-dark: #F59E0B;
       --bg-main: #FEFCE8;
       --primary-dark: #854D0E;
       --card-border: #FEF08A;
+      --accent-rgb: 251, 191, 36;
     }
 
     [data-theme="dark"] {
@@ -81,7 +96,11 @@
       --primary-dark: #F1F5F9;
       --card-border: #334155;
       --muted: #94A3B8;
-      --card-bg: #0F172A;
+      --card-bg: #1E293B;
+      --accent: #5A9BD4;
+      --accent-light: #3B82F6;
+      --accent-dark: #60A5FA;
+      --accent-rgb: 90, 155, 212;
     }
 
     body {
@@ -148,7 +167,6 @@
         padding-top: 70px;
       }
       
-      /* Mobile top bar */
       .mobile-top {
         display: flex;
         position: fixed;
@@ -172,44 +190,15 @@
         cursor: pointer;
         padding: 8px;
       }
-      
-      /* Hide text in sidebar on mobile when closed? No, keep as is when open */
-      /* But we want menu visible as icons only? Actually sidebar will slide in */
     }
     
-    /* Desktop: sidebar always visible */
     @media (min-width: 769px) {
       .mobile-top {
         display: none !important;
       }
     }
 
-    [data-theme="dark"] .card-shadow,
-    [data-theme="dark"] .mood-btn {
-      background: #1E2937;
-      border-color: #334155;
-    }
-
-    [data-theme="dark"] .text-slate-400 { color: #94A3B8 !important; }
-    [data-theme="dark"] .text-slate-700 { color: #E2E8F0 !important; }
-    [data-theme="dark"] .text-slate-500,
-    [data-theme="dark"] .text-slate-600 { color: #CBD5E1 !important; }
-    [data-theme="dark"] textarea {
-      background: #0F172A;
-      color: #E2E8F0;
-      border-color: #334155;
-    }
-    [data-theme="dark"] .banner-gradient {
-      background: linear-gradient(135deg, var(--accent), #0F172A);
-    }
-    [data-theme="dark"] .nav-item.active {
-      background: var(--accent);
-      color: white !important;
-    }
-    [data-theme="dark"] .nav-item.active i {
-      color: white !important;
-    }
-
+    /* Navigation items - FIXED */
     .nav-item {
       display: flex;
       align-items: center;
@@ -221,37 +210,98 @@
       color: #94A3B8;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      background: transparent;
     }
 
-    .nav-item i { width: 20px; transition: all 0.3s ease; }
+    .nav-item i { 
+      width: 20px; 
+      transition: all 0.3s ease; 
+      color: #94A3B8;
+    }
+    
     .nav-item:hover {
-      background: #F0F6FF;
-      color: #5A9BD4;
+      background: rgba(var(--accent-rgb), 0.1);
+      color: var(--accent);
       transform: translateX(4px);
     }
-    .nav-item:hover i { transform: scale(1.1); }
-    .nav-item.active {
-      background: var(--accent);
-      color: white !important;
-      box-shadow: 0 8px 25px rgba(90, 155, 212, 0.35);
+    
+    .nav-item:hover i { 
+      color: var(--accent);
+      transform: scale(1.1); 
     }
-    .nav-item.active i { color: white !important; }
+    
+    /* Active state - QUAN TRỌNG: phải override các style khác */
+    .nav-item.active {
+      background: var(--accent) !important;
+      color: white !important;
+      box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.35);
+    }
+    
+    .nav-item.active i { 
+      color: white !important; 
+    }
+    
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 60%;
+      background: white;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    [data-theme="dark"] .nav-item {
+      color: #94A3B8;
+    }
+    
     [data-theme="dark"] .nav-item:hover {
-      background: #334155;
-      color: #60A5FA;
+      background: rgba(var(--accent-rgb), 0.15);
+      color: var(--accent);
+    }
+    
+    [data-theme="dark"] .nav-item.active {
+      background: var(--accent) !important;
+      color: white !important;
+    }
+    
+    [data-theme="dark"] .nav-item.active::before {
+      background: white;
+    }
+
+    /* Logout button specific */
+    .nav-item.logout-item {
+      color: #f43f5e;
+    }
+    
+    .nav-item.logout-item:hover {
+      background: rgba(244, 63, 94, 0.1);
+      color: #f43f5e;
+    }
+    
+    .nav-item.logout-item i {
+      color: #f43f5e;
+    }
+    
+    .nav-item.logout-item:hover i {
+      color: #f43f5e;
     }
 
     .app-logo {
       width: 52px;
       height: 52px;
-      background: linear-gradient(135deg, var(--accent), #7EB8E8);
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 32px;
       color: white;
-      box-shadow: 0 6px 20px rgba(90, 155, 212, 0.35);
+      box-shadow: 0 6px 20px rgba(var(--accent-rgb), 0.35);
       transition: transform 0.3s ease;
     }
     .app-logo:hover { transform: scale(1.05); }
@@ -259,22 +309,22 @@
     .card-shadow {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
       border: 1px solid var(--card-border);
-      background: white;
+      background: var(--card-bg);
     }
 
     .banner-gradient {
-      background: linear-gradient(135deg, var(--accent), #7EB8E8);
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
     }
 
     .mood-btn {
       transition: all 0.25s;
       border: 1px solid var(--card-border);
-      background: white;
+      background: var(--card-bg);
     }
     .mood-btn:hover {
       border-color: var(--accent);
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(163, 196, 232, 0.25);
+      box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.25);
     }
 
     .bear-float { animation: float 3.5s ease-in-out infinite; }
@@ -315,18 +365,27 @@
     input:checked+.slider { background-color: var(--accent); }
     input:checked+.slider:before { transform: translateX(20px); }
 
-    .nav-item.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 60%;
-      background: white;
-      border-radius: 0 4px 4px 0;
+    /* Dark mode specific overrides */
+    [data-theme="dark"] .card-shadow {
+      background: #1E293B;
     }
-    [data-theme="dark"] .nav-item.active::before { background: var(--accent); }
+    
+    [data-theme="dark"] textarea,
+    [data-theme="dark"] input,
+    [data-theme="dark"] select {
+      background: #0F172A;
+      color: #E2E8F0;
+      border-color: #334155;
+    }
+    
+    [data-theme="dark"] .banner-gradient {
+      background: linear-gradient(135deg, var(--accent), #0F172A);
+    }
+    
+    [data-theme="dark"] .text-slate-400 { color: #94A3B8 !important; }
+    [data-theme="dark"] .text-slate-700 { color: #E2E8F0 !important; }
+    [data-theme="dark"] .text-slate-500,
+    [data-theme="dark"] .text-slate-600 { color: #CBD5E1 !important; }
   </style>
 </head>
 
@@ -353,23 +412,23 @@
     </div>
 
     <nav class="flex-1 space-y-2">
-      <a href="/" class="nav-item <%= title === 'Trang chủ - Moodiary' ? 'active' : '' %>">
+      <a href="/" class="nav-item <%= title === 'Trang chủ - Bear Diary' ? 'active' : '' %>">
         <i class="fa-solid fa-house"></i>
         <span>Trang chủ</span>
       </a>
-      <a href="/diaries/timeline" class="nav-item <%= title === 'Dòng thời gian - Moodiary' || title === 'Nhật ký - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/timeline" class="nav-item <%= title === 'Dòng thời gian - Bear Diary' || title === 'Nhật ký - Bear Diary' ? 'active' : '' %>">
         <i class="fa-solid fa-book-open"></i>
         <span>Timeline</span>
       </a>
-      <a href="/diaries/report" class="nav-item <%= title === 'Mood Report - Moodiary' || title === 'Báo cáo - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/report" class="nav-item <%= title === 'Mood Report - Bear Diary' || title === 'Báo cáo - Bear Diary' ? 'active' : '' %>">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Báo cáo</span>
       </a>
-      <a href="/diaries/tasks" class="nav-item <%= title === 'Công việc - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/tasks" class="nav-item <%= title === 'Công việc - Bear Diary' ? 'active' : '' %>">
         <i class="fa-solid fa-list-check"></i>
         <span>Công việc</span>
       </a>
-      <a href="/diaries/profile" class="nav-item <%= title === 'Cá nhân - Moodiary' ? 'active' : '' %>">
+      <a href="/diaries/profile" class="nav-item <%= title === 'Cá nhân - Bear Diary' ? 'active' : '' %>">
         <i class="fa-solid fa-user"></i>
         <span>Cá nhân</span>
       </a>
@@ -385,7 +444,7 @@
           <span class="slider"></span>
         </label>
       </div>
-      <a href="/auth/logout" class="nav-item text-rose-400 hover:text-rose-600 hover:bg-rose-50">
+      <a href="/auth/logout" class="nav-item logout-item">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
         <span>Đăng xuất</span>
       </a>
@@ -409,10 +468,10 @@
 
     const THEME_ACCENTS = {
       blue: '#5A9BD4',
-      pink: '#F8B4D9',
-      green: '#A8E6CF',
-      purple: '#D4B3FF',
-      yellow: '#F9D77E'
+      pink: '#F472B6',
+      green: '#34D399',
+      purple: '#A78BFA',
+      yellow: '#FBBF24'
     };
     window.THEME_ACCENTS = THEME_ACCENTS;
 
@@ -427,10 +486,20 @@
         const accent = THEME_ACCENTS[theme] || THEME_ACCENTS['blue'];
         localStorage.setItem('moodiary-accent', accent);
         document.documentElement.style.setProperty('--accent', accent);
+        // Update RGB values
+        const rgbMap = {
+          blue: '90, 155, 212',
+          pink: '244, 114, 182',
+          green: '52, 211, 153',
+          purple: '167, 139, 250',
+          yellow: '251, 191, 36'
+        };
+        document.documentElement.style.setProperty('--accent-rgb', rgbMap[theme] || '90, 155, 212');
         localStorage.setItem('moodiary-is-dark', '0');
       } else {
         const storedAccent = localStorage.getItem('moodiary-accent') || THEME_ACCENTS['blue'];
         document.documentElement.style.setProperty('--accent', storedAccent);
+        document.documentElement.style.setProperty('--accent-rgb', '90, 155, 212');
         localStorage.setItem('moodiary-is-dark', '1');
       }
     }
@@ -478,6 +547,20 @@
           }
         });
       }
+      
+      // Highlight current page in sidebar based on URL
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-item');
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && currentPath === href) {
+          link.classList.add('active');
+        } else if (href === '/' && currentPath === '/') {
+          link.classList.add('active');
+        } else if (href !== '/' && currentPath.startsWith(href) && href !== '/') {
+          link.classList.add('active');
+        }
+      });
     });
   </script>
 </body>

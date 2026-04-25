@@ -45,14 +45,14 @@ exports.createEntry = async (req, res) => {
         }
 
         // CHỈ THÊM isStarred VÀO ĐÂY ĐỂ LƯU ĐƯỢC SAO TỪ TRANG CHỦ
-        const { content, mood, isStarred } = req.body; 
+        const { content, mood, isStarred } = req.body;
         const newDiary = new Diary({
             userId: req.session.user._id,
             content: content,
             mood: mood || '😊 Happy',
             isStarred: isStarred === 'true' // ĐÃ THÊM DÒNG NÀY
         });
-        
+
         await newDiary.save();
         res.redirect('/diaries/home');
     } catch (error) {
@@ -234,7 +234,7 @@ exports.getReport = async (req, res) => {
             const isStarred = dayEntries.some(e => e.isStarred);
             const images = dayEntries.find(e => e.images && e.images.length > 0)?.images || [];
             if (hasJournal) console.log('Ngày có nhật ký:', i, 'entries:', dayEntries.length);
-            calendarDays.push({ day: i, isOtherMonth: false, isToday, hasJournal, isStarred, images });  
+            calendarDays.push({ day: i, isOtherMonth: false, isToday, hasJournal, isStarred, images });
         }
 
         const totalGridCells = calendarDays.length > 35 ? 42 : 35;
@@ -307,23 +307,22 @@ exports.getProfile = async (req, res) => {
         }
 
         const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
-        const avatar = user.avatar || (user.name ? user.name.charAt(0).toUpperCase() : 'U');
 
-            res.render('diaries/profile', {
-                title: 'Hồ sơ - Moodiary',
-                user: {
-                    name: user.name,
-                    email: user.email,
-                    avatar,
-                    memberSince,
-                    dayStreak,
-                    totalEntries,
-                    daysJournaled,
-                    starredEntries,
-                    isTwoFactorEnabled: user.isTwoFactorEnabled,
-                    passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null
-                }
-            });
+        res.render('diaries/profile', {
+            title: 'Hồ sơ - Moodiary',
+            user: {
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar,
+                memberSince,
+                dayStreak,
+                totalEntries,
+                daysJournaled,
+                starredEntries,
+                isTwoFactorEnabled: user.isTwoFactorEnabled,
+                passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null
+            }
+        });
     } catch (error) {
         console.error(error);
         res.redirect('/diaries/home');
@@ -354,6 +353,7 @@ exports.updateProfile = async (req, res) => {
 
         let avatarPath;
 
+        // Multer đã xử lý ảnh thành công từ biến avatarFile
         if (req.file) {
             const oldUser = await User.findById(userId);
             if (oldUser && oldUser.avatar && !oldUser.avatar.includes('default-avatars')) {
@@ -364,7 +364,8 @@ exports.updateProfile = async (req, res) => {
                     console.error('Lỗi xóa avatar cũ:', err);
                 }
             }
-            avatarPath = '/uploads/' + req.file.filename;
+            // ĐÂY LÀ CHỖ DUY NHẤT ĐƯỢC SỬA: Thêm 'diary/' vào đường dẫn
+            avatarPath = '/uploads/diary/' + req.file.filename;
         } else if (req.body.avatar) {
             avatarPath = req.body.avatar.trim();
         }
@@ -373,6 +374,9 @@ exports.updateProfile = async (req, res) => {
 
         const existing = await User.findOne({ email: email.trim().toLowerCase() });
         if (existing && String(existing._id) !== String(userId)) {
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.status(400).json({ ok: false, error: 'Email đã được sử dụng!' });
+            }
             req.flash('error_msg', 'Email đã được sử dụng!');
             return res.redirect('/diaries/profile/edit');
         }
@@ -380,7 +384,8 @@ exports.updateProfile = async (req, res) => {
         const updateData = { name: name.trim(), email: email.trim().toLowerCase() };
         if (avatarPath !== undefined) updateData.avatar = avatarPath;
 
-        const updated = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true }).lean();
+        // Sửa cảnh báo Mongoose: dùng returnDocument: 'after' thay vì new: true
+        const updated = await User.findByIdAndUpdate(userId, updateData, { returnDocument: 'after', runValidators: true }).lean();
 
         req.session.user.name = updated.name;
         req.session.user.email = updated.email;
@@ -524,7 +529,7 @@ exports.createDiary = async (req, res) => {
         });
 
         await newDiary.save();
-            res.redirect('/diaries/home');
+        res.redirect('/diaries/home');
     } catch (error) {
         console.error('Lỗi tạo nhật ký:', error);
         res.redirect('/diaries/home');

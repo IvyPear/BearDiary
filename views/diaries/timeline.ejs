@@ -1,108 +1,5 @@
 <% title='Timeline - Bear Diary' ; %>
 
-  <style>
-    .timeline-container {
-      position: relative;
-    }
-
-    .timeline-line {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 100%;
-      background-color: var(--card-border);
-      z-index: 0;
-    }
-
-    .timeline-card {
-      width: 45%;
-      background: white;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--card-border);
-      z-index: 10;
-    }
-
-    .emoji-dot {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 36px;
-      height: 36px;
-      background: white;
-      border: 2px solid var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      z-index: 20;
-    }
-
-    .filter-pill {
-      background: white;
-      border: 1px solid #E2E8F0;
-      padding: 6px 16px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #64748B;
-      transition: all 0.2s;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .filter-pill.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .filter-pill:hover {
-      background: var(--accent-light);
-      border-color: var(--accent);
-    }
-
-    .filter-select {
-      padding: 10px 16px;
-      border-radius: 999px;
-      border: 1px solid #E0ECF9;
-      background: white;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--primary-dark);
-      min-width: 140px;
-      cursor: pointer;
-    }
-
-    [data-theme="dark"] .timeline-card {
-      background: #1E2937;
-      border-color: #334155;
-    }
-
-    [data-theme="dark"] .filter-pill,
-    [data-theme="dark"] .filter-select {
-      background: #1E2937;
-      border-color: #334155;
-      color: #E2E8F0;
-    }
-
-    [data-theme="dark"] .timeline-line {
-      background-color: #334155;
-    }
-
-    [data-theme="dark"] .emoji-dot {
-      background: #1E2937;
-      border-color: #475569;
-    }
-
-    /* Empty state icon background in dark mode */
-    .empty-icon { background: #EFF6FF; }
-    [data-theme="dark"] .empty-icon { background: #1E2937; color: var(--accent); }
-  </style>
-
   <div class="mb-8 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">📖
@@ -152,7 +49,6 @@
     <% const isAllMonths=!currentMonth || currentMonth==='' ; %>
 
       <% if (entries.length===0) { %>
-        <!-- EMPTY STATE -->
         <div class="text-center py-20 card-shadow rounded-3xl border-dashed">
           <div
             class="mx-auto w-24 h-24 empty-icon rounded-3xl flex items-center justify-center text-6xl mb-6 shadow-inner">
@@ -164,8 +60,7 @@
           </h3>
 
           <p class="text-slate-400 font-medium max-w-md mx-auto leading-relaxed">
-            <%= isAllMonths ? 'Hãy bắt đầu hành trình ghi nhật ký của bạn ngay hôm nay ✨'
-              : 'Tháng này bạn chưa viết nhật ký . Hãy ghi lại cảm xúc của mình!' %>
+            <%= isAllMonths ? 'Hãy bắt đầu hành trình ghi nhật ký của bạn ngay hôm nay ✨' : 'Tháng này bạn chưa viết nhật ký . Hãy ghi lại cảm xúc của mình!' %>
           </p>
 
           <a href="/diaries/home"
@@ -199,11 +94,13 @@
                   <div class="emoji-dot border-<%= moodColor %>-200">
                     <%= moodIcon %>
                   </div>
+    
                   <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
                     <% if (entry.image) { %>
                       <img src="<%= entry.image %>" class="h-48 w-full object-cover" />
                       <% } %>
-                        <div class="p-6">
+ 
+                       <div class="p-6">
                           <div class="flex justify-between items-center mb-4">
                             <span
                               class="bg-white px-3 py-1 rounded-full text-[10px] font-bold text-<%= moodColor %>-600">
@@ -211,12 +108,9 @@
                                 <%= moodName %>
                             </span>
                             <div class="flex gap-3 text-slate-400">
-                              <i onclick="editEntry(this)"
-                                class="fa-solid fa-pen hover-accent cursor-pointer"></i>
-                              <i
-                                class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer"></i>
-                              <i onclick="deleteEntry(this)"
-                                class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer"></i>
+                              <i onclick="editEntry(this)" class="fa-solid fa-pen hover-accent cursor-pointer"></i>
+                              <i class="fa-<%= entry.isStarred ? 'solid' : 'regular' %> fa-star hover:text-yellow-400 cursor-pointer"></i>
+                              <i onclick="deleteEntry(this)" class="fa-solid fa-trash-can hover:text-rose-500 cursor-pointer"></i>
                             </div>
                           </div>
                           <p class="text-[10px] font-black text-slate-400 uppercase mb-2">📅 <%= displayDate %>
@@ -286,7 +180,6 @@
           updateVisibleCount(visible);
         });
       });
-
       // initialize count
       updateVisibleCount(timelineItems.length);
     })();

@@ -308,6 +308,16 @@ exports.getProfile = async (req, res) => {
 
         const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
 
+        let lastLoginDevice = '';
+        let lastLoginTime = '';
+        if (user.lastLogin && user.lastLogin.device) {
+            lastLoginDevice = user.lastLogin.device;
+            if (user.lastLogin.time) {
+                const d = new Date(user.lastLogin.time);
+                lastLoginTime = d.toLocaleString('vi-VN', { hour12: false });
+            }
+        }
+
         res.render('diaries/profile', {
             title: 'Hồ sơ - Moodiary',
             user: {
@@ -320,7 +330,9 @@ exports.getProfile = async (req, res) => {
                 daysJournaled,
                 starredEntries,
                 isTwoFactorEnabled: user.isTwoFactorEnabled,
-                passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null
+                passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null,
+                lastLoginDevice,
+                lastLoginTime
             }
         });
     } catch (error) {

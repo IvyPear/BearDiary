@@ -26,11 +26,13 @@ app.use(helmet({
             scriptSrc: [
                 "'self'",
                 "'unsafe-inline'",
+                "'unsafe-hashes'",
                 "https://cdn.tailwindcss.com",
                 "https://cdn.jsdelivr.net",
                 "https://cdnjs.cloudflare.com",
                 "https://fonts.googleapis.com"
             ],
+            scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: [
                 "'self'",
                 "'unsafe-inline'",

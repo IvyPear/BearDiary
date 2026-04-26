@@ -5,30 +5,29 @@
   <script>
     (function () {
       try {
-        var isDark = localStorage.getItem('moodiary-is-dark') === '1';
-        var saved = localStorage.getItem('moodiary-theme') || 'blue';
-        var accent = localStorage.getItem('moodiary-accent');
+        var isDark = localStorage.getItem('bd-dark-mode') === 'true';
+        var theme = localStorage.getItem('moodiary-theme') || 'blue';
+        var accent = localStorage.getItem('moodiary-accent') || '#5A9BD4';
+        
         if (isDark) {
           document.documentElement.setAttribute('data-theme', 'dark');
         } else {
-          document.documentElement.setAttribute('data-theme', saved);
+          document.documentElement.setAttribute('data-theme', theme);
         }
-        if (accent) {
-          document.documentElement.style.setProperty('--accent', accent);
-        }
+        document.documentElement.style.setProperty('--accent', accent);
       } catch (e) { /* ignore */ }
     })();
   </script>
+  
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
   <title>
-    <%= typeof title !='undefined' ? title : 'Bear Diary' %>
+    <%= typeof title != 'undefined' ? title : 'Bear Diary' %>
   </title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -53,32 +52,23 @@
     </div>
 
     <nav class="flex-1 space-y-2">
-      <a href="/diaries/home"
-        class="nav-item <%= (typeof title !== 'undefined' && title.includes('Trang chủ')) ? 'active' : '' %>">
+      <a href="/diaries/home" class="nav-item <%= (typeof title !== 'undefined' && title.includes('Trang chủ')) ? 'active' : '' %>">
         <i class="fa-solid fa-house"></i>
         <span>Trang chủ</span>
       </a>
-
-      <a href="/diaries/timeline"
-        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Dòng thời gian') || title.includes('Nhật ký'))) ? 'active' : '' %>">
+      <a href="/diaries/timeline" class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Dòng thời gian') || title.includes('Nhật ký'))) ? 'active' : '' %>">
         <i class="fa-solid fa-book-open"></i>
         <span>Timeline</span>
       </a>
-
-      <a href="/diaries/report"
-        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Báo cáo') || title.includes('Mood Report'))) ? 'active' : '' %>">
+      <a href="/diaries/report" class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Báo cáo') || title.includes('Mood Report'))) ? 'active' : '' %>">
         <i class="fa-solid fa-chart-simple"></i>
         <span>Báo cáo</span>
       </a>
-
-      <a href="/diaries/tasks"
-        class="nav-item <%= (typeof title !== 'undefined' && title.includes('Công việc')) ? 'active' : '' %>">
+      <a href="/diaries/tasks" class="nav-item <%= (typeof title !== 'undefined' && title.includes('Công việc')) ? 'active' : '' %>">
         <i class="fa-solid fa-list-check"></i>
         <span>Công việc</span>
       </a>
-
-      <a href="/diaries/profile"
-        class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Cá nhân') || title.includes('Hồ sơ'))) ? 'active' : '' %>">
+      <a href="/diaries/profile" class="nav-item <%= (typeof title !== 'undefined' && (title.includes('Cá nhân') || title.includes('Hồ sơ'))) ? 'active' : '' %>">
         <i class="fa-solid fa-user"></i>
         <span>Cá nhân</span>
       </a>
@@ -109,86 +99,82 @@
   </main>
 
   <script>
-    // Date display
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateEl = document.getElementById('currentDate');
-    if (dateEl) {
-      dateEl.innerText = new Date().toLocaleDateString('vi-VN', dateOptions);
-    }
-
     const THEME_ACCENTS = {
       blue: '#5A9BD4',
-      pink: '#F472B6',
+      pink: '#F8B4D9',
       green: '#34D399',
-      purple: '#A78BFA',
-      yellow: '#FBBF24'
+      purple: '#D4B3FF',
+      yellow: '#F9D77E'
     };
     window.THEME_ACCENTS = THEME_ACCENTS;
 
-    function setTheme(theme) {
-      if (theme === 'dark') {
+    // HÀM ĐỔI THEME ĐƯỢC TỐI ƯU
+    window.setTheme = function(themeName) {
+      if (themeName === 'dark') return;
+
+      const accent = THEME_ACCENTS[themeName] || THEME_ACCENTS['blue'];
+      localStorage.setItem('moodiary-theme', themeName);
+      localStorage.setItem('moodiary-accent', accent);
+      
+      // Luôn cập nhật màu chủ đạo
+      document.documentElement.style.setProperty('--accent', accent);
+
+      // Nếu KHÔNG BẬT dark mode, mới thay đổi data-theme
+      if (localStorage.getItem('bd-dark-mode') !== 'true') {
+        document.documentElement.setAttribute('data-theme', themeName);
+      } else {
+        // Đảm bảo vẫn giữ màu tối nếu đang bật
         document.documentElement.setAttribute('data-theme', 'dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', theme);
       }
-      if (theme !== 'dark') {
-        localStorage.setItem('moodiary-theme', theme);
-        const accent = THEME_ACCENTS[theme] || THEME_ACCENTS['blue'];
-        localStorage.setItem('moodiary-accent', accent);
-        document.documentElement.style.setProperty('--accent', accent);
-        // Update RGB values
-        const rgbMap = {
-          blue: '90, 155, 212',
-          pink: '244, 114, 182',
-          green: '52, 211, 153',
-          purple: '167, 139, 250',
-          yellow: '251, 191, 36'
-        };
-        document.documentElement.style.setProperty('--accent-rgb', rgbMap[theme] || '90, 155, 212');
-        localStorage.setItem('moodiary-is-dark', '0');
-      } else {
-        const storedAccent = localStorage.getItem('moodiary-accent') || THEME_ACCENTS['blue'];
-        document.documentElement.style.setProperty('--accent', storedAccent);
-        document.documentElement.style.setProperty('--accent-rgb', '90, 155, 212');
-        localStorage.setItem('moodiary-is-dark', '1');
-      }
-    }
+    };
+
+    // MUTATION OBSERVER: KHÓA CỨNG DARK MODE
+    // Tự động chặn các đoạn script cũ trên trang Profile cố tình đè data-theme
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.attributeName === 'data-theme') {
+          const currentTheme = document.documentElement.getAttribute('data-theme');
+          const isDark = localStorage.getItem('bd-dark-mode') === 'true';
+          
+          // Nếu đang ở Dark Mode mà hệ thống cố đổi sang theme khác (blue, pink...), ép nó quay lại dark ngay lập tức
+          if (isDark && currentTheme !== 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        }
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true });
 
     document.addEventListener('DOMContentLoaded', function () {
-      const savedTheme = localStorage.getItem('moodiary-theme') || 'blue';
-      const isDark = localStorage.getItem('moodiary-is-dark') === '1';
-      if (isDark) {
-        setTheme('dark');
-      } else {
-        setTheme(savedTheme);
+      const dateEl = document.getElementById('currentDate');
+      if (dateEl) {
+        dateEl.innerText = new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       }
 
+      // XỬ LÝ NÚT BẬT/TẮT DARK MODE
       const toggle = document.getElementById('darkToggle');
       if (toggle) {
-        toggle.checked = isDark;
+        toggle.checked = localStorage.getItem('bd-dark-mode') === 'true';
+        
         toggle.addEventListener('change', function () {
-          const current = document.documentElement.getAttribute('data-theme');
-          if (toggle.checked) {
-            if (current && current !== 'dark') localStorage.setItem('moodiary-previous-theme', current);
-            setTheme('dark');
-            localStorage.setItem('moodiary-is-dark', '1');
+          if (this.checked) {
+            localStorage.setItem('bd-dark-mode', 'true');
+            document.documentElement.setAttribute('data-theme', 'dark');
           } else {
-            const prev = localStorage.getItem('moodiary-previous-theme') || localStorage.getItem('moodiary-theme') || 'blue';
-            setTheme(prev);
-            localStorage.setItem('moodiary-is-dark', '0');
+            localStorage.setItem('bd-dark-mode', 'false');
+            const savedTheme = localStorage.getItem('moodiary-theme') || 'blue';
+            document.documentElement.setAttribute('data-theme', savedTheme);
           }
         });
       }
 
-      // Mobile menu
+      // MOBILE MENU
       const mobileBtn = document.getElementById('mobileMenuBtn');
       if (mobileBtn) {
         mobileBtn.addEventListener('click', function () {
           document.body.classList.toggle('sidebar-open');
         });
       }
-
-      // Close sidebar when clicking on overlay (main content)
       const mainEl = document.querySelector('main');
       if (mainEl) {
         mainEl.addEventListener('click', function () {
@@ -198,7 +184,7 @@
         });
       }
 
-      // Highlight current page in sidebar based on URL
+      // HIỆU ỨNG TÔ SÁNG NAVBAR
       const currentPath = window.location.pathname;
       const navLinks = document.querySelectorAll('.nav-item');
       navLinks.forEach(link => {
@@ -214,5 +200,4 @@
     });
   </script>
 </body>
-
 </html>

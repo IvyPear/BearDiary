@@ -9,12 +9,12 @@ const path = require('path');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, path.join(__dirname, '..', 'public', 'uploads', 'diary'));
-	},
-	filename: function (req, file, cb) {
-		const ext = path.extname(file.originalname);
-		const name = path.basename(file.originalname, ext).replace(/[^a-z0-9]/gi, '_');
-		cb(null, Date.now() + '_' + name + ext);
-	}
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext).replace(/[^a-z0-9]/gi, '_');
+    cb(null, Date.now() + '_' + name + ext);
+  }
 });
 
 const upload = multer({ storage, limits: { fileSize: 2 * 1024 * 1024 } });
@@ -26,7 +26,10 @@ router.use(ensureAuthenticated);
 router.get('/home', diaryController.getHome);
 router.get('/timeline', diaryController.getTimeline);
 router.get('/edit/:id', diaryController.getEditEntry);
-router.post('/update/:id', diaryController.updateEntry);
+
+// ĐÃ SỬA DÒNG NÀY: Thêm middleware upload.array('images', 10) để cho phép người dùng up ảnh khi chỉnh sửa
+router.post('/update/:id', upload.array('images', 10), diaryController.updateEntry);
+
 router.post('/delete/:id', diaryController.deleteEntry);
 router.get('/report', diaryController.getReport);
 router.get('/profile', diaryController.getProfile);

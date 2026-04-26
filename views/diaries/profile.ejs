@@ -160,8 +160,8 @@
     </div>
 </div>
 
-<div id="themePicker" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl">
+<div id="themePicker" class="hidden fixed inset-0 bg-transparent flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl p-8 w-[420px] shadow-2xl border border-slate-100">
       <h3 class="text-lg font-bold text-center mb-6 primary-text">Chọn chủ đề màu</h3>
       <div class="grid grid-cols-5 gap-6">
           <div data-theme="blue" class="theme-swatch w-12 h-12 rounded-2xl bg-[#5A9BD4] cursor-pointer hover:scale-110 transition-transform shadow"></div>
@@ -280,6 +280,7 @@
           pwdModal.style.display = 'none';
         }
       });
+      
       // 5. Theme picker
       const themePickerBtn = document.getElementById('themePickerBtn');
       const themePickerModal = document.getElementById('themePicker');
@@ -290,6 +291,14 @@
       if (themeClose) {
         themeClose.addEventListener('click', () => themePickerModal.classList.add('hidden'));
       }
+      
+      // Đóng popup theme khi nhấn ra ngoài
+      window.addEventListener('click', (e) => {
+        if (e.target === themePickerModal) {
+          themePickerModal.classList.add('hidden');
+        }
+      });
+
       document.querySelectorAll('.theme-swatch').forEach(el => {
         el.addEventListener('click', (ev) => {
           ev.stopPropagation();

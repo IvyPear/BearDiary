@@ -1,8 +1,8 @@
 <% title='Timeline - Bear Diary' ; %>
 
-  <div class="mb-8 flex items-center justify-between">
+  <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">📖
+      <div class="w-12 h-12 accent-bg rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg">⏳
       </div>
       <div>
         <h2 class="text-3xl font-black primary-text">Dòng thời gian</h2>
@@ -11,27 +11,31 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <button id="btnOpenPastDiary" class="bg-white border border-slate-200 text-slate-600 px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm flex items-center gap-2 hover:border-[var(--accent)] hover:text-[var(--accent)] transition">
+        <i class="fa-solid fa-calendar-plus"></i> Bổ sung
+      </button>
+
       <select id="monthFilter" class="filter-select">
-        <option value="" <%=!currentMonth ? 'selected' : '' %>>Tất cả tháng</option>
-        <option value="1" <%=currentMonth==='1' ? 'selected' : '' %>>Tháng 1</option>
-        <option value="2" <%=currentMonth==='2' ? 'selected' : '' %>>Tháng 2</option>
-        <option value="3" <%=currentMonth==='3' ? 'selected' : '' %>>Tháng 3</option>
-        <option value="4" <%=currentMonth==='4' ? 'selected' : '' %>>Tháng 4</option>
-        <option value="5" <%=currentMonth==='5' ? 'selected' : '' %>>Tháng 5</option>
-        <option value="6" <%=currentMonth==='6' ? 'selected' : '' %>>Tháng 6</option>
-        <option value="7" <%=currentMonth==='7' ? 'selected' : '' %>>Tháng 7</option>
-        <option value="8" <%=currentMonth==='8' ? 'selected' : '' %>>Tháng 8</option>
-        <option value="9" <%=currentMonth==='9' ? 'selected' : '' %>>Tháng 9</option>
-        <option value="10" <%=currentMonth==='10' ? 'selected' : '' %>>Tháng 10</option>
-        <option value="11" <%=currentMonth==='11' ? 'selected' : '' %>>Tháng 11</option>
-        <option value="12" <%=currentMonth==='12' ? 'selected' : '' %>>Tháng 12</option>
+        <option value="" <%= !currentMonth ? 'selected' : '' %>>Tất cả tháng</option>
+        <option value="1" <%= currentMonth == 1 ? 'selected' : '' %>>Tháng 1</option>
+        <option value="2" <%= currentMonth == 2 ? 'selected' : '' %>>Tháng 2</option>
+        <option value="3" <%= currentMonth == 3 ? 'selected' : '' %>>Tháng 3</option>
+        <option value="4" <%= currentMonth == 4 ? 'selected' : '' %>>Tháng 4</option>
+        <option value="5" <%= currentMonth == 5 ? 'selected' : '' %>>Tháng 5</option>
+        <option value="6" <%= currentMonth == 6 ? 'selected' : '' %>>Tháng 6</option>
+        <option value="7" <%= currentMonth == 7 ? 'selected' : '' %>>Tháng 7</option>
+        <option value="8" <%= currentMonth == 8 ? 'selected' : '' %>>Tháng 8</option>
+        <option value="9" <%= currentMonth == 9 ? 'selected' : '' %>>Tháng 9</option>
+        <option value="10" <%= currentMonth == 10 ? 'selected' : '' %>>Tháng 10</option>
+        <option value="11" <%= currentMonth == 11 ? 'selected' : '' %>>Tháng 11</option>
+        <option value="12" <%= currentMonth == 12 ? 'selected' : '' %>>Tháng 12</option>
       </select>
 
       <select id="yearFilter" class="filter-select">
-        <option value="2024" <%=currentYear==='2024' ? 'selected' : '' %>>2024</option>
-        <option value="2025" <%=currentYear==='2025' ? 'selected' : '' %>>2025</option>
-        <option value="2026" <%=currentYear==='2026' ? 'selected' : '' %>>2026</option>
-        <option value="2027" <%=currentYear==='2027' ? 'selected' : '' %>>2027</option>
+        <option value="2024" <%= currentYear == 2024 ? 'selected' : '' %>>2024</option>
+        <option value="2025" <%= currentYear == 2025 ? 'selected' : '' %>>2025</option>
+        <option value="2026" <%= currentYear == 2026 ? 'selected' : '' %>>2026</option>
+        <option value="2027" <%= currentYear == 2027 ? 'selected' : '' %>>2027</option>
       </select>
     </div>
   </div>
@@ -49,7 +53,15 @@
   </div>
 
   <div class="relative">
-    <% const isAllMonths=!currentMonth || currentMonth==='' ; %>
+    <% 
+      const isAllMonths = !currentMonth || currentMonth === ''; 
+      let emptyMessage = 'Bạn chưa có nhật ký nào';
+      if (currentMonth && currentYear) {
+          emptyMessage = `Chưa có nhật ký trong tháng ${currentMonth}/${currentYear}`;
+      } else if (currentYear) {
+          emptyMessage = `Chưa có nhật ký trong năm ${currentYear}`;
+      }
+    %>
 
       <% if (entries.length===0) { %>
         <div class="text-center py-20 card-shadow rounded-3xl border-dashed">
@@ -59,18 +71,16 @@
           </div>
 
           <h3 class="text-2xl font-black text-slate-500 mb-3">
-            <%= isAllMonths ? 'Bạn chưa có nhật ký nào' : 'Chưa có nhật ký cho tháng này' %>
+            <%= emptyMessage %>
           </h3>
 
           <p class="text-slate-400 font-medium max-w-md mx-auto leading-relaxed">
-            <%= isAllMonths ? 'Hãy bắt đầu hành trình ghi nhật ký của bạn ngay hôm nay ✨'
-              : 'Tháng này bạn chưa viết nhật ký . Hãy ghi lại cảm xúc của mình!' %>
+            Hãy bắt đầu hành trình ghi lại cảm xúc của bạn ngay hôm nay ✨
           </p>
 
-          <a href="/diaries/home"
-            class="mt-10 inline-flex items-center gap-3 accent-bg btn-accent text-white font-bold text-lg px-10 py-4 rounded-3xl transition shadow-lg">
-            🔥 Viết nhật ký ngay
-          </a>
+          <button id="btnEmptyOpenPast" class="mt-10 inline-flex items-center gap-3 accent-bg btn-accent text-white font-bold text-lg px-10 py-4 rounded-3xl transition shadow-lg">
+            <i class="fa-solid fa-plus"></i> Bổ sung nhật ký
+          </button>
         </div>
         <% } else { %>
           <div class="flex items-center gap-4 mb-12">
@@ -101,7 +111,7 @@
 
                 <div class="timeline-card bg-<%= moodColor %>-50/50 border border-<%= moodColor %>-100">
                   <% let displayImg=entry.image; if (!displayImg && entry.images && entry.images.length> 0) {
-                    displayImg = entry.images[0]; // Lấy ảnh đầu tiên nếu là mảng
+                    displayImg = entry.images[0]; 
                     }
                     %>
                     <% if (displayImg) { %>
@@ -135,7 +145,72 @@
           <% } %>
   </div>
 
+  <div id="pastDiaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center">
+    <div class="bg-white rounded-[2rem] w-full max-w-2xl p-6 md:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto" id="pastDiaryContent">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-black primary-text">⏳ Bổ sung nhật ký</h3>
+        <button type="button" id="closePastModal" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-rose-100 hover:text-rose-500 transition">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <form action="/diaries/create" method="POST" enctype="multipart/form-data" class="flex flex-col gap-5">
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Chọn ngày ghi nhật ký <span class="text-rose-500">*</span></label>
+          <input type="date" name="date" id="pastDateInput" required 
+                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[var(--accent)] font-medium text-slate-600">
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Cảm xúc của bạn lúc đó</label>
+          <input type="hidden" name="mood" id="pastModalMood" value="😊 Vui vẻ">
+          <div class="flex flex-wrap gap-2">
+            <% const modalMoods = [
+              { emoji: '😊', label: 'Vui vẻ' }, { emoji: '🥳', label: 'Hào hứng' },
+              { emoji: '😌', label: 'Bình tĩnh' }, { emoji: '🙏', label: 'Biết ơn' },
+              { emoji: '😢', label: 'Buồn bã' }, { emoji: '😨', label: 'Lo lắng' },
+              { emoji: '😴', label: 'Mệt mỏi' }, { emoji: '😡', label: 'Tức giận' }
+            ] %>
+            <% modalMoods.forEach((m, index) => { %>
+              <button type="button" class="past-mood-btn px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-500 transition-all <%= index === 0 ? 'bg-[#F0F6FF] border-[var(--accent)] text-[var(--accent)]' : 'hover:bg-slate-100' %>" data-mood="<%= m.emoji %> <%= m.label %>">
+                <%= m.emoji %> <%= m.label %>
+              </button>
+            <% }) %>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Nội dung <span class="text-rose-500">*</span></label>
+          <textarea name="content" required 
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[var(--accent)] min-h-[120px] resize-none font-medium text-slate-600 placeholder:text-slate-300" 
+                    placeholder="Viết lại những kỷ niệm ngày hôm ấy..."></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-2">
+          <label class="cursor-pointer flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-100 transition text-sm font-bold text-slate-500">
+            <i class="fa-regular fa-image text-lg"></i>
+            <span>Thêm ảnh (Tối đa 10)</span>
+            <input type="file" name="images" multiple accept="image/*" class="hidden" id="pastImageUpload">
+          </label>
+
+          <label class="cursor-pointer flex items-center gap-2 text-sm font-bold text-slate-500 transition group select-none">
+            <input type="checkbox" name="isStarred" value="true" class="hidden" id="pastStarredToggle">
+            <i class="fa-regular fa-star text-2xl group-hover:text-yellow-400 transition-colors" id="pastStarIcon"></i>
+            <span class="group-hover:text-yellow-500 transition-colors">Đánh dấu nổi bật</span>
+          </label>
+        </div>
+        
+        <div id="pastImagePreview" class="flex flex-wrap gap-2"></div>
+
+        <button type="submit" class="w-full accent-bg text-white font-bold text-lg py-4 rounded-xl mt-4 shadow-lg hover:opacity-90 transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-floppy-disk"></i> Lưu lại kỷ niệm
+        </button>
+      </form>
+    </div>
+  </div>
+
   <script>
+    // Xử lý các sự kiện click trên Timeline cũ (Edit, Delete, Star)
     document.addEventListener('click', function (e) {
       if (e.target.classList.contains('btn-edit')) {
         const id = e.target.closest('.timeline-item').dataset.id;
@@ -177,12 +252,14 @@
       }
     });
 
+    // Hàm áp dụng bộ lọc tháng / năm
     function applyFilter() {
       const month = document.getElementById('monthFilter').value;
       const year = document.getElementById('yearFilter').value;
       window.location.href = `/diaries/timeline?month=${month}&year=${year}`;
     }
 
+    // Logic lọc cảm xúc trên giao diện
     (function () {
       const filterPills = Array.from(document.querySelectorAll('.filter-pill'));
       const timelineItems = Array.from(document.querySelectorAll('.timeline-item'));
@@ -204,21 +281,103 @@
           timelineItems.forEach(item => {
             const itemMood = (item.getAttribute('data-mood') || '').toLowerCase().trim();
             const match = (mood === 'all') || (itemMood === mood) || (itemMood.includes(mood));
+            
             if (match) {
               item.style.display = 'flex';
+              item.classList.remove('justify-start', 'justify-end');
+              item.classList.add(visible % 2 === 0 ? 'justify-start' : 'justify-end');
               visible++;
             } else {
               item.style.display = 'none';
             }
           });
-
           updateVisibleCount(visible);
         });
       });
-      // initialize count
       updateVisibleCount(timelineItems.length);
     })();
 
     document.getElementById('monthFilter').addEventListener('change', applyFilter);
     document.getElementById('yearFilter').addEventListener('change', applyFilter);
+
+
+    // ========================================================
+    // LOGIC CHO MODAL BỔ SUNG NHẬT KÝ
+    // ========================================================
+    const modal = document.getElementById('pastDiaryModal');
+    const btnOpen = document.getElementById('btnOpenPastDiary');
+    const btnEmptyOpen = document.getElementById('btnEmptyOpenPast');
+    const btnClose = document.getElementById('closePastModal');
+    const dateInput = document.getElementById('pastDateInput');
+
+    // Chặn người dùng chọn ngày ở tương lai (Max date là ngày hôm nay)
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.max = today;
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    if(btnOpen) btnOpen.addEventListener('click', openModal);
+    if(btnEmptyOpen) btnEmptyOpen.addEventListener('click', openModal);
+    btnClose.addEventListener('click', closeModal);
+
+    // Đóng modal khi bấm ra ngoài vùng mờ
+    modal.addEventListener('click', function(e) {
+      if(e.target === modal) closeModal();
+    });
+
+    // Xử lý chọn nút Cảm xúc trong Modal
+    const pastMoodBtns = document.querySelectorAll('.past-mood-btn');
+    const pastMoodInput = document.getElementById('pastModalMood');
+
+    pastMoodBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        pastMoodBtns.forEach(b => {
+          b.classList.remove('bg-[#F0F6FF]', 'border-[var(--accent)]', 'text-[var(--accent)]');
+          b.classList.add('hover:bg-slate-100');
+        });
+        this.classList.remove('hover:bg-slate-100');
+        this.classList.add('bg-[#F0F6FF]', 'border-[var(--accent)]', 'text-[var(--accent)]');
+        pastMoodInput.value = this.dataset.mood;
+      });
+    });
+
+    // Xử lý Checkbox Nổi bật (Đổi icon sao vàng)
+    const starToggle = document.getElementById('pastStarredToggle');
+    const starIcon = document.getElementById('pastStarIcon');
+    
+    starToggle.addEventListener('change', function() {
+      if(this.checked) {
+        starIcon.classList.remove('fa-regular', 'text-slate-500');
+        starIcon.classList.add('fa-solid', 'text-yellow-400');
+      } else {
+        starIcon.classList.remove('fa-solid', 'text-yellow-400');
+        starIcon.classList.add('fa-regular', 'text-slate-500');
+      }
+    });
+
+    // Xử lý Preview Ảnh
+    const imgUpload = document.getElementById('pastImageUpload');
+    const imgPreview = document.getElementById('pastImagePreview');
+
+    imgUpload.addEventListener('change', function() {
+      imgPreview.innerHTML = '';
+      Array.from(this.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'h-16 w-16 object-cover rounded-xl border border-slate-200 shadow-sm';
+          imgPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
   </script>

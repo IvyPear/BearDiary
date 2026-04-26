@@ -1,22 +1,166 @@
 <% title = 'Chỉnh sửa nhật ký - Bear Diary' %>
 
-<div class="max-w-2xl mx-auto p-6">
-	<h2 class="text-2xl font-bold mb-4">Chỉnh sửa nhật ký</h2>
+<div class="max-w-2xl mx-auto p-6 bg-white rounded-[2rem] shadow-xl mt-8 relative">
+    <a href="/diaries/timeline" class="absolute top-6 right-6 w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-rose-100 hover:text-rose-500 transition">
+        <i class="fa-solid fa-xmark text-xl"></i>
+    </a>
 
-	<form action="/diaries/update/<%= entry._id %>" method="POST">
-		<div class="mb-4">
-			<label class="block text-sm font-semibold mb-1">Mood</label>
-			<input name="mood" type="text" value="<%= entry.mood %>" class="w-full border rounded px-3 py-2" />
-		</div>
+    <h2 class="text-3xl font-black primary-text mb-8 flex items-center gap-3">
+        ✏️ Chỉnh sửa nhật ký
+    </h2>
 
-		<div class="mb-4">
-			<label class="block text-sm font-semibold mb-1">Nội dung</label>
-			<textarea name="content" rows="6" class="w-full border rounded px-3 py-2"><%= entry.content %></textarea>
-		</div>
+    <form action="/diaries/update/<%= entry._id %>" method="POST" enctype="multipart/form-data" class="flex flex-col gap-6">
+        
+        <% 
+          let dateVal = '';
+          if(entry.date) {
+              const d = new Date(entry.date);
+              const y = d.getFullYear();
+              const m = String(d.getMonth() + 1).padStart(2, '0');
+              const day = String(d.getDate()).padStart(2, '0');
+              dateVal = `${y}-${m}-${day}`;
+          }
+        %>
 
-		<div class="flex gap-3">
-			<button type="submit" class="px-4 py-2 accent-bg btn-accent text-white rounded font-bold">Lưu</button>
-			<a href="/diaries/timeline" class="px-4 py-2 border rounded">Hủy</a>
-		</div>
-	</form>
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Ngày ghi nhật ký <span class="text-rose-500">*</span></label>
+          <input type="date" name="date" value="<%= dateVal %>" required
+                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[var(--accent)] font-medium text-slate-600">
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Cảm xúc của bạn</label>
+          <input type="hidden" name="mood" id="editMood" value="<%= entry.mood || '😊 Vui vẻ' %>">
+          <div class="flex flex-wrap gap-2">
+            <% const modalMoods = [
+              { emoji: '😊', label: 'Vui vẻ' }, { emoji: '🥳', label: 'Hào hứng' },
+              { emoji: '😌', label: 'Bình tĩnh' }, { emoji: '🙏', label: 'Biết ơn' },
+              { emoji: '😢', label: 'Buồn bã' }, { emoji: '😨', label: 'Lo lắng' },
+              { emoji: '😴', label: 'Mệt mỏi' }, { emoji: '😡', label: 'Tức giận' }
+            ] %>
+            <% modalMoods.forEach((m) => { 
+                const moodString = `${m.emoji} ${m.label}`;
+                const currentMood = entry.mood ? entry.mood.toLowerCase() : '';
+                const isSelected = currentMood.includes(m.label.toLowerCase()) || (!entry.mood && m.label === 'Vui vẻ');
+            %>
+              <button type="button" 
+                      class="edit-mood-btn px-4 py-2 rounded-xl text-sm font-bold transition-all border <%= isSelected ? 'bg-[#F0F6FF] border-[var(--accent)] text-[var(--accent)] active-mood' : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-slate-100' %>" 
+                      data-mood="<%= moodString %>">
+                <%= moodString %>
+              </button>
+            <% }) %>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-slate-500 mb-2">Nội dung <span class="text-rose-500">*</span></label>
+          <textarea name="content" required 
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[var(--accent)] min-h-[150px] resize-none font-medium text-slate-600"><%= entry.content %></textarea>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-2 p-4 bg-slate-50 rounded-xl border border-slate-100">
+          <label class="cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition text-sm font-bold text-slate-500 shadow-sm">
+            <i class="fa-regular fa-image text-lg"></i>
+            <span>Đổi ảnh mới (Tối đa 10)</span>
+            <input type="file" name="images" multiple accept="image/*" class="hidden" id="editImageUpload">
+          </label>
+
+          <label class="cursor-pointer flex items-center gap-2 text-sm font-bold text-slate-500 transition group select-none">
+            <input type="checkbox" name="isStarred" value="true" class="hidden" id="editStarredToggle" <%= entry.isStarred ? 'checked' : '' %>>
+            <i class="fa-<%= entry.isStarred ? 'solid text-yellow-400' : 'regular text-slate-400' %> fa-star text-2xl group-hover:text-yellow-400 transition-colors" id="editStarIcon"></i>
+            <span class="group-hover:text-yellow-500 transition-colors">Đánh dấu nổi bật</span>
+          </label>
+        </div>
+
+        <div class="mb-2">
+          <% if (entry.images && entry.images.length > 0) { %>
+            <p class="text-xs font-bold text-slate-400 mb-2" id="oldImageText">Ảnh hiện hành:</p>
+            <div class="flex flex-wrap gap-2" id="oldImageContainer">
+              <% entry.images.forEach(img => { %>
+                <img src="<%= img %>" class="h-20 w-20 object-cover rounded-xl border border-slate-200 shadow-sm">
+              <% }) %>
+            </div>
+          <% } else if (entry.image) { %>
+             <p class="text-xs font-bold text-slate-400 mb-2" id="oldImageText">Ảnh hiện hành:</p>
+            <div class="flex flex-wrap gap-2" id="oldImageContainer">
+                <img src="<%= entry.image %>" class="h-20 w-20 object-cover rounded-xl border border-slate-200 shadow-sm">
+            </div>
+          <% } %>
+          <div id="editImagePreview" class="flex flex-wrap gap-2 mt-3"></div>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-4">
+          <a href="/diaries/timeline" class="px-6 py-3 rounded-xl font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition">
+            Hủy
+          </a>
+          <button type="submit" class="accent-bg text-white font-bold text-lg px-8 py-3 rounded-xl shadow-lg hover:opacity-90 transition flex items-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+          </button>
+        </div>
+    </form>
 </div>
+
+<script>
+  // Script xử lý nút Cảm xúc
+  const moodBtns = document.querySelectorAll('.edit-mood-btn');
+  const moodInput = document.getElementById('editMood');
+
+  moodBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Xóa màu nút cũ
+      moodBtns.forEach(b => {
+        b.classList.remove('bg-[#F0F6FF]', 'border-[var(--accent)]', 'text-[var(--accent)]', 'active-mood');
+        b.classList.add('bg-slate-50', 'border-slate-100', 'text-slate-500');
+      });
+      // Thêm màu nút mới
+      this.classList.remove('bg-slate-50', 'border-slate-100', 'text-slate-500');
+      this.classList.add('bg-[#F0F6FF]', 'border-[var(--accent)]', 'text-[var(--accent)]', 'active-mood');
+      // Đẩy dữ liệu vào input ẩn
+      moodInput.value = this.dataset.mood;
+    });
+  });
+
+  // Script xử lý đánh dấu sao
+  const starToggle = document.getElementById('editStarredToggle');
+  const starIcon = document.getElementById('editStarIcon');
+  
+  starToggle.addEventListener('change', function() {
+    if(this.checked) {
+      starIcon.classList.remove('fa-regular', 'text-slate-400');
+      starIcon.classList.add('fa-solid', 'text-yellow-400');
+    } else {
+      starIcon.classList.remove('fa-solid', 'text-yellow-400');
+      starIcon.classList.add('fa-regular', 'text-slate-400');
+    }
+  });
+
+  // Script xử lý xem trước (preview) ảnh
+  const imgUpload = document.getElementById('editImageUpload');
+  const imgPreview = document.getElementById('editImagePreview');
+  const oldImgContainer = document.getElementById('oldImageContainer');
+  const oldImgText = document.getElementById('oldImageText');
+
+  imgUpload.addEventListener('change', function() {
+    imgPreview.innerHTML = ''; 
+    if(this.files.length > 0) {
+      // Ẩn ảnh cũ đi để người dùng biết họ sắp đè ảnh mới lên
+      if(oldImgContainer) oldImgContainer.style.display = 'none';
+      if(oldImgText) oldImgText.innerText = 'Ảnh mới chuẩn bị tải lên:';
+      
+      Array.from(this.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'h-20 w-20 object-cover rounded-xl border-2 border-[var(--accent)] shadow-md';
+          imgPreview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      // Phục hồi lại nếu người dùng đổi ý không tải ảnh lên nữa
+      if(oldImgContainer) oldImgContainer.style.display = 'flex';
+      if(oldImgText) oldImgText.innerText = 'Ảnh hiện hành:';
+    }
+  });
+</script>

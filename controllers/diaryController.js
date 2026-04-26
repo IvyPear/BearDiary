@@ -38,19 +38,17 @@ exports.getHome = async (req, res) => {
 
 exports.createEntry = async (req, res) => {
     try {
-        // 1. Kiểm tra an toàn: Đảm bảo session và thông tin user tồn tại
         if (!req.session || !req.session.user || !req.session.user._id) {
             console.log('⚠️ Bắt được lỗi: Chưa có session user. Chuyển hướng về Login.');
             return res.redirect('/auth/login');
         }
 
-        // CHỈ THÊM isStarred VÀO ĐÂY ĐỂ LƯU ĐƯỢC SAO TỪ TRANG CHỦ
         const { content, mood, isStarred } = req.body;
         const newDiary = new Diary({
             userId: req.session.user._id,
             content: content,
             mood: mood || '😊 Happy',
-            isStarred: isStarred === 'true' // ĐÃ THÊM DÒNG NÀY
+            isStarred: isStarred === 'true'
         });
 
         await newDiary.save();
@@ -65,17 +63,28 @@ exports.getTimeline = async (req, res) => {
     try {
         const userId = req.session.user._id;
 
-        let query = { userId };
-        const currentMonth = req.query.month || '';
-        const currentYear = req.query.year || new Date().getFullYear().toString();
+        // Lấy tham số và ép kiểu số để lọc logic
+        const currentMonth = req.query.month ? parseInt(req.query.month) : null;
+        const currentYear = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
 
-        if (currentMonth && currentYear) {
-            const startDate = new Date(parseInt(currentYear), parseInt(currentMonth) - 1, 1);
-            const endDate = new Date(parseInt(currentYear), parseInt(currentMonth), 0, 23, 59, 59, 999);
-            query.date = { $gte: startDate, $lte: endDate };
+        // Bước 1: Lấy tất cả nhật ký 
+        let rawEntries = await Diary.find({ userId }).sort({ date: -1 });
+
+        // Bước 2: Lọc bằng Javascript
+        if (currentYear) {
+            rawEntries = rawEntries.filter(entry => {
+                if (!entry.date) return false;
+                const entryDate = new Date(entry.date);
+                const entryYear = entryDate.getFullYear();
+                const entryMonth = entryDate.getMonth() + 1; // getMonth() trả về 0-11
+
+                if (currentMonth) {
+                    return entryYear === currentYear && entryMonth === currentMonth;
+                } else {
+                    return entryYear === currentYear;
+                }
+            });
         }
-
-        const rawEntries = await Diary.find(query).sort({ date: -1 });
 
         const parseMood = (moodString) => {
             const str = moodString || '😊 Happy';
@@ -97,6 +106,9 @@ exports.getTimeline = async (req, res) => {
         let moodCounts = { all: rawEntries.length };
         let uniqueMoods = {};
 
+        // Mảng tiếng Việt dịch thủ công
+        const daysVN = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+
         const entries = rawEntries.map((e, index) => {
             const { icon, name, color } = parseMood(e.mood);
             const moodKey = name.toLowerCase();
@@ -105,9 +117,7 @@ exports.getTimeline = async (req, res) => {
             if (!uniqueMoods[moodKey]) uniqueMoods[moodKey] = { icon, name };
 
             const dateObj = new Date(e.date);
-            const dateStr = dateObj.toLocaleDateString('en-US', {
-                weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
-            });
+            const dateStr = `${daysVN[dateObj.getDay()]}, ${dateObj.getDate()} tháng ${dateObj.getMonth() + 1}, ${dateObj.getFullYear()}`;
 
             return {
                 _id: e._id,
@@ -127,8 +137,8 @@ exports.getTimeline = async (req, res) => {
             entries,
             moodCounts,
             uniqueMoods,
-            currentMonth,
-            currentYear
+            currentMonth: currentMonth ? currentMonth.toString() : '',
+            currentYear: currentYear.toString()
         });
     } catch (error) {
         console.error(error);
@@ -154,24 +164,66 @@ exports.getEditEntry = async (req, res) => {
     }
 };
 
+// ==========================================
+// ĐÃ SỬA: Hàm updateEntry tối ưu nhất để nhận Date, Images và Highlights
 exports.updateEntry = async (req, res) => {
     try {
         const userId = req.session.user._id;
         const entryId = req.params.id;
-        const { content, mood } = req.body;
+
+        // Lấy tất cả dữ liệu từ form
+        const { content, mood, date, isStarred, highlights } = req.body;
+
+        let updateData = { 
+            content: content ? content.trim() : '', 
+            mood: mood || '😊 Vui vẻ',
+            isStarred: isStarred === 'true'
+        };
+
+        // 1. Cập nhật ngày nếu user thay đổi
+        if (date) {
+            const newDate = new Date(date);
+            const now = new Date(); // Giữ lại giờ phút hiện tại
+            newDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+            updateData.date = newDate;
+        }
+
+        // 2. Cập nhật Highlight
+        if (highlights) {
+            // Biến chuỗi thành mảng các object highlight
+            let hArray = typeof highlights === 'string' ? highlights.split(',') : highlights;
+            updateData.highlights = hArray
+                .filter(text => text && text.trim() !== '')
+                .map(text => ({ text: text.trim(), star: 3 }));
+            
+            // Nếu có đánh highlight thì tự động cho thành nổi bật
+            if (updateData.highlights.length > 0) {
+                updateData.isStarred = true;
+            }
+        } else {
+            updateData.highlights = [];
+        }
+
+        // 3. Nếu user upload ảnh mới thì ghi đè ảnh cũ
+        if (req.files && req.files.length > 0) {
+            updateData.images = req.files.map(file => `/uploads/diary/${file.filename}`);
+            // Đặt lại thuộc tính image cũ (nếu có dùng ở phiên bản schema trước) để tránh lỗi
+            updateData.image = undefined; 
+        }
 
         await Diary.findOneAndUpdate(
             { _id: entryId, userId },
-            { content: content.trim(), mood: mood || '😊 Happy' },
+            updateData,
             { new: true }
         );
 
         res.redirect('/diaries/timeline');
     } catch (error) {
-        console.error(error);
+        console.error('Lỗi khi cập nhật nhật ký:', error);
         res.redirect('/diaries/timeline');
     }
 };
+// ==========================================
 
 exports.deleteEntry = async (req, res) => {
     try {
@@ -233,7 +285,6 @@ exports.getReport = async (req, res) => {
             const hasJournal = dayEntries.length > 0;
             const isStarred = dayEntries.some(e => e.isStarred);
             const images = dayEntries.find(e => e.images && e.images.length > 0)?.images || [];
-            if (hasJournal) console.log('Ngày có nhật ký:', i, 'entries:', dayEntries.length);
             calendarDays.push({ day: i, isOtherMonth: false, isToday, hasJournal, isStarred, images });
         }
 
@@ -308,6 +359,16 @@ exports.getProfile = async (req, res) => {
 
         const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '';
 
+        let lastLoginDevice = '';
+        let lastLoginTime = '';
+        if (user.lastLogin && user.lastLogin.device) {
+            lastLoginDevice = user.lastLogin.device;
+            if (user.lastLogin.time) {
+                const d = new Date(user.lastLogin.time);
+                lastLoginTime = d.toLocaleString('vi-VN', { hour12: false });
+            }
+        }
+
         res.render('diaries/profile', {
             title: 'Hồ sơ - Moodiary',
             user: {
@@ -320,7 +381,9 @@ exports.getProfile = async (req, res) => {
                 daysJournaled,
                 starredEntries,
                 isTwoFactorEnabled: user.isTwoFactorEnabled,
-                passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null
+                passwordChangedAt: user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleString('vi-VN', { hour12: false }) : null,
+                lastLoginDevice,
+                lastLoginTime
             }
         });
     } catch (error) {
@@ -345,7 +408,6 @@ exports.getEditProfile = async (req, res) => {
     }
 };
 
-// POST update profile
 exports.updateProfile = async (req, res) => {
     try {
         const userId = req.session.user._id;
@@ -353,7 +415,6 @@ exports.updateProfile = async (req, res) => {
 
         let avatarPath;
 
-        // Multer đã xử lý ảnh thành công từ biến avatarFile
         if (req.file) {
             const oldUser = await User.findById(userId);
             if (oldUser && oldUser.avatar && !oldUser.avatar.includes('default-avatars')) {
@@ -364,7 +425,6 @@ exports.updateProfile = async (req, res) => {
                     console.error('Lỗi xóa avatar cũ:', err);
                 }
             }
-            // ĐÂY LÀ CHỖ DUY NHẤT ĐƯỢC SỬA: Thêm 'diary/' vào đường dẫn
             avatarPath = '/uploads/diary/' + req.file.filename;
         } else if (req.body.avatar) {
             avatarPath = req.body.avatar.trim();
@@ -384,7 +444,6 @@ exports.updateProfile = async (req, res) => {
         const updateData = { name: name.trim(), email: email.trim().toLowerCase() };
         if (avatarPath !== undefined) updateData.avatar = avatarPath;
 
-        // Sửa cảnh báo Mongoose: dùng returnDocument: 'after' thay vì new: true
         const updated = await User.findByIdAndUpdate(userId, updateData, { returnDocument: 'after', runValidators: true }).lean();
 
         req.session.user.name = updated.name;
@@ -407,67 +466,69 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// ====================== THÊM MỚI CHO TASK ======================
-
 exports.getCreateDiary = (req, res) => {
     res.render('diaries/create', {
         title: 'Viết Nhật Ký - Bear Diary'
     });
 };
 
-exports.createDiary = [
-    upload.array('images', 10),
-    async (req, res) => {
-        try {
-            // Kiểm tra an toàn session
-            if (!req.session || !req.session.user || !req.session.user._id) {
-                console.log('⚠️ Bắt được lỗi: Chưa có session user. Chuyển hướng về Login.');
-                return res.redirect('/auth/login');
-            }
-
-            const { title, content, mood, highlights } = req.body;
-            const userId = req.session.user._id;
-
-            let highlightArray = [];
-            if (highlights) {
-                if (Array.isArray(highlights)) {
-                    highlightArray = highlights
-                        .filter(text => text && text.trim() !== '')
-                        .map(text => ({ text: text.trim(), star: 3 }));
-                } else if (typeof highlights === 'string' && highlights.trim() !== '') {
-                    highlightArray = [{ text: highlights.trim(), star: 3 }];
-                }
-            }
-
-            const newDiary = new Diary({
-                userId,
-                title: title || 'Nhật ký trong ngày',
-                content: content.trim(),
-                mood: mood || '😊 Happy',
-                images: req.files ? req.files.map(file => `/uploads/diary/${file.filename}`) : [],
-                highlights: highlightArray,
-                isStarred: highlightArray.length > 0
-            });
-
-            await newDiary.save();
-            res.redirect('/diaries/timeline');
-        } catch (error) {
-            console.error('Lỗi tạo nhật ký (kèm ảnh):', error);
-            res.redirect('/diaries/home');
+exports.createDiary = async (req, res) => {
+    try {
+        if (!req.session || !req.session.user || !req.session.user._id) {
+            return res.redirect('/auth/login');
         }
+
+        const { title, content, mood, highlights, date } = req.body;
+        const userId = req.session.user._id;
+
+        let highlightArray = [];
+        if (highlights) {
+            if (Array.isArray(highlights)) {
+                highlightArray = highlights
+                    .filter(text => text && text.trim() !== '')
+                    .map(text => ({ text: text.trim(), star: 3 }));
+            } else if (typeof highlights === 'string' && highlights.trim() !== '') {
+                highlightArray = [{ text: highlights.trim(), star: 3 }];
+            }
+        }
+
+        const images = req.files ? req.files.map(file => `/uploads/diary/${file.filename}`) : [];
+
+        let entryDate = new Date();
+        if (date) {
+            entryDate = new Date(date);
+            const now = new Date();
+            entryDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+        }
+
+        const newDiary = new Diary({
+            userId,
+            title: title || 'Nhật ký trong ngày',
+            content: content.trim(),
+            mood: mood || '😊 Happy',
+            images: images,
+            highlights: highlightArray,
+            isStarred: req.body.isStarred === 'true' || highlightArray.length > 0,
+            date: entryDate
+        });
+
+        await newDiary.save();
+        res.redirect('/diaries/timeline');
+    } catch (error) {
+        console.error('Lỗi tạo nhật ký:', error);
+        res.redirect('/diaries/home');
     }
-];
+};
 
 exports.getTimelineWithHighlight = async (req, res) => {
     try {
         const userId = req.session.user._id;
         const rawEntries = await Diary.find({ userId }).sort({ date: -1 });
+        const daysVN = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
         const entries = rawEntries.map((e, index) => {
             const dateObj = new Date(e.date);
-            const dateStr = dateObj.toLocaleDateString('vi-VN', {
-                weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-            });
+            const dateStr = `${daysVN[dateObj.getDay()]}, ${dateObj.getDate()} tháng ${dateObj.getMonth() + 1}, ${dateObj.getFullYear()}`;
 
             return {
                 _id: e._id,
@@ -491,48 +552,6 @@ exports.getTimelineWithHighlight = async (req, res) => {
     } catch (error) {
         console.error('Lỗi tải Timeline với highlight:', error);
         res.send('Lỗi tải Timeline');
-    }
-};
-
-exports.createDiary = async (req, res) => {
-    try {
-        if (!req.session || !req.session.user || !req.session.user._id) {
-            return res.redirect('/auth/login');
-        }
-
-        const { title, content, mood, highlights } = req.body;
-        const userId = req.session.user._id;
-
-        // Xử lý highlights
-        let highlightArray = [];
-        if (highlights) {
-            if (Array.isArray(highlights)) {
-                highlightArray = highlights
-                    .filter(text => text && text.trim() !== '')
-                    .map(text => ({ text: text.trim(), star: 3 }));
-            } else if (typeof highlights === 'string' && highlights.trim() !== '') {
-                highlightArray = [{ text: highlights.trim(), star: 3 }];
-            }
-        }
-
-        // Xử lý ảnh
-        const images = req.files ? req.files.map(file => `/uploads/diary/${file.filename}`) : [];
-
-        const newDiary = new Diary({
-            userId,
-            title: title || 'Nhật ký trong ngày',
-            content: content.trim(),
-            mood: mood || '😊 Happy',
-            images: images,
-            highlights: highlightArray,
-            isStarred: req.body.isStarred === 'true'
-        });
-
-        await newDiary.save();
-        res.redirect('/diaries/home');
-    } catch (error) {
-        console.error('Lỗi tạo nhật ký:', error);
-        res.redirect('/diaries/home');
     }
 };
 

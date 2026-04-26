@@ -88,11 +88,47 @@ input:checked+.slider:before { transform: translateX(20px); }
 [data-theme="dark"] .text-slate-500, [data-theme="dark"] .text-slate-600 { color: #CBD5E1 !important; }
 [data-theme="dark"] .bg-slate-50 { background-color: #1E2937 !important; }
 [data-theme="dark"] .border-slate-100, [data-theme="dark"] .border-slate-200 { border-color: #334155 !important; }
-[data-theme="dark"] textarea, [data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="date"], [data-theme="dark"] select, [data-theme="dark"] input[type="time"] { background-color: #0F172A; color: #E2E8F0; border-color: #334155; }
-[data-theme="dark"] .banner-gradient { background: linear-gradient(135deg, var(--accent), #0F172A); }
-[data-theme="dark"] .nav-item.active { background: var(--accent); color: white !important; }
-[data-theme="dark"] .nav-item:hover:not(.active) { background: #334155; color: var(--accent); }
 
+/* 1. Mặc định cho Darkmode: Làm sáng icon lịch */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Đưa về màu trắng để dễ nhìn trên nền tối */
+    cursor: pointer;
+}
+
+/* 2. ÉP ICON LỊCH ĐỔI MÀU THEO TỪNG THEME KHI Ở DARKMODE */
+
+/* Theme Blue (Xanh dương) */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(56%) sepia(59%) saturate(464%) hue-rotate(170deg) brightness(92%) contrast(88%);
+}
+
+/* Theme Pink (Hồng) */
+[data-theme="pink"][data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] html[data-theme="pink"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(82%) sepia(34%) saturate(769%) hue-rotate(297deg) brightness(101%) contrast(95%);
+}
+
+/* Theme Green (Xanh lá) */
+[data-theme="green"][data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(89%) sepia(13%) saturate(1015%) hue-rotate(97deg) brightness(95%) contrast(90%);
+}
+
+/* Theme Purple (Tím) */
+[data-theme="purple"][data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(79%) sepia(50%) saturate(1376%) hue-rotate(209deg) brightness(103%) contrast(105%);
+}
+
+/* Theme Yellow (Vàng) */
+[data-theme="yellow"][data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(85%) sepia(35%) saturate(773%) hue-rotate(338deg) brightness(101%) contrast(96%);
+}
+
+/* Hiệu ứng khi di chuột vào icon */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(1) brightness(1.5); /* Sáng rực lên khi hover */
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
 
 /* ==========================================================================
    3. PROFILE PAGE

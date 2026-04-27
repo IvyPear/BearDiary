@@ -120,10 +120,18 @@
 <script>
 (function(){
     const STORE_KEY = 'bd_tasks_v5'; 
-    function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||[]; }catch(e){ return []; } }
-    function save(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
-    
-    let tasks = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||[]; }catch(e){ return []; } }
+function save(arr){ localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+
+let serverTasks = <%- tasks %>;
+let tasks = serverTasks.length > 0 ? serverTasks.map(t => ({
+    id: t._id,
+    name: t.name,
+    deadline: t.deadline ? new Date(t.deadline).toISOString().split('T')[0] : '',
+    pri: t.priority,
+    status: t.status,
+    createdAt: t.createdAt
+})) : load();
     let currentFilter = 'all';
     let addMode = 'today';
 
@@ -205,14 +213,22 @@
         if(!name) return;
 
         if(editId) {
-            let tk = tasks.find(t => t.id === editId);
-            if (tk) { tk.name = name; tk.deadline = date; tk.pri = pri; }
-            tkCancelEdit();
-        } else {
-            tasks.push({
-                id: uid(), name: name, deadline: date, pri: pri, status: 'todo', createdAt: new Date().toISOString()
-            });
-            document.getElementById('tkName').value = '';
+    fetch(`/diaries/tasks/update/${editId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, priority: pri, deadline: date, status: tasks.find(t=>t.id===editId)?.status || 'todo' })
+    }).then(res => res.json()).then(data => { if(data.ok) location.reload(); });
+    return;
+} 
+        else {
+            fetch('/diaries/tasks/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, priority: pri, deadline: date })
+}).then(res => res.json()).then(data => {
+    if(data.ok) location.reload();
+});
+return;
         }
 
         save(tasks);
@@ -256,16 +272,17 @@
     window.tkToggleStatus = function(id, isChecked) {
         let tk = tasks.find(t => t.id === id);
         if(tk) {
-            tk.status = isChecked ? 'done' : 'todo';
-            tk.completedAt = isChecked ? new Date().toISOString() : null;
-            save(tasks); tkRender(); tkRenderReport();
+            fetch(`/diaries/tasks/toggle/${id}`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => { if(data.ok) location.reload(); });
         }
     };
 
     window.tkDeleteTask = function(id) {
         if(confirm('Bạn có chắc muốn xóa công việc này?')) {
-            tasks = tasks.filter(t => t.id !== id);
-            save(tasks); tkRender(); tkRenderReport();
+            fetch(`/diaries/tasks/delete/${id}`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => { if(data.ok) location.reload(); });
         }
     };
 

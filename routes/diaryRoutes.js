@@ -58,11 +58,11 @@ router.get('/timeline-highlight', diaryController.getTimelineWithHighlight);
 
 // ====================== TASK MANAGEMENT ======================
 // GET: Trang quản lý công việc (client-side state via localStorage)
-router.get('/tasks', function(req, res) {
-  res.render('diaries/tasks', {
-    title: 'Công việc - Moodiary',
-    user: req.user || null
-  });
-});
+const taskController = require('../controllers/taskController');
+router.get('/tasks', taskController.getTasks);
+router.post('/tasks/create', taskController.createTask);
+router.post('/tasks/update/:id', taskController.updateTask);
+router.post('/tasks/delete/:id', taskController.deleteTask);
+router.post('/tasks/toggle/:id', taskController.toggleStatus);
 router.post('/star/:id', diaryController.toggleStar);
 module.exports = router;
